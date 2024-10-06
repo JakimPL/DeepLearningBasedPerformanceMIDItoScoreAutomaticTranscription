@@ -1,6 +1,14 @@
 full:
+	make clean
 	make process_lily_files
 	make build
+
+clean:
+	rm -f bibliography/bibliography.bib
+	rm -rf svg-inkscape
+	rm -f images/*_gen.svg
+	rm -f lily/*.svg
+	rm -f *.aux *.bbg *.bbl *.blg *.loa *.lof *.log *.lot *.out *.pdf *.toc
 
 build:
 	python bibparser.py
