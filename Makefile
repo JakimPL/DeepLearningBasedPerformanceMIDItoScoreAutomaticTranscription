@@ -1,6 +1,9 @@
+install:
+	pip install -r requirements.txt
+
 full:
 	make clean
-	make process_lily_files
+	make process_lily
 	make build
 
 clean:
@@ -15,7 +18,7 @@ build:
 	lualatex -interaction=nonstopmode -shell-escape main.tex
 	bibtex main.aux
 
-process_lily_files:
+process_lily:
 	cd lily && \
     for file in *.ly; do \
 		lilypond -dbackend=svg -dcrop $$file; \
