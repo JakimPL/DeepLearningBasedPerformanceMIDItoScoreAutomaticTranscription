@@ -159,4 +159,31 @@ There is no public implementation of the algorithm available. This makes hard to
 
 \section{Dynamic Programming Approach}
 
-In 2005, Yang et al. proposed another method for solving beat quantization problem \cite{Yang2005}
+In 2005, Yang et al. proposed another method for solving beat quantization problem \cite{Yang2005}. The authors dynamical programming approach to segment a piece into sections with different \emph{tatums}. \emph{Tatum} is often defined as ,,the smallest cognitively meaningful
+subdivision of the main beat''\footnote{Usually coincides with sixteenth-, twenty-fourth- or thirty-second notes.} \cite{Iyer1997}. The resulted tatums form a grid, from which the notes are being snapped to.
+
+\begin{figure}[!ht]
+\centering
+\input{sources/graphs/dynamic_programming_system}
+\caption[The scheme of the Dynamic Programming system]{The scheme of the Dynamic Programming system \cite{Yang2005}.}
+\end{figure}
+
+\subsection{Simultaneity Quantization}
+
+As the name suggests, \emph{Simultaneity Quantization} is a pre-processing step that recognizes events that are played at almost the same time, like chords. The consolidation procedure is: any group of events that lie within a certain time window is replaced by the group with a common averaged onset. 
+
+The window needs to be carefully adjusted: too small window may not correctly recognize all simultaneous entities but too large window may collapse musical ornaments such as thrills or grace notes. For some pieces there is no viable fixed threshold that allows discerning fast arpeggiated chords from thrills: some chords that should be treated as one entity may be played in fact slower than some ornaments that needs to be separated.
+
+\subsection{Tatum Segmentation}
+
+The main part of the algorithm is \emph{Tatum Segmentation} for finding an optimal metric grid in a performed piece, where optimal means of the least tatum-to-note error. The algorithm takes only onsets as inputs $\mathcal{O}=\mathcal{O}_1^n=\{o_i\}_{i=1}^n$ and disregards note-off events\footnote{This means that inter-onset intervals (IOI) are being used for the beat quantization.}. The output of the algorithm is a sequence of segmentation points $S=\{S_j\}_{j=1}^m$ within optimal tatums $\{T_j\}_{j=1}^m$.
+
+The authors define recursively the \emph{optimal segmentation function} as: $$\operatorname{OPT}(k) = \min_{1\leq i \leq k}\left[\operatorname{OPT}(i) + \operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)\right]$$ where $\mathcal{O}_{i+1}^k=\{o_{i+1},\ldots,o_k\}$ and the error function $\operatorname{ERR}$ describes the error obtained by the best tatum assignment for the sequence of onsets $\mathcal{O}_{i+1}^k$: $$\operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)=\min_p e\left(p,i+1,k\right)=\min_p \sum_{j=1}^{k-i-1}d_{\mathbb{Z}}\left(\frac{o_{j+1}-o_j}{p}\right)^2$$ where $d_{\mathbb{Z}}(x)$ is the distance of $x$ to the nearest integer, defined as $\left|x - \left\lfloor x + \tfrac{1}{2}\right\rfloor\right|$ The error function represents the remainder squared error (RSE), and the expression $o_{j+1}-o_j$ is the IOI between onsets $j$ and $j+1$. In other words, the error function describes the total error of snapping onsets to the grid. An observant reader may have noticed that the optimal tatum segmentation minimizes the RSE of the entire piece, that is $\operatorname{ERR}\left(\operatorname{\mathcal{O}}\right)$. 
+
+Let $S(k)$ be the \emph{segmentation boundary}: an argument that minimizes the cost function: $$S(k)=\argmin_{1\leq i \leq k}\left[\operatorname{OPT}(i) + \operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)\right]$$ Similarly, let the best \emph{tatum level} minimizing $\operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)$ be: $$T(k)=\argmin_{p} e(p,i+1,k)$$ 
+
+With the notation settled down, we can outline the main algorithm. It consists of two parts: the main procedure in which the optimal tatums are found, and the trace-back that finds the segmentation bounds.
+
+\input{sources/algorithms/dynamic_programming}
+
+The algorithm is in the class $O\left(n^3\right)$.

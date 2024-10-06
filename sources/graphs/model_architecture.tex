@@ -1,19 +1,19 @@
 \begin{tikzpicture}
-\tikzset{sequence/.style={thick, text centered, align=center}}
-\tikzset{convblock/.style={fill=gray!20, draw=gray, thick, text centered}}
-\tikzset{grublock/.style={fill=gray!30, draw=gray, thick, text centered}}
-\tikzset{linear/.style={fill=gray!10, draw=gray, thick, text centered}}
-\tikzset{output/.style={thick, anchor=west, align=left}}
-\tikzset{arrowstyle/.style={-{Latex[length=3mm]}}}
+    \tikzset{sequence/.style={thick, text centered, align=center}}
+    \tikzset{convblock/.style={fill=gray!20, draw=gray, thick, text centered}}
+    \tikzset{grublock/.style={fill=gray!30, draw=gray, thick, text centered}}
+    \tikzset{linear/.style={fill=gray!10, draw=gray, thick, text centered}}
+    \tikzset{output/.style={thick, anchor=west, align=left}}
+    \tikzset{arrowstyle/.style={-{Latex[length=3mm]}}}
     \draw (-3.5, 0.5) node[sequence] (sequence) {note\\ sequence};
-    
+
     \draw (-1.75, 5) node (joint1) {};
     \draw (-1.75, 3) node (joint2) {};
     \draw (-1.75, 2) node (joint3) {};
     \draw (-1.75, 0.5) node (joint4) {};
     \draw (-1.75, -1) node (joint5) {};
     \draw (-1.75, -2) node (joint6) {};
-    
+
     \draw (1.5, 3) node (concatenation) {$\boldsymbol{\oplus}$};
     \draw (1.5, 3.5) node (concatleftjoint1) {};
     \draw (1.5, 2.5) node (concatleftjoint2) {};
@@ -21,14 +21,14 @@
     \draw (7.25, 2.5) node (concatrightjoint2) {};
     \draw (7.25, 2) node (concatstart1) {};
     \draw (7.25, 4) node (concatstart2) {};
-    
+
     \draw (0, 5) node[convblock] (convblock1) {ConvBlock};
     \draw (0, 3) node[convblock] (convblock2) {ConvBlock};
     \draw (0, 2) node[convblock] (convblock3) {ConvBlock};
     \draw (0, 0.5) node[convblock] (convblock4) {ConvBlock};
     \draw (0, -1) node[convblock] (convblock5) {ConvBlock};
     \draw (0, -2) node[convblock] (convblock6) {ConvBlock};
-    
+
     \draw (3, 6) node[grublock] (grublock1) {GRUBlock};
     \draw (3, 5) node[grublock] (grublock2) {GRUBlock};
     \draw (3, 4) node[grublock] (grublock3) {GRUBlock};
@@ -37,7 +37,7 @@
     \draw (3, 0.5) node[grublock] (grublock6) {GRUBlock};
     \draw (3, -1) node[grublock] (grublock7) {GRUBlock};
     \draw (3, -2) node[grublock] (grublock8) {GRUBlock};
-    
+
     \draw (6, 6) node[linear] (linear1) {Linear (200)};
     \draw (6, 5) node[linear] (linear2) {Linear (1)};
     \draw (6, 4) node[linear] (linear3) {Linear (1)};
@@ -47,17 +47,17 @@
     \draw (6, 0) node[linear] (linear7) {Linear (4)};
     \draw (6, -1) node[linear] (linear8) {Linear (12)};
     \draw (6, -2) node[linear] (linear9) {Linear (1)};
-    
-	\draw (7.75, 6) node[output] (output1) {tempo};
-	\draw (7.75, 5) node[output] (output2) {downbeats};
-	\draw (7.75, 4) node[output] (output3) {beats};
-	\draw (7.75, 3) node[output] (output4) {musical onsets};
-	\draw (7.75, 2) node[output] (output5) {note values};
-	\draw (7.75, 1) node[output] (output6) {time signature\\  numerators};
-	\draw (7.75, 0) node[output] (output7) {time signature\\  denominators};
-	\draw (7.75, -1) node[output] (output8) {key signature};    
-	\draw (7.75, -2) node[output] (output9) {hand parts}; 
-    
+
+    \draw (7.75, 6) node[output] (output1) {tempo};
+    \draw (7.75, 5) node[output] (output2) {downbeats};
+    \draw (7.75, 4) node[output] (output3) {beats};
+    \draw (7.75, 3) node[output] (output4) {musical onsets};
+    \draw (7.75, 2) node[output] (output5) {note values};
+    \draw (7.75, 1) node[output] (output6) {time signature\\  numerators};
+    \draw (7.75, 0) node[output] (output7) {time signature\\  denominators};
+    \draw (7.75, -1) node[output] (output8) {key signature};
+    \draw (7.75, -2) node[output] (output9) {hand parts};
+
     \draw (sequence) to (joint4.center);
     \draw (joint1.center) to (joint6.center);
     \draw[arrowstyle] (joint1.center) to (convblock1);
@@ -66,7 +66,7 @@
     \draw[arrowstyle] (joint4.center) to (convblock4);
     \draw[arrowstyle] (joint5.center) to (convblock5);
     \draw[arrowstyle] (joint6.center) to (convblock6);
-    
+
     \draw[arrowstyle] (convblock1.east) to (grublock1.west);
     \draw[arrowstyle] (convblock1.east) to (grublock2.west);
     \draw[arrowstyle] (convblock1.east) to (grublock3.west);
@@ -75,7 +75,7 @@
     \draw[arrowstyle] (convblock4.east) to (grublock6.west);
     \draw[arrowstyle] (convblock5.east) to (grublock7.west);
     \draw[arrowstyle] (convblock6.east) to (grublock8.west);
-    
+
     \draw[arrowstyle] (grublock1.east) to (linear1.west);
     \draw[arrowstyle] (grublock2.east) to (linear2.west);
     \draw[arrowstyle] (grublock3.east) to (linear3.west);
@@ -85,7 +85,7 @@
     \draw[arrowstyle] (grublock6.east) to (linear7.west);
     \draw[arrowstyle] (grublock7.east) to (linear8.west);
     \draw[arrowstyle] (grublock8.east) to (linear9.west);
-    
+
     \draw[arrowstyle] (linear1.east) to (output1.west);
     \draw[arrowstyle] (linear2.east) to (output2.west);
     \draw[arrowstyle] (linear3.east) to (output3.west);
@@ -95,14 +95,14 @@
     \draw[arrowstyle] (linear7.east) to (output7.west);
     \draw[arrowstyle] (linear8.east) to (output8.west);
     \draw[arrowstyle] (linear9.east) to (output9.west);
-    
+
     \draw[arrowstyle, dashed] (concatleftjoint1.center) to (concatenation.center);
     \draw[arrowstyle] (concatleftjoint2.center) to (concatenation.center);
     \draw[dashed] (concatleftjoint1.center) to (concatrightjoint1.center);
     \draw (concatleftjoint2.center) to (concatrightjoint2.center);
-    \draw (concatstart1.center) to (concatrightjoint2.center);    
-    \draw[dashed] (concatstart2.center) to (concatrightjoint1.center);    
-    
+    \draw (concatstart1.center) to (concatrightjoint2.center);
+    \draw[dashed] (concatstart2.center) to (concatrightjoint1.center);
+
     \draw (3.5, -3) node[output] (legendsymbol1) {$\boldsymbol{\oplus}$};
     \draw (3, -3.75) node[output] (legendsymbolstart) {};
     \draw (4.5, -3.75) node[output] (legendsymbolend) {};

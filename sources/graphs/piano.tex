@@ -1,73 +1,73 @@
 \begin{tikzpicture}
 
-\coordinate (origin) at (0,0);
-\coordinate (stave) at (origin);
+    \coordinate (origin) at (0,0);
+    \coordinate (stave) at (origin);
 % left line of first key
-\draw (9.25,-1) -- (9.25,-5);
+    \draw (9.25,-1) -- (9.25,-5);
 
-\def\midiC{0}
-\def\midiD{2}
-\def\midiE{4}
-\def\midiF{5}
-\def\midiG{7}
-\def\midiA{9}
-\def\midiB{11}
+    \def\midiC{0}
+    \def\midiD{2}
+    \def\midiE{4}
+    \def\midiF{5}
+    \def\midiG{7}
+    \def\midiA{9}
+    \def\midiB{11}
 
 % Define a command to calculate the MIDI note number
-\newcommand{\midiNote}[3]{% #1 is pitch, #2 is octave
+    \newcommand{\midiNote}[3]{% #1 is pitch, #2 is octave
     % Assign MIDI note numbers to each pitch (C=0, C#=1, D=2, ..., B=11)
-    \pgfmathtruncatemacro{\pitchValue}{\csname midi#1\endcsname}
-    \pgfmathtruncatemacro{\midiNumber}{12 + \pitchValue + #2 * 12 + #3}
-};
+        \pgfmathtruncatemacro{\pitchValue}{\csname midi#1\endcsname}
+        \pgfmathtruncatemacro{\midiNumber}{12 + \pitchValue + #2 * 12 + #3}
+    };
 
-\newcommand{\drawPianoKey}[4]{
-	\pgfmathparse{#2*7+\p+0.25-#3}
+    \newcommand{\drawPianoKey}[4]{
+        \pgfmathparse{#2*7+\p+0.25-#3}
         \edef\myx{\pgfmathresult}
         % draw three lines for top, right, bottom of this key
         \draw (\myx,-1) -- (\myx,-5);
         \draw (\myx,-1) -- ($(\myx,-1)+(-1,0)$);
         \draw (\myx,-5) -- ($(\myx,-5)+(-1,0)$);
-        % print pitch on line
+        % print pitch on the line
         \node [anchor=base,xshift=-15] at (\pgfmathresult,-4.5) {{#1}{#2}};
-        
-		\midiNote{#1}{#2}{0};
-    		\node[anchor=base,xshift=-15] at (\pgfmathresult, -5.5) {\midiNumber};
+
+        \midiNote{#1}{#2}{0};
+        \node[anchor=base,xshift=-15] at (\pgfmathresult, -5.5) {\midiNumber};
 
         \blacknotefalse
         \ifcase\p
         \or
-            \blacknotetrue
+        \blacknotetrue
         \or
-          \ifnum#2>0
-            \blacknotetrue
-          \fi
+        \ifnum#2>0
+        \blacknotetrue
+        \fi
         \or
         \or
-            \blacknotetrue
+        \blacknotetrue
         \or
-            \blacknotetrue
+        \blacknotetrue
         \or
-            \blacknotetrue
+        \blacknotetrue
         \else
         \fi
         \ifblacknote
-            % recalculate x
-            \pgfmathparse{#2*7+\p-#3}
-                \fill ([xshift=0.25cm, yshift=-1cm]stave.south -| \pgfmathresult,0) ++(-0.25cm,0) rectangle ++(0.5cm,-2.5cm);
-                % print pitch on black key
-                \node [anchor=base,xshift=0.25cm,white] at (\pgfmathresult,-2.5) {\textbf{#1}$\sharp$};
-		        \midiNote{#1}{#2}{1};
-    		       \node[anchor=base,xshift=0.25cm] at (\pgfmathresult, -0.75) {\midiNumber};
+        % recalculate x
+        \pgfmathparse{#2*7+\p-#3}
+        \fill ([xshift=0.25cm, yshift=-1cm]stave.south -| \pgfmathresult,0) ++(-0.25cm,0) rectangle ++(0.5cm,-2.5cm);
+        % print pitch on black key
+        \node [anchor=base,xshift=0.25cm,white] at (\pgfmathresult,-2.5) {\textbf{#1}$\sharp$};
+        \midiNote{#1}{#2}{1};
+        \node[anchor=base,xshift=0.25cm] at (\pgfmathresult, -0.75) {\midiNumber};
         \fi
-}
+    }
 
-\newif\ifblacknote
-\foreach \octave in {2,...,5}
+    \newif\ifblacknote
+    \foreach \octave in {2,...,5}
     \foreach \pitch [count=\p] in {C,D,E,F,G,A,B}{
         % calculate x position from octave and pitch
         \drawPianoKey{\pitch}{\octave}{5}{15}
     }
 
-\def\p{7}
-\drawPianoKey{C}{6}{11}{21}
+    \def\p{7}
+    \drawPianoKey{C}{6}{11}{21}
 \end{tikzpicture} 

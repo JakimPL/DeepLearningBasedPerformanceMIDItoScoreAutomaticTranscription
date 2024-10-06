@@ -1,13 +1,13 @@
 \begin{tikzpicture}
-\tikzset{layer1/.style={fill=gray!10, draw=gray, thick, text centered}}
-\tikzset{layer2/.style={fill=gray!30, draw=gray, thick, text centered}}
-\tikzset{arrowstyle/.style={-{Latex[length=3mm]}}}
+    \tikzset{layer1/.style={fill=gray!10, draw=gray, thick, text centered}}
+    \tikzset{layer2/.style={fill=gray!30, draw=gray, thick, text centered}}
+    \tikzset{arrowstyle/.style={-{Latex[length=3mm]}}}
 
-	\fill[fill=gray!50, fill opacity=0.5, draw=gray, thick, line width=2pt] (0.0, 0.0) rectangle (12.0, 7.0);
-	\fill[fill=gray!30, fill opacity=0.5, draw=gray, thick, line width=2pt] (0.0, -0.5) rectangle (12.0, -4.0);
-	\fill[fill=white!50, fill opacity=1.0, draw=black, thick, line width=1pt] (0.5, 2.0) rectangle (10.5, 6.5);
-	\fill[fill=white!50, fill opacity=1.0, draw=black, thick, line width=1pt] (1.0, 1.5) rectangle (11.0, 6.0);
-	\fill[fill=white!50, fill opacity=1.0, draw=black, thick, line width=1pt] (1.5, 1.0) rectangle (11.5, 5.5);
+    \fill[fill=gray!50, fill opacity=0.5, draw=gray, thick, line width=2pt] (0.0, 0.0) rectangle (12.0, 7.0);
+    \fill[fill=gray!30, fill opacity=0.5, draw=gray, thick, line width=2pt] (0.0, -0.5) rectangle (12.0, -4.0);
+    \fill[fill=white!50, fill opacity=1.0, draw=black, thick, line width=1pt] (0.5, 2.0) rectangle (10.5, 6.5);
+    \fill[fill=white!50, fill opacity=1.0, draw=black, thick, line width=1pt] (1.0, 1.5) rectangle (11.0, 6.0);
+    \fill[fill=white!50, fill opacity=1.0, draw=black, thick, line width=1pt] (1.5, 1.0) rectangle (11.5, 5.5);
 
     \draw (6.5, 7.75) node (note_sequence) {Note sequence};
     \draw (6.5, 4.75) node[layer2] (layerA1) {Convolutional};
@@ -15,30 +15,30 @@
     \draw (6.5, 2.75) node[layer1] (layerA3) {Exponential linear unit};
     \draw (6.5, 1.75) node[layer1] (layerA4) {Dropout};
     \draw[anchor=south, inner sep=2pt] (6.5, 0.0) node (outputA) {To the next convolutional layer};
-    
+
     \draw (6.5, -1.25) node[layer2] (layerB1) {Bi-directional GRU (512)};
     \draw (6.5, -2.25) node[layer2] (layerB2) {Bi-directional GRU (512)};
     \draw (6.5, -3.25) node[layer1] (layerB3) {Linear (512)};
-    
+
     \draw (6.5, -5.00) node[layer1] (output) {Linear (1)};
-    
-	\node[anchor=south west, inner sep=2pt] at (0.2, 0.2) {ConvBlock};    
-	\node[anchor=south west, inner sep=2pt] at (0.2, -3.8) {GRUBlock};
-	
-	\node[anchor=north west, inner sep=2pt] at (1.55, 5.45) {\small{(9, in features), 128}};
-	\node[anchor=north west, inner sep=2pt] at (1.05, 5.95) {\small{(9, 1), 256}};
-	\node[anchor=north west, inner sep=2pt] at (0.55, 6.45) {\small{(9, 1), 512}};
-	\node[anchor=north west, inner sep=2pt] at (0.05, 6.95) {\small{kernel size, channels}};
-	
-	\draw[arrowstyle] (note_sequence.south) to (layerA1.north);
-	\draw[arrowstyle] (layerA1.south) to (layerA2.north);
-	\draw[arrowstyle] (layerA2.south) to (layerA3.north);
-	\draw[arrowstyle] (layerA3.south) to (layerA4.north);
-	\draw[arrowstyle] (layerA4.south) to (outputA.north);
-	\draw[arrowstyle] (layerA4.south) to (outputA.north);
-	
-	\draw[arrowstyle] (outputA.south) to (layerB1.north);
-	\draw[arrowstyle] (layerB1.south) to (layerB2.north);
-	\draw[arrowstyle] (layerB2.south) to (layerB3.north);
-	\draw[arrowstyle] (layerB3.south) to (output.north);
+
+    \node[anchor=south west, inner sep=2pt] at (0.2, 0.2) {ConvBlock};
+    \node[anchor=south west, inner sep=2pt] at (0.2, -3.8) {GRUBlock};
+
+    \node[anchor=north west, inner sep=2pt] at (1.55, 5.45) {\small{(9, in features), 128}};
+    \node[anchor=north west, inner sep=2pt] at (1.05, 5.95) {\small{(9, 1), 256}};
+    \node[anchor=north west, inner sep=2pt] at (0.55, 6.45) {\small{(9, 1), 512}};
+    \node[anchor=north west, inner sep=2pt] at (0.05, 6.95) {\small{kernel size, channels}};
+
+    \draw[arrowstyle] (note_sequence.south) to (layerA1.north);
+    \draw[arrowstyle] (layerA1.south) to (layerA2.north);
+    \draw[arrowstyle] (layerA2.south) to (layerA3.north);
+    \draw[arrowstyle] (layerA3.south) to (layerA4.north);
+    \draw[arrowstyle] (layerA4.south) to (outputA.north);
+    \draw[arrowstyle] (layerA4.south) to (outputA.north);
+
+    \draw[arrowstyle] (outputA.south) to (layerB1.north);
+    \draw[arrowstyle] (layerB1.south) to (layerB2.north);
+    \draw[arrowstyle] (layerB2.south) to (layerB3.north);
+    \draw[arrowstyle] (layerB3.south) to (output.north);
 \end{tikzpicture}

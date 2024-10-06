@@ -1,0 +1,22 @@
+\begin{tikzpicture}
+\tikzset{layer/.style={fill=gray!10, draw=gray, thick, text centered, minimum width=5cm, minimum height=0.75cm}}
+\tikzset{arrowstyle/.style={-{Latex[length=3mm]}}}
+
+    \draw (-3, 6.25) node[layer] (performed_audio) {Performed Audio};
+    \draw (3, 6.25) node[layer] (performed_midi) {Performed MIDI};
+    \draw (-3, 5.00) node[layer] (onset_detection) {Onset Detection};
+    \draw (3, 5.00) node[layer] (onset_extraction) {Onset Extraction};
+    \draw (0, 3.75) node[layer] (simultaneity_quantization) {Simultaneity Quantization};
+    \draw (0, 2.50) node[layer] (tatum_segmentation) {Tatum Segmentation};
+    \draw (0, 1.25) node[layer] (note_onset_quantization) {Note Onset Quantization};
+    \draw (0, 0) node[layer] (metric_structure) {Metric Structure};
+
+    \draw[arrowstyle] (performed_audio) -- (onset_detection);
+    \draw[arrowstyle] (onset_detection) -- (simultaneity_quantization);
+    \draw[arrowstyle] (performed_midi) -- (onset_extraction);
+    \draw[arrowstyle] (onset_extraction) -- (simultaneity_quantization);
+
+    \draw[arrowstyle] (simultaneity_quantization) -- (tatum_segmentation);
+    \draw[arrowstyle] (tatum_segmentation) -- (note_onset_quantization);
+    \draw[arrowstyle] (note_onset_quantization) -- (metric_structure);
+\end{tikzpicture}

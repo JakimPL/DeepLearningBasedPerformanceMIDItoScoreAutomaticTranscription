@@ -1,0 +1,25 @@
+\begin{algorithm}[ht!]
+    \begin{algorithmic}[1]
+        \Require{list of onsets $\mathcal{O}_1^n$}
+        \Ensure{the segmentation boundaries $\{S_j\}_{j=1}^m$ and optimal tatum levels $\{T_j\}_{j=1}^m$}
+        \Statex{{\bf Main procedure}}
+        \State initialize tables $S[\cdot]$ and $T[\cdot]$ from $1$ to $n$
+        \For{$k=1$ \textbf{to} $n$}
+            \State $S[k]\gets \argmin_{1\leq i \leq k}\operatorname{OPT}(i)+\operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)$
+            \State $\operatorname{OPT}(k)\gets \operatorname{OPT}(S_k)+\operatorname{ERR}\left(\mathcal{O}_{S_k+1}^k\right)$
+            \State $T[S_k]\gets\argmin_p e(p,S_k+1,k)$
+        \EndFor
+        \Statex {\bf Trace-back}
+        \State initialize sequences $S$ and $T$
+        \State $k \gets n$
+        \State $j \gets 0$
+        \While{$k > 0$}
+            \State $j \gets j + 1$
+            \State $S_j \gets S[k]$
+            \State $T_j \gets T[k]$
+            \State $k \gets S_k$ \Comment{move to the previous segmentation point}
+        \EndWhile
+        \State \Return reversed $\{S_j\}_{j=1}^m$
+    \end{algorithmic}
+    \captionof{algorithm}[Dynamic programming tatum segmentation]{Dynamic programming tatum segmentation.}
+\end{algorithm}
