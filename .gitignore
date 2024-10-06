@@ -1,6 +1,7 @@
 *.aux
 *.bbg
 *.bbl
+*.blg
 *.loa
 *.lof
 *.log
@@ -8,3 +9,5 @@
 *.out
 *.pdf
 *.toc
+
+svg-inkscape/
