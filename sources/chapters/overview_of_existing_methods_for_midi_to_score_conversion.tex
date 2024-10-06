@@ -1,0 +1,162 @@
+\chapter{Overview of Existing Methods for MIDI to Score Conversion}
+
+Before we get into an overview of methods for MIDI to score conversion, in order to get a better idea of the transcription task, we need to be aware how a performance MIDI score deviates from the sheet music and which information is being lost while transition from one to another.
+
+{\color{red} The traditional music notation is a form of an idealized [definition]...
+
+traditional music notation provides an idealized, simplified version of how a piece should be played, focusing on clarity and consistency.}
+
+For the sake of simplicity, we will ignore and advanced musical cues and pedaling.
+
+The are plenty of differences between the notation and actual recordings, let us sketch some of the most important ones:
+
+\begin{figure}[ht!]
+\centering
+\begin{tabular}{cc}a)
+\includesvg[width=0.3\textwidth]{images/sonata_original.svg}
+ & b)\includesvg[width=0.6\textwidth]{images/sonata_performance.svg}
+\end{tabular}
+\caption{An example of an imported performance MIDI of Chopin's \emph{Sonata No. 2, Op. 35, 2nd movement} ,,as it is'': a) the original sheet, b) the imported performance MIDI without time/key signature assignment. Not only the actual durations render the sheet unreadable and impractical, but also introduce error resulting from note quantization. Notice that there is no hand separation.}
+\label{chopin_sonata}
+\end{figure}
+
+\begin{itemize}
+	\item MIDI file sets operates on a fixed tempo (or to be more precise, a discrete set of tempo changes). Human player never aligns to the tempo perfectly, even in a course of a single measure. In many cases such deviation is intentional: a player deliberately slows down (\emph{rubato}) or holds keys for a little longer than the sheet indicates (\emph{fermata}) for expressive purposes. But, more importantly, performance MIDI files often disregard the tempo, rendering the ticks-per-quarter-note parameter meaningless.
+	\item Note durations are usually not respected. Usually, a pianist shortens the actual length in order to prepare the hand for the next key.
+	 In \emph{legato} playing, some notes may be overlapping and their actual length is a bit longer than indicated by the notation. This is especially visible in fast passages. [obrazek?]
+	 Moreover, \emph{staccato} notes which almost immediate release are never denoted with actual expected time of playing. [obrazek: pasaż staccato oraz wykonanie]
+	\item The traditional notation is limited in terms of dynamics. We have several markings and crescendo/diminuendo Thorough centuries, the notation has been expanded and introduced new markings such as \emph{sforzando} (sfz) or \emph{subito forte}.
+	 The dynamics are not absolute, rather contextual and depending on the surrounding musical elements. 	 A performer has some room for interpretation in terms of dynamics and
+	 Besides For a pianist, slight variations of dynamics are unavoidable.  [obrazek oznaczenia i wykresu głośności]
+	\item Musical sheet provides clear distinction between the left and the right hand. This is not viable in the case of a MIDI stream\footnote{For compositions, left and right hands are split into separate tracks. [...] For recorded MIDI streams hand detection is a challenging task on its own.}
+	\item The voicing [voicing]
+	A key element of a musical notation is voicing [definition?]. For piano pieces, it allows 
+	Chords are denoted with the same size and weight, while players may tend (intentionally or not) to emphasize certain notes from the group, which is not reflected in the sheet.
+	MIDI stream does not 
+	\item The playing, and MIDI format as well, does not distinguish enharmonic differences between keys. A harmonic analysis needs to be performed in order to retrieve this information from a concrete MIDI notes stream.
+\end{itemize}
+
+As it has been noted, performance MIDI is generally not aligned to the internal MIDI tempo. One can correct a MIDI file by assigning the tempo within each note so that each beat lasts the same number of ticks. Grohganz \cite{Grohganz2014} defines two kinds of MIDI files: \begin{enumerate}
+	\item \emph{S-MIDI}: \emph{score-informed} MIDI files,
+	\item \emph{P-MIDI}: unaligned \emph{performance} MIDI file, with unknown real tempo.
+\end{enumerate}
+
+\begin{figure}[ht!]
+\centering
+\begin{tabular}{cc}a)
+\includesvg[height=1.25cm]{images/score_agnostic.svg}
+ & b)\includesvg[height=1.15cm]{images/score_informed.svg}
+\end{tabular}
+\caption{An actual recording of a simple melody: a) the score-agnostic recording with (incorrectly quantized) musical onsets not aligned with the MIDI tempo, b) the score-informed representation of the performance. Notice that the pickup measure is also correctly identified.}
+\label{score_informed}
+\end{figure}
+
+Beat quantization may be thought as a process of converting a P-MIDI into a S-MIDI file.
+
+Musical software programs fail to correctly import P-MIDI as they interpret the onsets and durations according to ticks. This makes beat quantization a crucial part of music transcription.
+
+[summarize]
+
+To summarize, the procedure of translating the raw performance MIDI to a score requires at least: \begin{itemize}
+	\item note quantization, which consists of:
+	\begin{itemize}
+		\item recognizing the beat grid within the downbeats
+		\item interpreting the musical onsets according to the grid
+		\item assigning proper musical duration to notes	
+	\end{itemize}
+	\item assigning the time signature (or signatures)
+	\item assigning the key signature
+	\item separate voices (here: hands)
+\end{itemize}
+
+[example? tempo markings]
+
+Other elements of musical score are out of scope: dynamics, accents, articulation marks, pedalization etc.
+
+Each subtask will be reflected as a separate module in the main model architecture.
+
+As the MIDI file format does not distinguish enharmonically  equivalent pitches, we generally cannot solve the problem  of \emph{pitch spelling}, that is assigning correct \emph{accidentals}: flats ($\flat$) or sharps ($\sharp$) \cite{Cambouropoulos2000}. However, assigning the key signature helps indicating the correct accidentals.
+
+\section{A Brief History}
+
+While the modern formulation of the problem appears to be present in the academic discourse since \cite{Cogliati2016}, the problem of interpreting various elements of the performance MIDI has been known much earlier \cite{Cambouropoulos2000}.
+
+For beat quantization, for many years the state-of-the-art method was using Hidden Markov Models (HMM). \cite{Takeda2002}
+
+[Dynamic programming]
+
+A notable example is \cite{Grohganz2014} that proposes a beat quantization method [...].
+
+\section{Hidden Markov Model}
+
+\emph{Hidden Markov Model} (HMM) is a statistical framework that allows to estimate variables that are not directly observable (so called \emph{hidden} variables) but inferred through other dependent variable: \emph{observations} \cite[p. 210--213]{Jurafsky2009}.
+
+A HMM is specified by the following components: \begin{itemize}
+	\item $Q=\{q_1,q_2,\ldots, q_S\}$ is a set of (hidden) \emph{states}.
+	\item $A=(a_{ij})_{i,j=1}^S$ is a \emph{transition probability matrix}, where each $a_{ij}$ represents the probability of moving from the state $i$ to the state $j$. Each row is a probability distribution, that is $\sum_{j=1}^S a_{ij}=1$ for each $i$.
+	\item $X=(x_t)_{t=1}^T$ is a sequence of \emph{observations}, drawn from some random variable,
+	\item $B=\{b_i(x_t)\}_{i=1}^S$ is a sequence of \emph{emission probabilities}, expressing the probability of an observation $x_t$ being generated by the state $i$.
+	\item $\{\pi_i\}_{i=1}^S$ being an \emph{initial distribution over states}.
+\end{itemize}
+
+They are two underlying assumptions for the model: \begin{itemize}
+	\item {\bf Markov Assumption}: The probability of a particular state depends only on the previous state: $$P\left(q_i|q_1\,\ldots,q_{i-1}\right) = P(q_i|q_{i-1})$$
+	\item {\bf Output Independence}: The probability of an output observation $o_i$ depends only on the state that produced the observation $q_i$: $$P\left(x_i|q_1,\ldots,q_i,\ldots,q_T,x_1,\ldots,x_i,\ldots, x_T\right)=P(x_i|q_i)$$
+\end{itemize}
+
+Hidden Markov Models are said to be characterized by \emph{three fundamental problems} \cite[p. 213]{Jurafsky2009}: \begin{enumerate}
+	\item {\bf Likelihood}: Given an HMM $\lambda = (A, B)$ and observation sequence $X$, determine the likelihood $P(X|\lambda)$
+	\item {\bf Decoding}: Given an observation sequence $X$ and an HMM $\lambda=(A, B)$ determine the optimal state sequence $X$
+	\item {\bf Learning}: Given an observation sequence $X$ and the set of states in the HMM, learn the model parameters $A$ and $B$.
+\end{enumerate}
+
+These problems can be solved algorithmically. For more information, refer to \cite[p. 213--226]{Jurafsky2009}.
+
+\subsection{Hidden Markov Model for Beat Quantization}
+
+Takeda et al. \cite{Takeda2002} employed Hidden Markov Models to solve beat quantization problem for performance MIDI streams in a tempo-free scenario. 
+
+The basic idea behind the approach is to treat performance note durations as \emph{observations} of some unknown, ,,ideal'' (nominal, intended time value). The actual length fluctuation can be modeled by some Gaussian distribution with the mean of the length of the nominal length of a note. The performed note duration $x_t$ at the time $t$ is modeled by a probability density function $b_i(x_t)$ where $i$ is the \emph{intention}, i.e. nominal time value of the note. The observations are measured via \emph{inter-onset intervals} (IOI), that is the time interval between consecutive note onsets.
+
+Let $Q = \{q_1,q_2,\ldots, q_N\}$ be the time sequence of identified intentions, and let $X=\{x_1,x_2,\ldots,x_N\}$ be the observations: the sequence of actual durations. The probability of observing the entire sequence is given by: $$P(X|Q)=\prod_{t=1}^N b_{q_t}(x_t)$$ 
+
+The authors introduce two models for predicting note lengths: \begin{itemize}
+	\item \emph{Note $n$-gram Model}. Note length is predicted from preceding $n - 1$ notes. For example, the bigram model predicts the length of a new note based on the length of the previous note.
+	\item \emph{Rhythm Vocabulary Model}. The vocabulary consists of all known rhythm patterns for a unit time, e.g. one measure.\end{itemize}
+	
+Both models are represented by probabilistic state transition networks. Each state is associated with an intended note length. For example, in a $3$-gram model we may represent a state as $a_{ij,jk}$, where two preceding notes are of length $i$ and $j$, and the successor note is of length $k$. In general, instead of using tuplets, all possible stats are labeled and enumerated, yielding transition matrix $(a_{ij})_{i,j}$. Thus, the probability that state number changes along a time sequence $Q=\{q_1,q_2,\ldots,q_N\}$ is given by the product: $$P(Q)=\pi_{q_0}\prod_{t=1}^N a_{q_{t-1},q_t}$$ for some initial probability $\pi_i$ starting with the state $i$. This the foundation of Hidden Markov Model: \begin{itemize}
+	\item The matrix $A=(a_{ij})_{i,j}$ constitutes a \emph{transition probability matrix}.
+	\item The sequence $B=\{b_i(x_t)\}_{i}$ is a sequence of \emph{emission probabilities}.
+\end{itemize}
+
+\subsection{Optimal Sequence of States}
+
+From the Bayes theorem, one have: $$P(Q|X)=\frac{P(X|Q)P(Q)}{P(X)}$$ In order to maximize a posteriori probability $P(Q|X)$, one needs to maximize $P(Q|X)$ as for given sequence $X$, the probability $P(X)$ is constant. One could examine all possible state sequences, compute the likelihood of the observation sequence given that hidden state sequence, and pick the one that maximizes that likelihood. However the space of all state sequences is exponentially large.
+
+Instead, the optimal sequence of states is found through a faster \emph{Viterbi algorithm}, which is an established dynamic programming algorithm for that purpose \cite[p.210--220]{Jurafsky2009}. 
+
+Given the HMM $\lambda = (A, B)$, the procedure is as follows:
+
+\input{sources/algorithms/viterbi}
+
+The procedure returns the optimal sequence of intended notes $$\hat{Q} = \argmax_Q P(X|Q)P(Q)$$
+
+\subsection{Training}
+
+Hidden Markov Models are subject to training in order to find the transition matrix $A$ and the sequence $B$. More precisely, given the sequence $X$ and corresponding sequence of hidden states $Q$, the model parameters $A$ and $B$ are inferred from the training data. For more information, refer to the \emph{Baum-Welch algorithm} \cite[p. 220--226]{Jurafsky2009}.
+
+Takeda et al. used approximately $50\;000$ notes in MIDI data of classical and jazz music for the $n$-gram model, with an additional smoothing. For the rhythm vocabulary model, they extracted 267 one-bar-long rhythm patterns from 88 various pieces. The exact dataset information has been not provided.
+
+\subsection{Limitations}
+
+The model focuses solely on beat quantization problem, it gives no insight about other music aspects as key signature. It however, partially deals with time signature: for each key signature there is a separate model.
+
+As the Gaussian distribution is unimodal, the basic assumption of the model is that the tempo is constant. Similarly, to catch fluctuating tempi, several different models are being run in parallel, and the one that maximizes the likelihood for the observed note durations $P(X|Q,T)P(Q|T)P(T)$ is selected, where $Q$ is the recognized rhythm, and $T$ is the tempo. Usually, a limited discrete set of predefined tempi are used\footnote{The authors used a set of 6 equally spaced tempi, ranging from 60 to 120 beats per minute.}.
+
+The algorithm was designed mostly for transcribing of single-voice music. Authors claim that with enriched rhythm vocabulary containing overlapping notes (as in fugues or cannons) it is possible to use the framework on multi-voice music, however it needs a chord identification to treat groups of notes played at almost the same time as one entity. The paper does not explain the results of such procedure.
+
+There is no public implementation of the algorithm available. This makes hard to compare the results with the currently available solutions.
+
+\section{Dynamic Programming Approach}
+
+In 2005, Yang et al. proposed another method for solving beat quantization problem \cite{Yang2005}

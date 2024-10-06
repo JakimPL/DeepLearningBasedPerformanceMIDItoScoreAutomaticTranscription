@@ -1,0 +1,73 @@
+\chapter{Performance MIDI-to-Score Conversion by Neural Beat Tracking}
+
+The main model of interest \cite{Liu2022} is composed of two parts:
+\begin{itemize}
+	\item Beat Tracking.
+	\item Score Element Assignment.
+\end{itemize}
+
+The first part is responsible for quantizing the raw material into beats and downbeats. Each measure is consisted of several beats, and the number of beats in a measure is governed by the time signature. The beats mark the tempo, and they are the basis for the musical onsets detection.
+
+The second part assigns every other aspect of the musical score to the MIDI stream. Let us recall these elements: musical onsets, note values, hand parts, key signature and time signature.
+
+Let us review both components.
+
+\section{Beat Tracking}
+
+A single measure consists of several beats, and the rhythmic structure of beats is determined by time signature (or signatures). A performance MIDI does not contain information about beats and one of the objectives of the model is to predict locations of these.
+
+After these predictions, note beginnings (onsets) can be placed in a subdivision of a single beat. The smallest unit of time distance is thus dictated by the size of the beat subdivision. More precisely, a musical onset $mo_i$ of the $i$-th note is defined as \[mo_i = \frac{s_n}{S}\] where $S$ is the number of subdivisions per beat in rhythm quantization, and $s_n$ is the musical onset time expressed in the number of subdivisions.
+
+The authors provide a novel approach to detecting beats, splitting them into two categories, for which there are two separate methods.
+
+Beats can fall into two distinct groups:
+\begin{itemize}
+	\item \emph{In-note}: beats concurrent with at least one note onset. This means that some notes play within the start of the beat.
+	\item \emph{Out-of-note}: a beat is not concurrent with any note onset. No notes are beginning with such beats.
+\end{itemize}
+
+\subsection{In-note Beat Prediction}
+
+For predicting in-note beats, one can reduce the problem to a binary classification task on the note sequence $\mathbf{X}$. This sequence is assumed to have a length $N$.
+
+\begin{figure}[!ht]
+\centering
+\input{sources/graphs/in_note}
+\caption[In-note beat prediction model]{In-note beat prediction model with a CRNN with 3 convolutional layers and 2 bi-directional gated recurrent unit (GRU) layers.}
+\end{figure}
+
+The probability $P_n$ that $n$-th note is concurrent with a beat is defined as: $$P_n = \mathbb{P}\left(B_n|\mathbf{X}\right)$$ where $B_n\in\{0,1\}$ is the ground-truth beat label for the $n$-th note from the note sequence. The model is trained using the standard cross-entropy loss function: $$\mathcal{L}=-\frac{1}{N}\sum_{n=1}^N B_n\ln P_n + \left(1-B_n\right)\ln\left(1-P_n\right)$$ The authors used CRNN with 3 convolutional layers and 2 bidirectional gated recurrent unit (GRU) layers. The probability threshold for positive classification has been set dynamically, depending on the maximum probability in a fixed segment length.
+
+\subsection{Out-of-note Beat Prediction}
+
+The approach to predicting out-of-note beats, which do not align with note onsets, requires distinct approach. Liu et al. (2022) proposed a dynamic programming strategy to solve this problem \cite{Liu2022}.
+
+Let us assume that there are $B^i$ in-note beats $\{b_n^i\}_{n=1}^{B^i}$ in total, and out-of-note beats are at subdivisions of the neighboring in-note beats\footnote{We may select only one note per in-note beat, if there are more.} $b_{n}^i$ and $b_{n+1}^i$.
+
+The goal of the procedure is to find out-of-note beats $b^o$ from a set of candidates: \begin{equation}\label{out_of_note_candidates}
+b_{n,K}^o = \left\{b_n^i + \frac{k}{K+1}\left(b_{n+1}^i-b_n^i\right)\right\}_{k=1}^K
+\end{equation} where $K\in\{0,1,2,3\}$ is the number of out-of-note beats to insert inside the $\left(b_{n+1}^i, b_n^i\right)$ interval.
+
+The number of candidates is selected in order to minimize the tempo change after adding out-of-note beats. The function may be represented as the sum: \[\mathcal{O}_1 = \sum_{n=1}^{B-2}\left|\ln\left(\frac{b_{n+2} - b_{n+1}}{b_{n+1} - b_n}\right)\right|\] where $\{b_n\}_{n=1}^B$ is the sequence of all $B$ beats (both in-note and out-of-note, sorted chronologically).
+
+To discourage the procedure from adding too many out-of-note beats, which leads to an unnecessarily subdivided output, an additional penalty is associated with the objective function: \begin{equation}\label{out_of_note_objective}
+\mathcal{O} = \mathcal{O}_1 + \lambda B^o
+\end{equation} where $B^o$ is the number of added out-of-note beats, and $\lambda$ is the penalty coefficient. The coefficient is to be found experimentally, however the default value set by the authors is $1$.
+
+\input{sources/algorithms/out_of_note}
+
+\section{Score Elements Assignment}
+
+As discussed in the Section \ref{music_score_encoding}, score elements assignment may be viewed as a function from a note sequence $\mathbf{X}$ into a score encoded by a tensor $\mathbf{Y}_n$ representing musical onsets, note values, key signature, time signature, and hand parts, for each note separately.
+
+Besides the quantization model, which relies on the beat tracking module, key signature, time signature and hand parts modules can be treated independently.
+
+\begin{figure}[!ht]
+\centering
+\input{sources/graphs/model_architecture}
+\caption[An architecture of the model.]{An architecture of the model. There are five separate modules of the entire model in total: \emph{beat}, \emph{quantization}, \emph{time signature}, \emph{key signature} and \emph{hand parts}.}
+\end{figure}
+
+\section{Score Generation}
+
+The final score generation process synthesizes the source MIDI stream, incorporating pitch sequence, with the model's output. The resultant annotated MIDI encompasses essential information for visual score generation, including key/time signatures, which are not typically present in standard MIDI files.

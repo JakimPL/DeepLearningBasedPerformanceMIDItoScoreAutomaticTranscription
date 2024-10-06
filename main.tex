@@ -1,0 +1,204 @@
+% Niniejszy plik stanowi przykład formatowania pracy magisterskiej na
+% Wydziale MIM UW.  Szkielet użytych poleceń można wykorzystywać do
+% woli, np. formatujac wlasna prace.
+%
+% Zawartosc merytoryczna stanowi oryginalnosiagniecie
+% naukowosciowe Marcina Wolinskiego.  Wszelkie prawa zastrzeżone.
+%
+% Copyright (c) 2001 by Marcin Woliński <M.Wolinski@gust.org.pl>
+% Poprawki spowodowane zmianami przepisów - Marcin Szczuka, 1.10.2004
+% Poprawki spowodowane zmianami przepisow i ujednolicenie 
+% - Seweryn Karłowicz, 05.05.2006
+% Dodanie wielu autorów i tłumaczenia na angielski - Kuba Pochrybniak, 29.11.2016
+
+% dodaj opcję [licencjacka] dla pracy licencjackiej
+% dodaj opcję [en] dla wersji angielskiej (mogą być obie: [licencjacka,en])
+
+\documentclass[licencjacka,en]{pracamgr}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+
+\usepackage{fontspec}
+\usepackage{lilyglyphs}
+\usepackage{tikz}
+\usepackage{svg}
+\usepackage{shellesc}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{array}
+\usepackage{color}
+\usepackage{setspace}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{caption}
+\usepackage{float}
+\DeclareCaptionFormat{algorithmformat}{Algorithm \arabic{section}.\arabic{algorithm}: #3}
+\captionsetup[algorithm]{format=algorithmformat}
+
+% Ensure that algorithms are numbered within sections
+\makeatletter
+\@addtoreset{algorithm}{section}
+\makeatother
+
+
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{calc}
+
+\usepackage{natbib}
+\bibliographystyle{alpha}
+
+%\bibliographystyle{plain}
+
+% Dane magistranta:
+\autor{Mateusz Szymański}{457163}
+
+\title{Deep Learning-Based Performance MIDI to Score Automatic Transcription}
+\titlepl{Automatyczna transkrypcja wykonań MIDI do partytur oparta na głębokim uczeniu}
+
+%kierunek: 
+% - matematyka, informacyka, ...
+% - Mathematics, Computer Science, ...
+\kierunek{Machine Learning}
+
+% informatyka - nie okreslamy zakresu (opcja zakomentowana)
+% matematyka - zakres moze pozostac nieokreslony,
+% a jesli ma byc okreslony dla pracy mgr,
+% to przyjmuje jedna z wartosci:
+% {metod matematycznych w finansach}
+% {metod matematycznych w ubezpieczeniach}
+% {matematyki stosowanej}
+% {nauczania matematyki}
+% Dla pracy licencjackiej mamy natomiast
+% mozliwosc wpisania takiej wartosci zakresu:
+% {Jednoczesnych Studiow Ekonomiczno--Matematycznych}
+
+% \zakres{Tu wpisac, jesli trzeba, jedna z opcji podanych wyzej}
+
+% Praca wykonana pod kierunkiem:
+% (podać tytuł/stopień imię i nazwisko opiekuna
+% Instytut
+% ew. Wydział ew. Uczelnia (jeżeli nie MIM UW))
+\opiekun{dr hab. Marek Cygan\\
+	Instytut Informatyki\\
+	Wydział Matematyki, Informatyki i Mechaniki\\
+	Uniwersytet Warszawski\\
+	\bfseries{dr inż. Mateusz Modrzejewski}\\
+	Instytut Informatyki\\
+	Wydział Elektroniki i Technik Informacyjnych\\
+	Politechnika Warszawska
+}
+
+% miesiąc i~rok:
+\date{June 2024}
+
+%Podać dziedzinę wg klasyfikacji Socrates-Erasmus:
+\dziedzina{ 
+%11.0 Matematyka, Informatyka:\\ 
+%11.1 Matematyka\\ 
+%11.2 Statystyka\\ 
+%11.3 Informatyka\\ 
+11.4 Sztuczna inteligencja\\ 
+%11.5 Nauki aktuarialne\\
+%11.9 Inne nauki matematyczne i informatyczne
+}
+
+%Klasyfikacja tematyczna wedlug AMS (matematyka) lub ACM (informatyka)
+\klasyfikacja{I. Computing Methodologies\\
+  I.2. Artificial Intelligence\\
+  I.2.7. Natural Language Processing}
+
+% Słowa kluczowe:
+\keywords{deep learning, performance MIDI, automatic music transcription, score generation}
+
+\linespread{1.3}
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
+
+\setlist[itemize]{parsep=0pt}
+\setlist[enumerate]{parsep=0pt}
+
+\newcommand{\nocitation}[0]{{\color{red}citation}}
+\newcommand{\missing}[0]{{\color{red}\ldots}}
+\newcommand{\argmax}{\operatornamewithlimits{arg\,max}}
+
+\graphicspath{images/}
+
+\begin{document}
+\maketitle
+
+\input{sources/abstract}
+
+\input{sources/table_of_contents}
+
+\input{sources/chapters/introduction}
+
+\input{sources/chapters/representation_of_music_information}
+
+\input{sources/chapters/automatic_music_transcription}
+
+\input{sources/chapters/overview_of_existing_methods_for_midi_to_score_conversion}
+
+\input{sources/chapters/midi_to_score_transcription_evaluation}
+
+\input{sources/chapters/performance_midi_to_score_conversion_by_neural_beat_tracking}
+
+\input{sources/chapters/experiments_and_improvements}
+
+\input{sources/chapters/conclusions}
+
+\nocite{ABC2013}
+\nocite{Benetos2013}
+\nocite{Benetos2019}
+\nocite{Berenzweig2003}
+\nocite{Bhattarai2023}
+\nocite{Chopin1839}
+\nocite{Cogliati2016}
+\nocite{Cogliati2017}
+\nocite{Desain1989}
+\nocite{Duan2014}
+\nocite{Francesco2020}
+\nocite{Good2001}
+\nocite{Hiramatsu2021}
+\nocite{Huber2007}
+\nocite{ISO1975}
+\nocite{ISO2008}
+\nocite{Kim2018}
+\nocite{Kostka1994}
+\nocite{Krueger1996}
+\nocite{LilyPond2002}
+\nocite{Liu2022}
+\nocite{MIDI1996}
+\nocite{Oliveira2017}
+\nocite{Orio2006}
+\nocite{McLeod2018}
+\nocite{McLeod2019}
+\nocite{Oliveira2017}
+\nocite{Read1969}
+\nocite{Rudin1976}
+\nocite{Riley2023}
+\nocite{Sethares2005}
+\nocite{Schaeffer2012}
+\nocite{Schedl2014}
+\nocite{Smith1999}
+\nocite{Suzuki2021}
+\nocite{Temperley2009}
+\nocite{Wiki2024A}
+\nocite{Wiki2024B}
+\nocite{Ycart2018}
+
+\bibliography{bibliography/bibliography}
+
+\end{document}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% coding: latin-2
+%%% End:

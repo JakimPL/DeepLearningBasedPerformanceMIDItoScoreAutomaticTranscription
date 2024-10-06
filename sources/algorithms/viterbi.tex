@@ -1,0 +1,29 @@
+\begin{algorithm}[ht!]
+\begin{algorithmic}[1]
+\Require{the HMM model, the sequence of observations $X=(x_t)_{t=1}^N$}
+\Ensure{the optimal sequence of hidden states $Q=(q_1,\ldots,q_N)$}
+
+\Statex \textbf{Initialization}
+\State initialize the matrices $v$ and $bp$ of the size $S\times N$
+\For{\textbf{each} state $i$ \textbf{from} $1$ \textbf{to} $S$}
+	\State $v_1(i)\ \gets \pi_i\cdot b_i(x_1)$
+	\State $bp_1(j)\gets 0$
+\EndFor
+
+\Statex \textbf{Recursion}
+\For{\textbf{each} time step \textbf{from} $t=2$ \textbf{to} $N$}
+	\For{\textbf{each} state \textbf{from} $j=1$ \textbf{to} $S$}
+		\State $v_i(t) \gets \max_{j=1}^S v_{j}(t-1)\cdot a_{ji}\cdot b_i(x_t)$
+		\State $bp_i(t) \gets \argmax_{j=1}^S v_j(t-1)\cdot a_{ji}\cdot b_i(x_t)$
+	\EndFor
+\EndFor
+
+\Statex \textbf{Termination}
+\State $p \gets \max_{j=1}^S v_j(N)$ \Comment{best path probability}
+\State $q \gets \argmax_{j=1}^S v_j(N)$ \Comment{best path pointer}
+\State best path $\gets$ the path starting at the state $q$, that follows the backpointer $bp$ to states back in time
+
+    \State \Return best path, $p$
+\end{algorithmic}
+\captionof{algorithm}[Viterbi algorithm]{Viterbi algorithm.}
+\end{algorithm}

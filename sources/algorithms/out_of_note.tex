@@ -1,0 +1,29 @@
+\begin{algorithm}[ht!]
+\begin{algorithmic}[1]
+\Require{list of in-note notes $\mathcal{B}^i$}
+\Ensure{list of all beats $\mathcal{B}$ including added out-of-note beats}
+\State $n \gets 1$
+\For{$K=0,1,2,3$}
+    \State initialize objective function $\mathcal{O}_K\gets 0$
+    \State initialize beat sequence $\mathcal{B}_K\gets \{b_1\}$
+\EndFor
+\For{$n=1,2,\ldots,B^i-2$}
+    \For{$K_{\textrm{cur}}=0,1,2,3$}
+        \State get out-of-note beats for current step by \eqref{out_of_note_candidates}
+        \If{tempo is beyond tempo range limits}
+            \State \textbf{continue}
+        \EndIf
+        \For{$K_{\textrm{prev}}=0,1,2,3$}
+            \State update objective function by \eqref{out_of_note_objective}
+        \EndFor
+        \State select the minimum objective among all $K_{\textrm{prev}}$ values
+        \State add out-of-beats for the current step to the beat sequence mapped to the selected $K_{\textrm{prev}}$
+    \EndFor
+    \For{$K_{\textrm{cur}}=0,1,2,3$}
+        \State update $\mathcal{O}_K$, $\mathcal{B}_K$ mapped with $K_{\textrm{cur}}$
+    \EndFor
+\EndFor
+\State \Return{the beat sequence $\mathcal{B}_K$ with the minimum objective function $\mathcal{O}_K$}
+\end{algorithmic}
+\captionof{algorithm}[Out-of-note beat prediction]{Out-of-note beat prediction.}
+\end{algorithm}
