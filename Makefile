@@ -1,3 +1,8 @@
+build:
+	python bibparser.py
+	lualatex -interaction=nonstopmode -shell-escape main.tex
+	bibtex main.aux
+
 install:
 	pip install -r requirements.txt
 
@@ -12,11 +17,6 @@ clean:
 	rm -f images/*_gen.svg
 	rm -f lily/*.svg
 	rm -f *.aux *.bbg *.bbl *.blg *.loa *.lof *.log *.lot *.out *.pdf *.toc
-
-build:
-	python bibparser.py
-	lualatex -interaction=nonstopmode -shell-escape main.tex
-	bibtex main.aux
 
 process_lily:
 	cd lily && \
