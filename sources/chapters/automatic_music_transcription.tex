@@ -206,3 +206,82 @@ To summarize, the output score $\mathbf{Y}$ can be represented as a pair of two 
 \end{itemize}
 
 The objective of performance MIDI to score automatic transcription is to find a good enough function $\mathbf{X}\to\mathbf{Y}$. Further sections will be devoted to measuring the quality of the resulting score in order to define the \emph{good enough} part. 
+
+\section{Common Transcription Problems}
+
+Before we get into an overview of methods for MIDI to score conversion, in order to get a better idea of the transcription task, we need to be aware how a performance MIDI score deviates from the sheet music and which information is being lost while transition from one to another.
+
+{\color{red} The traditional music notation is a form of an idealized [definition]...
+
+traditional music notation provides an idealized, simplified version of how a piece should be played, focusing on clarity and consistency.}
+
+For the sake of simplicity, we will ignore and advanced musical cues and pedaling.
+
+The are plenty of differences between the notation and actual recordings, let us sketch some of the most important ones:
+
+\begin{figure}[ht!]
+\centering
+\begin{tabular}{cc}a)
+\includesvg[width=0.3\textwidth]{images/sonata_original_gen.svg}
+ & b)\includesvg[width=0.6\textwidth]{images/sonata_performance_gen.svg}
+\end{tabular}
+\caption{An example of an imported performance MIDI of Chopin's \emph{Sonata No. 2, Op. 35, 2nd movement} ,,as it is'': a) the original sheet, b) the imported performance MIDI without time/key signature assignment. Not only the actual durations render the sheet unreadable and impractical, but also introduce error resulting from note quantization. Notice that there is no hand separation.}
+\label{chopin_sonata}
+\end{figure}
+
+\begin{itemize}
+	\item MIDI file sets operates on a fixed tempo (or to be more precise, a discrete set of tempo changes). Human player never aligns to the tempo perfectly, even in a course of a single measure. In many cases such deviation is intentional: a player deliberately slows down (\emph{rubato}) or holds keys for a little longer than the sheet indicates (\emph{fermata}) for expressive purposes. But, more importantly, performance MIDI files often disregard the tempo, rendering the ticks-per-quarter-note parameter meaningless.
+	\item Note durations are usually not respected. Usually, a pianist shortens the actual length in order to prepare the hand for the next key.
+	 In \emph{legato} playing, some notes may be overlapping and their actual length is a bit longer than indicated by the notation. This is especially visible in fast passages. [obrazek?]
+	 Moreover, \emph{staccato} notes which almost immediate release are never denoted with actual expected time of playing. [obrazek: pasaż staccato oraz wykonanie]
+	\item The traditional notation is limited in terms of dynamics. We have several markings and crescendo/diminuendo Thorough centuries, the notation has been expanded and introduced new markings such as \emph{sforzando} (sfz) or \emph{subito forte}.
+	 The dynamics are not absolute, rather contextual and depending on the surrounding musical elements. 	 A performer has some room for interpretation in terms of dynamics and
+	 Besides For a pianist, slight variations of dynamics are unavoidable.  [obrazek oznaczenia i wykresu głośności]
+	\item Musical sheet provides clear distinction between the left and the right hand. This is not viable in the case of a MIDI stream\footnote{For compositions, left and right hands are split into separate tracks. [...] For recorded MIDI streams hand detection is a challenging task on its own.}
+	\item The voicing [voicing]
+	A key element of a musical notation is voicing [definition?]. For piano pieces, it allows 
+	Chords are denoted with the same size and weight, while players may tend (intentionally or not) to emphasize certain notes from the group, which is not reflected in the sheet.
+	MIDI stream does not 
+	\item The playing, and MIDI format as well, does not distinguish enharmonic differences between keys. A harmonic analysis needs to be performed in order to retrieve this information from a concrete MIDI notes stream.
+\end{itemize}
+
+As it has been noted, performance MIDI is generally not aligned to the internal MIDI tempo. One can correct a MIDI file by assigning the tempo within each note so that each beat lasts the same number of ticks. Grohganz \cite{Grohganz2014} defines two kinds of MIDI files: \begin{enumerate}
+	\item \emph{S-MIDI}: \emph{score-informed} MIDI files,
+	\item \emph{P-MIDI}: unaligned \emph{performance} MIDI file, with unknown real tempo.
+\end{enumerate}
+
+\begin{figure}[ht!]
+\centering
+\begin{tabular}{cc}a)
+\includesvg[height=1.25cm]{images/score_agnostic_gen.svg}
+ & b)\includesvg[height=1.15cm]{images/score_informed_gen.svg}
+\end{tabular}
+\caption{An actual recording of a simple melody: a) the score-agnostic recording with (incorrectly quantized) musical onsets not aligned with the MIDI tempo, b) the score-informed representation of the performance. Notice that the pickup measure is also correctly identified.}
+\label{score_informed}
+\end{figure}
+
+Beat quantization may be thought as a process of converting a P-MIDI into a S-MIDI file.
+
+Musical software programs fail to correctly import P-MIDI as they interpret the onsets and durations according to ticks. This makes beat quantization a crucial part of music transcription.
+
+[summarize]
+
+To summarize, the procedure of translating the raw performance MIDI to a score requires at least: \begin{itemize}
+	\item note quantization, which consists of:
+	\begin{itemize}
+		\item recognizing the beat grid within the downbeats
+		\item interpreting the musical onsets according to the grid
+		\item assigning proper musical duration to notes	
+	\end{itemize}
+	\item assigning the time signature (or signatures)
+	\item assigning the key signature
+	\item separate voices (here: hands)
+\end{itemize}
+
+[example? tempo markings]
+
+Other elements of musical score are out of scope: dynamics, accents, articulation marks, pedalization etc.
+
+Each subtask will be reflected as a separate module in the main model architecture.
+
+As the MIDI file format does not distinguish enharmonically  equivalent pitches, we generally cannot solve the problem  of \emph{pitch spelling}, that is assigning correct \emph{accidentals}: flats ($\flat$) or sharps ($\sharp$) \cite{Cambouropoulos2000}. However, assigning the key signature helps indicating the correct accidentals.
