@@ -8,9 +8,9 @@ Cogliati et al. present a brief but succinct history of the development of AMT s
 \begin{itemize}
 	\item Aforementioned Cambouropoulos \cite{Cambouropoulos2000} identifies musical elements and tasks needed to transcribe a performance recording into a score.
 	\item Takeda et al. \cite{Takeda2002} introduce the automatic transcription of monophonic recordings using Hidden Markov Models.
-	\item 
-	\item In 2005, Yang \cite{Yang2005} propose a dynamic programming approach to solve beat quantization problem.
-	\item Grohganz \cite{Grohganz2014} defines the concept of score-performed and score-informed MIDI files and proposes a method to transform the former to the latter.
+	\item Karydis et al. \cite{Karydis2007} tackle the problem of assigning note clusters to voices, of which the hand separation is a subproblem.
+	\item In 2005, Yang et al. \cite{Yang2005} propose a dynamic programming approach to solve beat quantization problem.
+	\item Grohganz et al. \cite{Grohganz2014} define the concept of score-performed and score-informed MIDI files and proposes a method to transform the former to the latter.
 \end{itemize}
 
 After the formulation, the problem has been developed, incorporating the advancements from machine learning, including:
@@ -30,6 +30,8 @@ Previous AMT systems focused on different aspects of the transforming a recordin
 \input{sources/graphs/transcription_system}
 \caption[Performance MIDI to score system proposed by Cogliati et al.]{Performance MIDI to score system proposed by Cogliati et al. \cite{Cogliati2016}.}
 \end{figure}
+
+The proposed system takes into account not only quantization problem, but also note spelling through key signature alignment.
 
 We are going to describe some of foregoing in the previous section method.
 

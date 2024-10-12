@@ -273,15 +273,29 @@ To summarize, the procedure of translating the raw performance MIDI to a score r
 		\item interpreting the musical onsets according to the grid
 		\item assigning proper musical duration to notes	
 	\end{itemize}
-	\item assigning the time signature (or signatures)
-	\item assigning the key signature
-	\item separate voices (here: hands)
+	\item assigning time signatures
+	\item assigning key signatures
+	\item separating independent voices (here: separating hands)
 \end{itemize}
-
-[example? tempo markings]
-
-Other elements of musical score are out of scope: dynamics, accents, articulation marks, pedalization etc.
 
 Each subtask will be reflected as a separate module in the main model architecture.
 
-As the MIDI file format does not distinguish enharmonically  equivalent pitches, we generally cannot solve the problem  of \emph{pitch spelling}, that is assigning correct \emph{accidentals}: flats ($\flat$) or sharps ($\sharp$) \cite{Cambouropoulos2000}. However, assigning the key signature helps indicating the correct accidentals.
+\subsection{Limitations}
+
+Only a subset of musical elements is subject to score generation. There are plenty of other markings that are out of scope: dynamics, accents, articulation marks, pedalization or ornaments such as grace notes. All of these  remain unhandled by present AMT systems, including the main model.
+
+\subsubsection{Harmonic Equivalence}
+
+As the MIDI file format does not distinguish enharmonically  equivalent pitches, we generally cannot solve the problem  of \emph{pitch spelling}, that is assigning correct \emph{accidentals}: flats ($\flat$) or sharps ($\sharp$) \cite{Cambouropoulos2000}. However, assigning the key signature helps indicating the correct accidentals. For example, a MIDI note 66 can be spelled as F$\sharp$ or G$\flat$. In certain scales like D major or G major, this note is expected to be F$\sharp$ while in other scales like E$\flat$ or B$\flat$ minor this note should be rendered as G$\flat$. This approach has been successfully used in \cite{Karydis2007}.
+
+\subsubsection{Voicing}
+
+\emph{Voice} is ,,a monophonic sequence of successive non-overlapping musical tones'' \cite{Karydis2007}. This basic notion can be broadened to any sequence of notes, possibly polyphonic, that are perceived as a single entity. Voicing is an important cue in music notation. 
+
+\begin{figure}[ht!]
+\centering
+\includesvg{images/bach_fugue_gen.svg}
+\caption[Four independent voices in the Fugue No.1 in C Major, BWV846 by J.S. Bach.]{Four independent voices in the Fugue No.1 in C Major, BWV846 by J.S. Bach.}
+\end{figure}
+
+A single MIDI track can be viewed as a collection of notes.  Inside one track there are no subsequent groupings. Exporting a score to a MIDI file loses voicing information. For that reason, left and hand notes of a piano recording are usually (but not always) split into two independent tracks corresponding to both hands. Since there can be more voices than only indicated by the left and hand right (as the example above shows), the hand separation is a subproblem of a more general voice separation problem. For a related work in that matter, refer to \cite{Karydis2007}.
