@@ -1,0 +1,34 @@
+\begin{tikzpicture}
+    \tikzset{font=\scriptsize}
+    \tikzset{layer/.style={fill=gray!10, draw=gray, thick, text centered, align=center, minimum width=1.75cm, minimum height=1.0cm}}
+
+    \tikzset{arrowstyle/.style={-{Latex[length=3mm]}}}
+    \draw (-7.5, 0) node[layer] (midi_file) {MIDI File};
+    \draw (-5.0, 0) node[layer] (note_list) {Note List};
+    \draw (-2.5, 4.0) node[layer] (streams) {Streams};
+    \draw (-2.5, 1.0) node[layer] (beats) {Beats};
+    \draw (-2.5, 0) node[layer] (meter) {Meter};
+    \draw (-2.5, -1.0) node[layer] (time_signature) {Time \\ Signature};
+    \draw (-2.5, -3.0) node[layer] (harmony) {Harmony};
+    \draw (-2.5, -4.0) node[layer] (key_signature) {Key \\ Signature};
+    \draw (0, 0.5) node[layer] (quantized_notes) {Quantized \\ Notes};
+    \draw (0, -2.0) node[layer] (note_spelling) {Note \\ Spelling};
+    \draw (2.5, 4.0) node[layer] (staves) {Staves};
+    \draw (2.5, 2.0) node[layer] (bars_voices) {Bars / \\ Voices};
+    \draw (5.0, -1.0) node[layer] (score) {Score};
+
+    \draw[arrowstyle] (midi_file.east) -- (note_list.west);
+    \draw[arrowstyle] (note_list.north) -- (streams.south west);
+    \draw[arrowstyle] (note_list.east) -- (meter.west);
+    \draw[arrowstyle] (note_list.south) -- (harmony.north west);
+    \draw[arrowstyle] (streams.east) -- (staves.west);
+    \draw[arrowstyle] (staves.south) -- (bars_voices.north);
+    \draw[arrowstyle] (beats.east) -- (bars_voices.west);
+    \draw[arrowstyle] (beats.east) -- (quantized_notes.west);
+    \draw[arrowstyle] (harmony.east) -- (note_spelling.south west);
+    \draw[arrowstyle] (key_signature.east) -- (score.south west);
+    \draw[arrowstyle] (note_spelling.east) -- (score.west);
+    \draw[arrowstyle] (quantized_notes.east) -- (score.west);
+    \draw[arrowstyle] (time_signature.east) -- (score.west);
+    \draw[arrowstyle] (bars_voices.south east) -- (score.north west);
+\end{tikzpicture}

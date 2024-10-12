@@ -5,13 +5,13 @@
 While the modern formulation of the problem appears to be present in the academic discourse since \cite{Cogliati2016}, the problem of interpreting various elements of the performance MIDI has been known much earlier \cite{Cambouropoulos2000}.
 
 Cogliati et al. present a brief but succinct history of the development of AMT systems focused on music transcription into a score or some other intermediate forms \cite{Cogliati2016}. Some major steps involve the following papers:
-\begin{enumerate}
+\begin{itemize}
 	\item Aforementioned Cambouropoulos \cite{Cambouropoulos2000} identifies musical elements and tasks needed to transcribe a performance recording into a score.
 	\item Takeda et al. \cite{Takeda2002} introduce the automatic transcription of monophonic recordings using Hidden Markov Models.
 	\item 
 	\item In 2005, Yang \cite{Yang2005} propose a dynamic programming approach to solve beat quantization problem.
 	\item Grohganz \cite{Grohganz2014} defines the concept of score-performed and score-informed MIDI files and proposes a method to transform the former to the latter.
-\end{enumerate}
+\end{itemize}
 
 After the formulation, the problem has been developed, incorporating the advancements from machine learning, including:
 \begin{enumerate}
@@ -19,7 +19,19 @@ After the formulation, the problem has been developed, incorporating the advance
 	\item Liu et al. \cite{Liu2022} use a deep-learning method involving convolutional neural networks and gated recurrent units, which is the main focus of the thesis.
 \end{enumerate}
 
-We are going to describe some of foregoing method.
+\section{Modern Formulation of the Problem}
+
+While systems for performance MIDI to score systems have been existed for a while\footnote{\emph{MuseScore 3} has a special module for importing performance MIDI. \missing}, the particular implementations were not the subject of scientific publications until 2016, when Cogliati et al. defined the entire process of transcribing an unannotated and unquantized MIDI file into a score. 
+
+Previous AMT systems focused on different aspects of the transforming a recording (either from an audio or a MIDI file) into some form of musical notation. Many of these systems recognized only so-called low level of musical information \cite{Cogliati2016}, usually focusing on only one aspect of the transcription.
+
+\begin{figure}[!ht]
+\centering
+\input{sources/graphs/transcription_system}
+\caption[Performance MIDI to score system proposed by Cogliati et al.]{Performance MIDI to score system proposed by Cogliati et al. \cite{Cogliati2016}.}
+\end{figure}
+
+We are going to describe some of foregoing in the previous section method.
 
 \section{Hidden Markov Model}
 
@@ -116,14 +128,10 @@ The authors define recursively the \emph{optimal segmentation function} as: $$\o
 
 Let $S(k)$ be the \emph{segmentation boundary}: an argument that minimizes the cost function: $$S(k)=\argmin_{1\leq i \leq k}\left[\operatorname{OPT}(i) + \operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)\right]$$ Similarly, let the best \emph{tatum level} minimizing $\operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)$ be: $$T(k)=\argmin_{p} e(p,i+1,k)$$ 
 
-With the notation settled down, we can outline the main algorithm. It consists of two parts: the main procedure in which the optimal tatums are found, and the trace-back that finds the segmentation bounds. The entire algorithm is in the class $O\left(n^3\right)$.
+With the notation settled down, we can outline the main algorithm. It consists of two parts: the main procedure in which the optimal tatums are found, and the trace-back that finds the segmentation bounds. The entire algorithm is of the $O\left(n^3\right)$ time complexity.
 
 \input{sources/algorithms/dynamic_programming}
 
 \subsection{Note Onset Quantization}
 
 After the segmentation, one needs to snap the onsets to the obtained grid, for each piece segment. Additionally, the notes are snapped from left to right, and the first note indicates the first grid point. 
-
-\section{Modern Formulation of the Problem}
-
-Many AMT systems focus on different aspects of the transforming a recording (either from an audio or a MIDI file) into some form of musical notation. Many of these systems recognize only so-called low level of musical information \cite{Cogliati2016}.
