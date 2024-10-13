@@ -106,7 +106,7 @@ One possible format of the output of note-level transcription is a MIDI stream.
 
 \emph{Stream-level transcription}, also known as \emph{multi-pitch streaming} (MPS), involves grouping estimated pitches or notes into separate streams, typically corresponding to individual instruments \cite{Bhattarai2023}. On that level of transcription, multi-pitch estimation is not sufficient as distinguishing different instruments is needed. The process of instrument differentiation is in fact a clustering problem.
 
-nstruments differ in their timbres, or tone colors, which is the perceived quality of sound that makes two instruments sound distinct even when they play the same pitch at the same energy level. The timbre largely depends on an instrument's harmonic series and its variation over time (the envelope). This is merely a simplification: not all sounds conform to harmonic series representations; for example, noise or most percussion instruments are exceptions, though tonal instruments are generally well-described by harmonic series \cite[p.~27--28]{Sethares2005}.
+Instruments differ in their timbres, or tone colors, which is the perceived quality of sound that makes two instruments sound distinct even when they play the same pitch at the same energy level. The timbre largely depends on an instrument's harmonic series and its variation over time (the envelope). This is merely a simplification: not all sounds conform to harmonic series representations; for example, noise or most percussion instruments are exceptions, though tonal instruments are generally well-described by harmonic series \cite[p.~27--28]{Sethares2005}.
 
 Duan et al. (2014) defines the streaming tasks as: \emph{the clustering objective is to maintain timbre consistency, based on the assumption that sound objects coming from the same source have similar timbre} \cite{Duan2014}. Notes coming from the same instrument are expected to have similar timbre characteristic. Depending on the method, the number of instrument clusters may or may not be specified beforehand.
 
@@ -207,17 +207,17 @@ To summarize, the output score $\mathbf{Y}$ can be represented as a pair of two 
 
 The objective of performance MIDI to score automatic transcription is to find a good enough function $\mathbf{X}\to\mathbf{Y}$. Further sections will be devoted to measuring the quality of the resulting score in order to define the \emph{good enough} part. 
 
-\section{Common Transcription Problems}
+\section{Challenges in the Transcription Task}
 
-Before we get into an overview of methods for MIDI to score conversion, in order to get a better idea of the transcription task, we need to be aware how a performance MIDI score deviates from the sheet music and which information is being lost while transition from one to another.
+Before providing an overview of methods for MIDI to score conversion, it is essential to first understand the inherent challenges of the transcription task. We need to examine how a performance captured in a MIDI file deviates from traditional sheet music and identify the types of information that are lost in the process of translating between these two forms of musical representation.
 
-{\color{red} The traditional music notation is a form of an idealized [definition]...
+Some challenges are directly related to the way musical data is encoded in the MIDI format, such as the issue of \emph{note spelling}\footnote{See the Section \ref{harmonic_equivalence} for the explanation.}. This leads to ambiguities that require further disambiguation through additional algorithms or human intervention.
 
-traditional music notation provides an idealized, simplified version of how a piece should be played, focusing on clarity and consistency.}
+Other challenges arise from the nature of musical performance itself and the variations that occur when a piece is interpreted and played. A live performance rarely, if ever, adheres strictly to the abstract representations of rhythm and timing found in traditional notation. Some vital aspects of the human performance are described in more detail in the next section.
 
-For the sake of simplicity, we will ignore and advanced musical cues and pedaling.
+\subsection{Common Transcription Problems}
 
-The are plenty of differences between the notation and actual recordings, let us sketch some of the most important ones:
+Traditional music notation represents an idealized version of how a piece should be played. While it provides a structured framework for pitch, rhythm, dynamics, and articulation, it abstracts away from many performance nuances that are either too subtle, too variable or simply irrelevant to be captured in symbolic notation.
 
 \begin{figure}[ht!]
 \centering
@@ -229,26 +229,65 @@ The are plenty of differences between the notation and actual recordings, let us
 \label{chopin_sonata}
 \end{figure}
 
-\begin{itemize}
-	\item MIDI file sets operates on a fixed tempo (or to be more precise, a discrete set of tempo changes). Human player never aligns to the tempo perfectly, even in a course of a single measure. In many cases such deviation is intentional: a player deliberately slows down (\emph{rubato}) or holds keys for a little longer than the sheet indicates (\emph{fermata}) for expressive purposes. But, more importantly, performance MIDI files often disregard the tempo, rendering the ticks-per-quarter-note parameter meaningless.
-	\item Note durations are usually not respected. Usually, a pianist shortens the actual length in order to prepare the hand for the next key.
-	 In \emph{legato} playing, some notes may be overlapping and their actual length is a bit longer than indicated by the notation. This is especially visible in fast passages. [obrazek?]
-	 Moreover, \emph{staccato} notes which almost immediate release are never denoted with actual expected time of playing. [obrazek: pasaż staccato oraz wykonanie]
-	\item The traditional notation is limited in terms of dynamics. We have several markings and crescendo/diminuendo Thorough centuries, the notation has been expanded and introduced new markings such as \emph{sforzando} (sfz) or \emph{subito forte}.
-	 The dynamics are not absolute, rather contextual and depending on the surrounding musical elements. 	 A performer has some room for interpretation in terms of dynamics and
-	 Besides For a pianist, slight variations of dynamics are unavoidable.  [obrazek oznaczenia i wykresu głośności]
-	\item Musical sheet provides clear distinction between the left and the right hand. This is not viable in the case of a MIDI stream\footnote{For compositions, left and right hands are split into separate tracks. [...] For recorded MIDI streams hand detection is a challenging task on its own.}
-	\item The voicing [voicing]
-	A key element of a musical notation is voicing [definition?]. For piano pieces, it allows 
-	Chords are denoted with the same size and weight, while players may tend (intentionally or not) to emphasize certain notes from the group, which is not reflected in the sheet.
-	MIDI stream does not 
-	\item The playing, and MIDI format as well, does not distinguish enharmonic differences between keys. A harmonic analysis needs to be performed in order to retrieve this information from a concrete MIDI notes stream.
-\end{itemize}
+These deviations can make the direct conversion of performance MIDI into readable sheet music difficult, as exemplified in Figure \ref{chopin_sonata}. Below, we will explore some of the most common transcription problems.
 
-As it has been noted, performance MIDI is generally not aligned to the internal MIDI tempo. One can correct a MIDI file by assigning the tempo within each note so that each beat lasts the same number of ticks. Grohganz \cite{Grohganz2014} defines two kinds of MIDI files: \begin{enumerate}
-	\item \emph{S-MIDI}: \emph{score-informed} MIDI files,
-	\item \emph{P-MIDI}: unaligned \emph{performance} MIDI file, with unknown real tempo.
-\end{enumerate}
+\subsubsection{Tempo}
+
+MIDI files operate with a fixed tempo, or more precisely, a discrete set of tempo changes. A human performer, however, never aligns to the tempo perfectly, even in a course of a single measure.
+
+In many cases, these deviations are deliberate. For example, a performer might slow down (\emph{rubato}) or sustain a note longer than notated (\emph{fermata}) for expressive purposes. While these nuances may sometimes be annotated in the score, it is not always the case, and even when marked, the precise nature of the tempo fluctuation is left to the performer’s interpretation. Performers have considerable freedom in determining the extent and suddenness of tempo changes, which MIDI struggles to represent accurately.
+
+More importantly, performance MIDI files often do not reflect internal tempo structures, rendering the ticks-per-quarter-note parameter ineffective. This issue is further addressed in Section \ref{score-informed_midi_files}.
+
+\subsubsection{Note duration}
+
+In live performances, note durations often deviate from those specified in the score. Pianists, for example, tend to slightly shorten note lengths to prepare for the next note or chord.
+
+In \emph{legato} playing, some notes may be overlapping and their actual length is a bit longer than indicated by the notation. This elongation is especially prominent in rapid, fluid passages. Conversely, \emph{staccato} notes, which are played with almost immediate release, are never denoted with actual expected time of playing. Traditional notation primarily indicates note boundaries, leaving the actual performed lengths to be interpreted by the pianist.
+
+\subsubsection{Dynamics}
+
+The traditional notation system offers a relatively limited palette of dynamic markings, ranging from \emph{pianississimo} ($\lilyDynamics{ppp}$) to \emph{fortississimo} ($\lilyDynamics{fff}$). Changes in volume over a phrase are marked by \emph{crescendo} ($\crescHairpin$) and \emph{diminuendo} ($\decrescHairpin$) symbols. Thorough centuries, the notation has been expanded and introduced new markings such as \emph{sforzando} (sfz) or \emph{subito forte} (sf).
+
+The dynamics are not absolute, rather contextual and depending on the surrounding musical elements. Since these markings are guidelines, there is some room for interpretation by the performer.
+	 	 
+In contrast, MIDI format stores a concrete note velocity with 7-bit precision. As a rule of thumb, the following arbitrary classification is adopted:
+
+\begin{table}[!ht]
+\centering
+\input{sources/tables/dynamics}
+\caption[The dynamics table.]{The dynamics table.\missing}
+\end{table}
+
+While the MIDI format represents the dynamics numerically instead of symbolically, there is no direct translation of the actual note velocity to dynamics markings: these describe broader phrases rather than individual notes. An analysis is required to translate raw velocity data into meaningful dynamics guidelines.
+	 
+The standard transcription model does not handle dynamics explicitly. Experimental methods addressing this issue are discussed in Chapter \ref{experiments_and_improvements}.
+
+\subsubsection{Harmonic Equivalence}\label{harmonic_equivalence}
+
+As the MIDI file format does not distinguish enharmonically  equivalent pitches, we generally cannot solve the problem  of pitch spelling, that is assigning correct \emph{accidentals}: flats ($\flat$) or sharps ($\sharp$) \cite{Cambouropoulos2000}. For example, in keys like D major or G major, a MIDI note 66 is likely to be spelled as F$\sharp$, while the same pitch may function as G$\flat$ in keys such as E$\flat$ or B$\flat$ minor.
+
+The ambiguity can be resolved through assigning the key signature, that is determining the key of the scale. This approach has been successfully used in \cite{Liu2022}.
+
+\subsubsection{Voicing}
+
+A \emph{voice} (or \emph{stream}) is defined as "a monophonic sequence of successive, non-overlapping musical tones" \cite{Karydis2007}. This notion can be broadened to any sequence of notes, whether monophonic or polyphonic, that is perceived as a single musical entity. 
+
+\begin{figure}[ht!]
+\centering
+\includesvg{images/bach_fugue_gen.svg}
+\caption[Four independent voices in the Fugue No.1 in C Major, BWV846 by J.S. Bach.]{Four independent voices in the Fugue No.1 in C Major, BWV846 by J.S. Bach.}
+\end{figure}
+
+A single MIDI track can be viewed as a collection of notes, and the MIDI format does not offer any levels of further subdivisions. Consequently, exporting a score to a MIDI file loses all information regarding the original voicing. For that reason in the case of piano music, it is common (but not guaranteed) to separate left-hand and right-hand notes into two tracks, corresponding to the two hands. Since there can be more voices than only indicated by the left and hand right (as the example above shows), the hand separation is a subset of a broader challenge of voice separation. For a related work in that matter, refer to \cite{Karydis2007}.
+	
+\subsection{Score-Informed MIDI files}\label{score-informed_midi_files}
+
+As noted previously, performance MIDI files are generally not aligned to an internal MIDI tempo. One can correct a MIDI file by assigning the tempo so that every beat in the piece corresponds to the same number of ticks. This process effectively regularizes the performance by aligning it with the underlying metric structure of the music.
+
+Grohganz et al. \cite{Grohganz2014} identify two types of MIDI files based on this alignment: \begin{enumerate}
+	\item \emph{S-MIDI}: \emph{Score-informed} MIDI files, which have been aligned to a specific tempo, ensuring that the musical events correspond accurately to the beat structure.
+	\item \emph{P-MIDI}: Unaligned \emph{performance} MIDI files, where the real tempo of the performance is unknown or inconsistent with the internal timing of the MIDI format. \end{enumerate}
 
 \begin{figure}[ht!]
 \centering
@@ -256,17 +295,15 @@ As it has been noted, performance MIDI is generally not aligned to the internal 
 \includesvg[height=1.25cm]{images/score_agnostic_gen.svg}
  & b)\includesvg[height=1.15cm]{images/score_informed_gen.svg}
 \end{tabular}
-\caption{An actual recording of a simple melody: a) the score-agnostic recording with (incorrectly quantized) musical onsets not aligned with the MIDI tempo, b) the score-informed representation of the performance. Notice that the pickup measure is also correctly identified.}
+\caption{An actual recording of a simple melody: a) the score-agnostic recording with incorrectly quantized musical onsets not aligned with the MIDI tempo, b) the score-informed representation of the performance. Notice that the pickup measure is also correctly identified.}
 \label{score_informed}
 \end{figure}
 
-Beat quantization may be thought as a process of converting a P-MIDI into a S-MIDI file.
+The beat quantization problem may be thought as a process of converting a P-MIDI into a S-MIDI file.
 
-Musical software programs fail to correctly import P-MIDI as they interpret the onsets and durations according to ticks. This makes beat quantization a crucial part of music transcription.
+Most musical software programs struggle to correctly import P-MIDI as they rely on the internal tick-based structure to interpret note onsets. Without accurate alignment to a tempo grid, the resulting transcription can appear rhythmically distorted, with notes placed in incorrect positions relative to the beat (see: Figure \ref{score_informed}). This makes beat quantization an essential step in the transcription of human-performed music.
 
-[summarize]
-
-To summarize, the procedure of translating the raw performance MIDI to a score requires at least: \begin{itemize}
+In summary, the procedure of translating the raw performance MIDI to a score involves at least: \begin{itemize}
 	\item note quantization, which consists of:
 	\begin{itemize}
 		\item recognizing the beat grid within the downbeats
@@ -278,24 +315,17 @@ To summarize, the procedure of translating the raw performance MIDI to a score r
 	\item separating independent voices (here: separating hands)
 \end{itemize}
 
-Each subtask will be reflected as a separate module in the main model architecture.
+Each of these subtasks will be implemented as a separate module within the main model architecture.
 
 \subsection{Limitations}
 
-Only a subset of musical elements is subject to score generation. There are plenty of other markings that are out of scope: dynamics, accents, articulation marks, pedalization or ornaments such as grace notes. All of these  remain unhandled by present AMT systems, including the main model.
+While AMT systems aim to convert performance data into a readable musical score, only a subset of musical elements is typically included in the generated output. Many nuances remain beyond the scope of current AMT systems, including the main model described here.
 
-\subsubsection{Harmonic Equivalence}
+Key limitations include: \begin{itemize}
+	\item {\bf Accents and articulation marks}: Elements such as \emph{staccato}, \emph{tenuto}, or accents are vital for conveying how each note should be played in terms of attack, duration, and emphasis. 
+	\item {\bf Pedalization}: While MIDI files capture pedal events, the transcription process does not typically translate these events into notated pedal marks. A human intervention is often needed to transform raw MIDI signals into a clean notation.
+	\item {\bf Ornaments}: Grace notes, trills, mordents, and other ornaments add complexity to both performance and notation. As the MIDI does not distinguish special notes, all of such ornaments are shown as ordinary notes. To the author's knowledge, there is no model that attempts to transcribe performance recording recognizing ornaments.
+	\item {\bf Dynamics and expression marks}: While note velocity can give a rough indication of dynamics, AMT systems do not capture more complex dynamic markings like crescendo, diminuendo, or sudden dynamic shifts. A partial work in that matter can be found in the Chapter \ref{experiments_and_improvements}.
+	\item {\bf Phrasing}: The subtle shaping of musical phrases, which performers use to convey musical direction and intention. Common group indications like slurs are absent in the generated scores. \end{itemize}
 
-As the MIDI file format does not distinguish enharmonically  equivalent pitches, we generally cannot solve the problem  of \emph{pitch spelling}, that is assigning correct \emph{accidentals}: flats ($\flat$) or sharps ($\sharp$) \cite{Cambouropoulos2000}. However, assigning the key signature helps indicating the correct accidentals. For example, a MIDI note 66 can be spelled as F$\sharp$ or G$\flat$. In certain scales like D major or G major, this note is expected to be F$\sharp$ while in other scales like E$\flat$ or B$\flat$ minor this note should be rendered as G$\flat$. This approach has been successfully used in \cite{Karydis2007}.
-
-\subsubsection{Voicing}
-
-\emph{Voice} is ,,a monophonic sequence of successive non-overlapping musical tones'' \cite{Karydis2007}. This basic notion can be broadened to any sequence of notes, possibly polyphonic, that are perceived as a single entity. Voicing is an important cue in music notation. 
-
-\begin{figure}[ht!]
-\centering
-\includesvg{images/bach_fugue_gen.svg}
-\caption[Four independent voices in the Fugue No.1 in C Major, BWV846 by J.S. Bach.]{Four independent voices in the Fugue No.1 in C Major, BWV846 by J.S. Bach.}
-\end{figure}
-
-A single MIDI track can be viewed as a collection of notes.  Inside one track there are no subsequent groupings. Exporting a score to a MIDI file loses voicing information. For that reason, left and hand notes of a piano recording are usually (but not always) split into two independent tracks corresponding to both hands. Since there can be more voices than only indicated by the left and hand right (as the example above shows), the hand separation is a subproblem of a more general voice separation problem. For a related work in that matter, refer to \cite{Karydis2007}.
+This is, of course, by no means an exhaustive list.
