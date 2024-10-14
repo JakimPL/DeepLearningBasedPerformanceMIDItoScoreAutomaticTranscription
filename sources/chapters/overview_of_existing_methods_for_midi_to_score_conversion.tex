@@ -2,113 +2,114 @@
 
 \section{A Brief History}
 
-While the modern formulation of the problem appears to be present in the academic discourse since \cite{Cogliati2016}, the problem of interpreting various elements of the performance MIDI has been known much earlier \cite{Cambouropoulos2000}.
+While the modern formulation of the problem appears to be present in the academic discourse since \cite{Cogliati2016}, the challenges with interpreting various elements of the performance MIDI have been recognized much earlier. Cambouropoulos \cite{Cambouropoulos2000}, for instance, explored necessary elements to process in order to translate a performance MIDI into a score.
 
-Cogliati et al. present a brief but succinct history of the development of AMT systems focused on music transcription into a score or some other intermediate forms \cite{Cogliati2016}. Some major steps involve the following papers:
+Cogliati et al. present a brief but succinct history of the development of AMT systems focused on trnascribing performance data into either musical scores or some other intermediate forms \cite{Cogliati2016}. Several key contributions include:
 \begin{itemize}
 	\item Aforementioned Cambouropoulos \cite{Cambouropoulos2000} identifies musical elements and tasks needed to transcribe a performance recording into a score.
-	\item Takeda et al. \cite{Takeda2002} introduce the automatic transcription of monophonic recordings using Hidden Markov Models.
-	\item Karydis et al. \cite{Karydis2007} tackle the problem of assigning note clusters to voices, of which the hand separation is a subproblem.
+	\item Takeda et al. \cite{Takeda2002} introduce the use of Hidden Markov Models (HMMs) for the automatic transcription of monophonic recordings.
+	\item Karydis et al. \cite{Karydis2007} address the problem of assigning note clusters to separate voices, of which the hand separation is a subproblem.
 	\item In 2005, Yang et al. \cite{Yang2005} propose a dynamic programming approach to solve beat quantization problem.
-	\item Grohganz et al. \cite{Grohganz2014} define the concept of score-performed and score-informed MIDI files and proposes a method to transform the former to the latter.
+	\item Grohganz et al. \cite{Grohganz2014} define the concepts of score-performed and score-informed MIDI files and propose a method for transforming the former to the latter.
 \end{itemize}
 
-After the formulation, the problem has been developed, incorporating the advancements from machine learning, including:
+After the formulation, the problem has continued to evolve, incorporating the advancements from machine learning. Some of the more recent advances include:
 \begin{enumerate}
-	\item Nakamura et al. \cite{Nakamura2017} use Markov Random Fields for piano transcription.
+	\item Nakamura et al. \cite{Nakamura2017} apply Markov Random Fields for piano transcription.
 	\item Liu et al. \cite{Liu2022} use a deep-learning method involving convolutional neural networks and gated recurrent units, which is the main focus of the thesis.
 \end{enumerate}
 
 \section{Modern Formulation of the Problem}
 
-While systems for performance MIDI to score systems have been existed for a while\footnote{\emph{MuseScore 3} has a special module for importing performance MIDI. \missing}, the particular implementations were not the subject of scientific publications until 2016, when Cogliati et al. defined the entire process of transcribing an unannotated and unquantized MIDI file into a score. 
+While complete systems for performance MIDI to score systems have been existed for a while\footnote{\emph{MuseScore 3} has a special module for importing performance MIDI. \missing}, the particular implementations were not the subject of scientific publications until 2016, when Cogliati et al. defined a comprehensive formulation of the process of transcribing an unannotated and unquantized MIDI file into a score. 
 
-Previous AMT systems focused on different aspects of the transforming a recording (either from an audio or a MIDI file) into some form of musical notation. Many of these systems recognized only so-called low level of musical information \cite{Cogliati2016}, usually focusing on only one aspect of the transcription.
+Earlier AMT systems focused on different aspects of the transforming a recording --- either from an audio or a MIDI file --- into some form of musical notation. Many of these systems recognized only low level of musical information \cite{Cogliati2016}, usually concentrating on only one aspect of the transcription such as pitch detection or rhythm quantization.
 
 \begin{figure}[!ht]
 \centering
 \input{sources/graphs/transcription_system}
 \caption[Performance MIDI to score system proposed by Cogliati et al.]{Performance MIDI to score system proposed by Cogliati et al. \cite{Cogliati2016}.}
+\label{transcription_system}
 \end{figure}
 
-The proposed system takes into account not only beat quantization, but also imposes the metric structure and solves note spelling problem through key signature alignment. It also handles other transcription problems as note spelling which were usually not addressed.
+The system proposed by Cogliati et al. (Figure \ref{transcription_system}) handles multiple aspects of the transcription process, taking into account not only beat quantization, but also imposing the metric structure and solving note spelling problem through key signature alignment.
 
-We are going to describe some of foregoing in the previous section method.
+In the following sections, we will describe some of the methods introduced in previous works that contributed to the development of this system.
 
 \section{Hidden Markov Model}
 
-\emph{Hidden Markov Model} (HMM) is a statistical framework that allows to estimate variables that are not directly observable (so called \emph{hidden} variables) but inferred through other dependent variable: \emph{observations} \cite[p. 210--213]{Jurafsky2009}.
+The \emph{Hidden Markov Model} (HMM) is a statistical framework that allows to estimate variables that are not directly observable (referred to as \emph{hidden} variables) which are inferred through other dependent variables, known as \emph{observations} \cite[p. 210--213]{Jurafsky2009}.
 
-A HMM is specified by the following components: \begin{itemize}
-	\item $Q=\{q_1,q_2,\ldots, q_S\}$ is a set of (hidden) \emph{states}.
-	\item $A=(a_{ij})_{i,j=1}^S$ is a \emph{transition probability matrix}, where each $a_{ij}$ represents the probability of moving from the state $i$ to the state $j$. Each row is a probability distribution, that is $\sum_{j=1}^S a_{ij}=1$ for each $i$.
-	\item $X=(x_t)_{t=1}^T$ is a sequence of \emph{observations}, drawn from some random variable,
-	\item $B=\{b_i(x_t)\}_{i=1}^S$ is a sequence of \emph{emission probabilities}, expressing the probability of an observation $x_t$ being generated by the state $i$.
-	\item $\{\pi_i\}_{i=1}^S$ being an \emph{initial distribution over states}.
+An HMM is specified by the following components: \begin{itemize}
+	\item $Q=\{q_1,q_2,\ldots, q_S\}$: A set of (hidden) \emph{states}.
+	\item $A=(a_{ij})_{i,j=1}^S$: A \emph{transition probability matrix}, where each $a_{ij}$ represents the probability of transitioning from state $i$ to state $j$. Each row is a probability distribution, meaning $\sum_{j=1}^S a_{ij}=1$ for each $i$.
+	\item $X=(x_t)_{t=1}^T$: A sequence of \emph{observations}, drawn from some random variable,
+	\item $B=\{b_i(x_t)\}_{i=1}^S$: A sequence of \emph{emission probabilities}, expressing the probability of an observation $x_t$ being generated by state $i$.
+	\item $\{\pi_i\}_{i=1}^S$: An \emph{initial distribution over states}.
 \end{itemize}
 
-They are two underlying assumptions for the model: \begin{itemize}
-	\item {\bf Markov Assumption}: The probability of a particular state depends only on the previous state: $$P\left(q_i|q_1\,\ldots,q_{i-1}\right) = P(q_i|q_{i-1})$$
-	\item {\bf Output Independence}: The probability of an output observation $o_i$ depends only on the state that produced the observation $q_i$: $$P\left(x_i|q_1,\ldots,q_i,\ldots,q_T,x_1,\ldots,x_i,\ldots, x_T\right)=P(x_i|q_i)$$
+The HMM framework operates on two fundamental assumptions for the model: \begin{itemize}
+	\item {\bf Markov Assumption}: The probability of being in a particular state depends only on the previous state: $$P\left(q_i|q_1\,\ldots,q_{i-1}\right) = P(q_i|q_{i-1})$$
+	\item {\bf Output Independence}: The probability of an output observation $o_i$ depends only on the state that generated the observation $q_i$: $$P\left(x_i|q_1,\ldots,q_i,\ldots,q_T,x_1,\ldots,x_i,\ldots, x_T\right)=P(x_i|q_i)$$
 \end{itemize}
 
-Hidden Markov Models are said to be characterized by \emph{three fundamental problems} \cite[p. 213]{Jurafsky2009}: \begin{enumerate}
+HMMs are said to be characterized by \emph{three fundamental problems} \cite[p. 213]{Jurafsky2009}: \begin{enumerate}
 	\item {\bf Likelihood}: Given an HMM $\lambda = (A, B)$ and observation sequence $X$, determine the likelihood $P(X|\lambda)$
 	\item {\bf Decoding}: Given an observation sequence $X$ and an HMM $\lambda=(A, B)$ determine the optimal state sequence $X$
 	\item {\bf Learning}: Given an observation sequence $X$ and the set of states in the HMM, learn the model parameters $A$ and $B$.
 \end{enumerate}
 
-These problems can be solved algorithmically. For more information, refer to \cite[p. 213--226]{Jurafsky2009}.
+These problems can be solved algorithmically. For further details, see \cite[p. 213--226]{Jurafsky2009}.
 
 \subsection{Hidden Markov Model for Beat Quantization}
 
-Takeda et al. \cite{Takeda2002} employed Hidden Markov Models to solve beat quantization problem for performance MIDI streams in a tempo-free scenario. 
+Takeda et al. \cite{Takeda2002} employed HMMs to solve the beat quantization problem for performance MIDI streams in a tempo-free scenario.
 
-The basic idea behind the approach is to treat performance note durations as \emph{observations} of some unknown, ,,ideal'' (nominal, intended time value). The actual length fluctuation can be modeled by some Gaussian distribution with the mean of the length of the nominal length of a note. The performed note duration $x_t$ at the time $t$ is modeled by a probability density function $b_i(x_t)$ where $i$ is the \emph{intention}, i.e. nominal time value of the note. The observations are measured via \emph{inter-onset intervals} (IOI), that is the time interval between consecutive note onsets.
+The core idea behind the approach is to treat performance note durations as \emph{observations} of some unknown, ,,ideal'' (nominal, intended time value). The fluctuations in actual note lengths can be modeled by some Gaussian distribution with the mean of the length of the nominal note duration. The performed note duration $x_t$ at time $t$ is represented by a probability density function $b_i(x_t)$ where $i$ denotes the\emph{intention}, i.e. nominal time value of the note. The observations are measured via \emph{inter-onset intervals} (IOI), which are the time intervals between consecutive note onsets.
 
-Let $Q = \{q_1,q_2,\ldots, q_N\}$ be the time sequence of identified intentions, and let $X=\{x_1,x_2,\ldots,x_N\}$ be the observations: the sequence of actual durations. The probability of observing the entire sequence is given by: $$P(X|Q)=\prod_{t=1}^N b_{q_t}(x_t)$$ 
+Let $Q = \{q_1,q_2,\ldots, q_N\}$ be the time sequence of identified intentions, and let $X=\{x_1,x_2,\ldots,x_N\}$ be the observations: the sequence of actual durations (observations). The probability of observing the entire sequence is given by: $$P(X|Q)=\prod_{t=1}^N b_{q_t}(x_t)$$ 
 
 The authors introduce two models for predicting note lengths: \begin{itemize}
-	\item \emph{Note $n$-gram Model}. Note length is predicted from preceding $n - 1$ notes. For example, the bigram model predicts the length of a new note based on the length of the previous note.
-	\item \emph{Rhythm Vocabulary Model}. The vocabulary consists of all known rhythm patterns for a unit time, e.g. one measure.\end{itemize}
+	\item \emph{Note $n$-gram Model}. Note length is predicted based on preceding $n - 1$ notes. For example, in a bigram model, the length of note is predicted base on the previous note's length.
+	\item \emph{Rhythm Vocabulary Model}. The model consists of predefined rhythmic patterns for a unit time. The collection of all patterns makes a \emph{vocabulary}.\end{itemize}
 	
-Both models are represented by probabilistic state transition networks. Each state is associated with an intended note length. For example, in a $3$-gram model we may represent a state as $a_{ij,jk}$, where two preceding notes are of length $i$ and $j$, and the successor note is of length $k$. In general, instead of using tuplets, all possible stats are labeled and enumerated, yielding transition matrix $(a_{ij})_{i,j}$. Thus, the probability that state number changes along a time sequence $Q=\{q_1,q_2,\ldots,q_N\}$ is given by the product: $$P(Q)=\pi_{q_0}\prod_{t=1}^N a_{q_{t-1},q_t}$$ for some initial probability $\pi_i$ starting with the state $i$. This the foundation of Hidden Markov Model: \begin{itemize}
+Both models are represented as probabilistic state transition networks. Each state is associated with an intended note length. For example, in a $3$-gram model we may represent a state as $a_{ij,jk}$, where two preceding notes are of length $i$ and $j$, and the succeeding note length is $k$. In general, instead of using tuplets, all possible stats are labeled and enumerated, yielding transition matrix $(a_{ij})_{i,j}$. Thus, the probability that state number changes along a time sequence $Q=\{q_1,q_2,\ldots,q_N\}$ is given by the product: $$P(Q)=\pi_{q_0}\prod_{t=1}^N a_{q_{t-1},q_t}$$ for some initial probability $\pi_i$ starting with a state $i$. This the foundation of Hidden Markov Model: \begin{itemize}
 	\item The matrix $A=(a_{ij})_{i,j}$ constitutes a \emph{transition probability matrix}.
 	\item The sequence $B=\{b_i(x_t)\}_{i}$ is a sequence of \emph{emission probabilities}.
 \end{itemize}
 
 \subsection{Optimal Sequence of States}
 
-From the Bayes theorem, one have: $$P(Q|X)=\frac{P(X|Q)P(Q)}{P(X)}$$ In order to maximize a posteriori probability $P(Q|X)$, one needs to maximize $P(Q|X)$ as for given sequence $X$, the probability $P(X)$ is constant. One could examine all possible state sequences, compute the likelihood of the observation sequence given that hidden state sequence, and pick the one that maximizes that likelihood. However the space of all state sequences is exponentially large.
+From the Bayes theorem, one have: $$P(Q|X)=\frac{P(X|Q)P(Q)}{P(X)}$$ To maximize a posteriori probability $P(Q|X)$, one needs to maximize $P(Q|X)$ as for given sequence $X$, the probability $P(X)$ is constant. Although it is theoretically possible to examine all possible state sequences and compute the likelihood for each, the number of possible sequences grows exponentially, rendering this approach infeasible.
 
-Instead, the optimal sequence of states is found through a faster \emph{Viterbi algorithm}, which is an established dynamic programming algorithm for that purpose \cite[p.210--220]{Jurafsky2009}. 
+Instead, the optimal sequence of states is efficiently found using the \emph{Viterbi algorithm}, which is an established dynamic programming algorithm  \cite[p.210--220]{Jurafsky2009}. 
 
 Given the HMM $\lambda = (A, B)$, the procedure is as follows:
 
 \input{sources/algorithms/viterbi}
 
-The procedure returns the optimal sequence of intended notes $$\hat{Q} = \argmax_Q P(X|Q)P(Q)$$
+The procedure returns the optimal sequence of intended notes: $$\hat{Q} = \argmax_Q P(X|Q)P(Q)$$
 
 \subsection{Training}
 
-Hidden Markov Models are subject to training in order to find the transition matrix $A$ and the sequence $B$. More precisely, given the sequence $X$ and corresponding sequence of hidden states $Q$, the model parameters $A$ and $B$ are inferred from the training data. For more information, refer to the \emph{Baum-Welch algorithm} \cite[p. 220--226]{Jurafsky2009}.
+Hidden Markov Models are subject to training in order to HMMs require training to determine the transition matrix $A$ and the emission probabilities $B$. More specifically, given an observation sequence $X$ and the corresponding sequence of hidden states $Q$, the model parameters $A$ and $B$ are inferred from training data. The \emph{Baum-Welch algorithm} is commonly used for this purpose \cite[p. 220--226]{Jurafsky2009}.
 
-Takeda et al. used approximately $50\;000$ notes in MIDI data of classical and jazz music for the $n$-gram model, with an additional smoothing. For the rhythm vocabulary model, they extracted 267 one-bar-long rhythm patterns from 88 various pieces. The exact dataset information has been not provided.
+Takeda et al. used approximately $50\;000$ notes in MIDI data of classical and jazz music to train the $n$-gram model. For the rhythm vocabulary model, they extracted 267 one-bar-long rhythm patterns from 88 various pieces. The exact details of the dataset, however, were not provided.
 
 \subsection{Limitations}
 
 The model focuses solely on beat quantization problem, it gives no insight about other music aspects as key signature. It however, partially deals with time signature: for each key signature there is a separate model.
 
-As the Gaussian distribution is unimodal, the basic assumption of the model is that the tempo is constant. Similarly, to catch fluctuating tempi, several different models are being run in parallel, and the one that maximizes the likelihood for the observed note durations $P(X|Q,T)P(Q|T)P(T)$ is selected, where $Q$ is the recognized rhythm, and $T$ is the tempo. Usually, a limited discrete set of predefined tempi are used\footnote{The authors used a set of 6 equally spaced tempi, ranging from 60 to 120 beats per minute.}.
+As the Gaussian distribution is unimodal, the model assumes that the tempo is constant. To account for fluctuating tempi, multiple models are run in parallel, and the one that maximizes the likelihood for the observed note durations is selected. The model typically uses a limited, discrete set of predefined tempi\footnote{The authors used a set of six equally spaced tempi, ranging from 60 to 120 beats per minute.}.
 
-The algorithm was designed mostly for transcribing of single-voice music. Authors claim that with enriched rhythm vocabulary containing overlapping notes (as in fugues or cannons) it is possible to use the framework on multi-voice music, however it needs a chord identification to treat groups of notes played at almost the same time as one entity. The paper does not explain the results of such procedure.
+The algorithm was designed for single-voice music transcriptions. The authors suggest that with enriched rhythm vocabulary containing overlapping notes (as in fugues or cannons) it is possible to use the framework on polyphonic music, however it would require chord identification to group notes played at almost the same time into a single entity. The paper does not provide more details on such procedure.
 
-There is no public implementation of the algorithm available. This makes hard to compare the results with the currently available solutions.
+No public implementation of the algorithm is available, making it difficult to compare its performance with modern solutions.
 
 \section{Dynamic Programming Approach}
 
-In 2005, Yang et al. proposed another method for solving beat quantization problem \cite{Yang2005}. The authors dynamical programming approach to segment a piece into sections with different \emph{tatums}. \emph{Tatum} is often defined as ,,the smallest cognitively meaningful
-subdivision of the main beat''\footnote{Usually coincides with sixteenth-, twenty-fourth- or thirty-second notes.} \cite{Iyer1997}. The resulted tatums form a grid, from which the notes are being snapped to.
+In 2005, Yang et al. proposed another method for solving beat quantization problem \cite{Yang2005}. The authors used dynamical programming approach to segment a piece into sections with different \emph{tatums}. A \emph{tatum} is often defined as ,,the smallest cognitively meaningful
+subdivision of the main beat''\footnote{Usually coincides with sixteenth-, twenty-fourth- or thirty-second notes.} \cite{Iyer1997}. The resulted tatums form a grid to which notes are spanned for quantization.
 
 \begin{figure}[!ht]
 \centering
@@ -118,22 +119,32 @@ subdivision of the main beat''\footnote{Usually coincides with sixteenth-, twent
 
 \subsection{Simultaneity Quantization}
 
-As the name suggests, \emph{Simultaneity Quantization} is a pre-processing step that recognizes events that are played at almost the same time, like chords. The consolidation procedure is: any group of events that lie within a certain time window is replaced by the group with a common averaged onset. 
+As the name suggests, \emph{Simultaneity Quantization} is a preprocessing step that identifies events played almost simultaneously, such as chords. The procedure consolidates events within a specified time window by averaging their onset times into a single group.
 
-The window needs to be carefully adjusted: too small window may not correctly recognize all simultaneous entities but too large window may collapse musical ornaments such as thrills or grace notes. For some pieces there is no viable fixed threshold that allows discerning fast arpeggiated chords from thrills: some chords that should be treated as one entity may be played in fact slower than some ornaments that needs to be separated.
+The size of the window needs to be carefully adjusted: too small window may not correctly recognize all simultaneous entities but too large window may collapse musical ornaments such as thrills or grace notes. For some pieces, there is no viable fixed threshold that allows discerning fast arpeggiated chords from thrills: some chords that should be treated as one entity may be played in fact slower than some ornaments that needs to be separated.
 
 \subsection{Tatum Segmentation}
 
-The main part of the algorithm is \emph{Tatum Segmentation} for finding an optimal metric grid in a performed piece, where optimal means of the least tatum-to-note error. The algorithm takes only onsets as inputs $\mathcal{O}=\mathcal{O}_1^n=\{o_i\}_{i=1}^n$ and disregards note-off events\footnote{This means that inter-onset intervals (IOI) are being used for the beat quantization.}. The output of the algorithm is a sequence of segmentation points $S=\{S_j\}_{j=1}^m$ within optimal tatums $\{T_j\}_{j=1}^m$.
+The central component of the algorithm is \emph{Tatum Segmentation} for finding an optimal metric grid that minimizes the tatum-to-note error. The algorithm takes only onsets as inputs $\mathcal{O}=\mathcal{O}_1^n=\{o_i\}_{i=1}^n$ and disregards note-off events\footnote{This means that inter-onset intervals (IOI) are used for beat quantization.}. The output of the algorithm is a sequence of segmentation points $S=\{S_j\}_{j=1}^m$ within the optimal tatums $\{T_j\}_{j=1}^m$.
 
-The authors define recursively the \emph{optimal segmentation function} as: $$\operatorname{OPT}(k) = \min_{1\leq i \leq k}\left[\operatorname{OPT}(i) + \operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)\right]$$ where $\mathcal{O}_{i+1}^k=\{o_{i+1},\ldots,o_k\}$ and the error function $\operatorname{ERR}$ describes the error obtained by the best tatum assignment for the sequence of onsets $\mathcal{O}_{i+1}^k$: $$\operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)=\min_p e\left(p,i+1,k\right)=\min_p \sum_{j=1}^{k-i-1}d_{\mathbb{Z}}\left(\frac{o_{j+1}-o_j}{p}\right)^2$$ where $d_{\mathbb{Z}}(x)$ is the distance of $x$ to the nearest integer, defined as $\left|x - \left\lfloor x + \tfrac{1}{2}\right\rfloor\right|$ The error function represents the remainder squared error (RSE), and the expression $o_{j+1}-o_j$ is the IOI between onsets $j$ and $j+1$. In other words, the error function describes the total error of snapping onsets to the grid. An observant reader may have noticed that the optimal tatum segmentation minimizes the RSE of the entire piece, that is $\operatorname{ERR}\left(\operatorname{\mathcal{O}}\right)$. 
+The authors define recursively the \emph{optimal segmentation function} as: $$\operatorname{OPT}(k) = \min_{1\leq i \leq k}\left[\operatorname{OPT}(i) + \operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)\right]$$ where $\mathcal{O}_{i+1}^k=\{o_{i+1},\ldots,o_k\}$ The function $\operatorname{ERR}$ describes the error obtained by the best tatum assignment for the sequence of onsets $\mathcal{O}_{i+1}^k$: $$\operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)=\min_p e\left(p,i+1,k\right)=\min_p \sum_{j=1}^{k-i-1}d_{\mathbb{Z}}\left(\frac{o_{j+1}-o_j}{p}\right)^2$$ where $d_{\mathbb{Z}}(x)$ is the distance of $x$ to the nearest integer, defined as $\left|x - \left\lfloor x + \tfrac{1}{2}\right\rfloor\right|$ The error function represents the remainder squared error (RSE), and the expression $o_{j+1}-o_j$ is the IOI between onsets $j$ and $j+1$. In other words, the error quantifies the total error of snapping onsets to the grid. An observant reader may have noticed that the optimal tatum segmentation minimizes the RSE of the entire piece, that is $\operatorname{ERR}\left(\operatorname{\mathcal{O}}\right)$. 
 
 Let $S(k)$ be the \emph{segmentation boundary}: an argument that minimizes the cost function: $$S(k)=\argmin_{1\leq i \leq k}\left[\operatorname{OPT}(i) + \operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)\right]$$ Similarly, let the best \emph{tatum level} minimizing $\operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)$ be: $$T(k)=\argmin_{p} e(p,i+1,k)$$ 
 
-With the notation settled down, we can outline the main algorithm. It consists of two parts: the main procedure in which the optimal tatums are found, and the trace-back that finds the segmentation bounds. The entire algorithm is of the $O\left(n^3\right)$ time complexity.
+With the notation settled down, we can outline the main algorithm consisted of two parts: the main procedure, which determines the optimal tatums, and the trace-back that finds the segmentation boundaries. The entire algorithm has time complexity of $O\left(n^3\right)$.
 
 \input{sources/algorithms/dynamic_programming}
 
 \subsection{Note Onset Quantization}
 
-After the segmentation, one needs to snap the onsets to the obtained grid, for each piece segment. Additionally, the notes are snapped from left to right, and the first note indicates the first grid point. 
+Once the segmentation is complete, the onsest are snapped to the obtained grid for each piece segment. The notes are snapped from left to right, and the first note in a segment determines the first grid point. 
+
+\subsection{Limitations}
+
+There are several limitations of the proposed solution. Similarly to the previous algorithm, it addresses only the beat quantization. Moreover, it does not recognize metric structure of a performed piece.
+
+The presented dynamic programming approach does not handle tempo variations inside a single tatum segment. This means that it is not able to capture \emph{rubato} or other expressive timing changes. This may result in uniform, inflexible sections or distorted time grids. Furthermore, some notes may be misaligned due to snapping to the grid.
+
+This comes closely with the next assumption of the algorithm: it minimizes RSE for each segment, but the underlying assumption is that the notes are supposed to be played uniformly in each segment, which is not always the case. Henceforth, the algorithm is not able to handle other expressive techniques as gradual tempo increase (\emph{accelerando}) or decrease (\emph{ritartdando}).
+
+Finally, the algorithm is computationally expensive and not suitable for real-time performance.

@@ -225,7 +225,7 @@ Traditional music notation represents an idealized version of how a piece should
 \includesvg[width=0.3\textwidth]{images/sonata_original_gen.svg}
  & b)\includesvg[width=0.6\textwidth]{images/sonata_performance_gen.svg}
 \end{tabular}
-\caption{An example of an imported performance MIDI of Chopin's \emph{Sonata No. 2, Op. 35, 2nd movement} ,,as it is'': a) the original sheet, b) the imported performance MIDI without time/key signature assignment. Not only the actual durations render the sheet unreadable and impractical, but also introduce error resulting from note quantization. Notice that there is no hand separation.}
+\caption[An example of the imported performance MIDI of Chopin's \emph{Sonata No. 2, Op. 35, 2nd movement} ,,as it is''.]{An example of the imported performance MIDI of Chopin's \emph{Sonata No. 2, Op. 35, 2nd movement} ,,as it is'': a) the original sheet, b) the imported performance MIDI without time/key signature assignment. Not only the actual durations render the sheet unreadable and impractical, but also introduce error resulting from note quantization. Notice that there is no hand separation.}
 \label{chopin_sonata}
 \end{figure}
 
@@ -295,13 +295,15 @@ Grohganz et al. \cite{Grohganz2014} identify two types of MIDI files based on th
 \includesvg[height=1.25cm]{images/score_agnostic_gen.svg}
  & b)\includesvg[height=1.15cm]{images/score_informed_gen.svg}
 \end{tabular}
-\caption{An actual recording of a simple melody: a) the score-agnostic recording with incorrectly quantized musical onsets not aligned with the MIDI tempo, b) the score-informed representation of the performance. Notice that the pickup measure is also correctly identified.}
+\caption[An actual recording of a simple melody]{An actual recording of a simple melody: a) the score-agnostic recording with incorrectly quantized musical onsets not aligned with the MIDI tempo, b) the score-informed representation of the performance. Notice that the pickup measure is also correctly identified.}
 \label{score_informed}
 \end{figure}
 
 The beat quantization problem may be thought as a process of converting a P-MIDI into a S-MIDI file.
 
 Most musical software programs struggle to correctly import P-MIDI as they rely on the internal tick-based structure to interpret note onsets. Without accurate alignment to a tempo grid, the resulting transcription can appear rhythmically distorted, with notes placed in incorrect positions relative to the beat (see: Figure \ref{score_informed}). This makes beat quantization an essential step in the transcription of human-performed music.
+
+\subsection{Summary of Steps}
 
 In summary, the procedure of translating the raw performance MIDI to a score involves at least: \begin{itemize}
 	\item note quantization, which consists of:

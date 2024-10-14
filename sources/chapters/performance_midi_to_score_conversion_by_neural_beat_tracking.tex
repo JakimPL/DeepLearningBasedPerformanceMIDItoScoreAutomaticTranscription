@@ -71,3 +71,127 @@ Besides the quantization model, which relies on the beat tracking module, key si
 \section{Score Generation}
 
 The final score generation process synthesizes the source MIDI stream, incorporating pitch sequence, with the model's output. The resultant annotated MIDI encompasses essential information for visual score generation, including key/time signatures, which are not typically present in standard MIDI files.
+
+\section{Model Performance}
+
+\section{Robustness Analysis}
+
+\subsection{Ceteris Paribus}
+
+We conducted a \emph{ceteris paribus} analysis focusing on musical element models, making several assumptions:
+
+\begin{itemize}[noitemsep, topsep=4pt]
+	\item Note velocity should not affect time signature or hand part assignment.
+	\item Note duration should not impact key signature.
+	\item Note pitch is crucial for key signature/hand part assigning, while other features should not contribute.
+	\item Note pitch does not matter for the time signature.
+\end{itemize}
+
+These should be regarded as general guidelines rather than strict principles.
+
+\subsubsection{Perturbations}
+
+For a sample $M=50$ musical pieces from the dataset, we introduced perturbations to test the assumptions:
+
+\begin{itemize}[noitemsep, topsep=4pt]
+	\item Changing velocity with standard deviations $\sigma_v$ of 8, 16, 32, and 64.
+	\item Scaling note lengths by a factor from an interval $\alpha\in(\alpha_l,1)$, where $\alpha_l\in\{0.9, 0.75, 0.5, 0.2\}$ (note extension may lead to overlapping).
+	\item Changing pitch with standard deviations $\sigma_p$ of 12 and 24 (whole octave, double octave).
+\end{itemize}
+
+Each transformation is applied separately to each feature, note by note. Notice that we don't change onsets as they change the musical structure of a piece.
+
+For each feature model $f$: \emph{hand part} $f_H$, \emph{key signature} $f_K$, \emph{time signature} $f_T$, we calculated the average error between the output sequence and the output of a perturbed sequence.
+
+For each element ${\bf x}_i$ in the dataset sample $i\in\{1,2,\ldots,50\}$ and for each change, we sampled $m=10$ perturbations ${\bf x}^{(j)}$ of the original item and measured the error: $$\operatorname{error}\left(f\right) = \frac{1}{M}\sum_{i=1}^{M}\frac{1}{m}\sum_{j=1}^{m}\operatorname{error}\left(f\left({\bf x}_i\right), f\left({\bf x}_i^{(j)}\right)\right)$$ Here, $\operatorname{error}$ between two sequences ${\bf x} = (x_i)_{i=1}^N$ and ${\bf y} = (y_i)_{i=1}^N$ is defined as: $$\operatorname{error}({\bf x},{\bf y}) = \frac{1}{N}\sum_{i=1}^N \left[x_i \neq y_i\right]$$ Higher error values indicate greater influence on the output $f$ from a transformation.
+
+This analysis directly measures the model's robustness to specific transformations and does not rely on the model's overall performance.
+
+\subsubsection{Results}
+
+Among all three models, the key signature $f_K$ model proved to be robust to all proposed transformations, with an average error of less than $1.5\%$ in each category.
+
+The hand part model $f_H$ error is robust to note shortening (maximum average error of $3\%$), but inconsistent when note velocities are changed. This inconsistency is mitigated by maintaining consistent velocity for notes played simultaneously. We hypothesize that chords played by one hand typically have similar velocities (see Table \ref{perturbations_hand_part} for detailed results).
+
+The time signature model is quite robust to note velocity and pitch manipulations (average errors less than $13\%$), but loses consistency when notes are shortened. \begin{table}[ht!]
+\input{sources/tables/perturbations_errors}
+\caption{The average errors of certain perturbations (in percent).}
+\label{perturbations}
+\end{table}
+
+\begin{table}[ht!]
+\input{sources/tables/hand_part_perturbations}
+\caption[The average errors for the hand part model]{The average errors for the hand part model $f_H$ for 1. standard perturbation, 2. uniform random change for notes played in the same time. The second transformation introduces less inconsistencies.}
+\label{hand_part_perturbations}
+\end{table} 
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.96\textwidth]{images/ceteris_paribus_results.png}
+\caption[\emph{Ceteris paribus} analysis model errors]{\emph{Ceteris paribus} analysis model errors.}
+\label{ceteris_paribus}
+\end{figure}
+
+\subsection{Local Feature Importance}
+
+We encountered challenges with common explainable machine learning tools: 
+
+\begin{itemize}[noitemsep, topsep=4pt]
+	\item Input data is a tensor of variable length, not conforming to tabular or image-like formats supported by many tools.
+	\item The input data is a very high-dimensional space, computationally infeasible for certain methods (e.g. Shapley values).
+	\item Pitch perturbations introduce non-integer values, and the pitch space lacks a meaningful measure of distance.
+	\item Some model components (e.g. GRU blocks, ELU activation function) are not supported by certain XAI libraries.
+\end{itemize} 
+
+We developed a custom solution to overcome these obstacles. For velocity, we applied a LIME-like approach due to the absence of metric structure in the pitch space. We generated a locally modified version of the MIDI stream tensor for each note, randomizing the velocity for one note. We created $100$ samples for each note, calculating model predictions to compare with the original prediction. This approach aids in explaining the findings from the previous section (see Figure \ref{hand_part_misalignment} for an example).
+
+We also measured the mean influence through this approach: the square root of the mean of squares of linear regression coefficients. This approach aligns with the \emph{ceteris paribus} analysis.
+
+\begin{table}[ht!]
+\input{sources/tables/lime_like_approach}
+\caption{The average influence of three models calculated by a LIME-like approach.}
+\end{table} 
+
+However, the proposed approach ignores the feature interaction and silently assumes variable independence, both horizontally and vertically. This is a serious limitation of this approach. 
+
+\subsection{Key Signature Assignment by Note Omission}
+
+For the key signature model, as the pitch space is not a metric space, we applied a different strategy. The method is as follows: 
+\begin{enumerate}[noitemsep, topsep=4pt]
+	\item Get the key signature prediction values (before the last activation function) for the entire sequence.
+	\item Individually remove each note in a sequence and calculate the difference between the original prediction and the prediction made on a sequence without a single note.
+	\item Compute a contribution score, represented by the mean of the differences for each note.
+	\end{enumerate} This approach enables the measurement of each note's contribution to the attribution of a specific scale. Refer to Figure \ref{note_removing} for an illustrative example.
+
+\subsection{Conclusion}
+
+We were able to discover certain artifacts of the score generation models, especially when it comes to velocity contribution to hand part assignment. The time signature model is not fully robust to alterations that should not have affect the output.
+
+Unfortunately, the proposed methods have drawbacks and are not fully justified. Current XAI methods do not work well with symbolic music data in general. Developing more tailored and adaptable XAI methods for musical applications could contribute to improved model interpretability. One of the challenge would be to find a reasonable (and interpretable) embedding of the pitch space that encodes musical features. 
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.7\textwidth]{images/ceteris_paribus_results_h.png}
+\includegraphics[width=0.7\textwidth]{images/ceteris_paribus_results_k.png}
+\includegraphics[width=0.7\textwidth]{images/ceteris_paribus_results_t.png}
+\caption[Results of the \emph{ceteris paribus} experiment]{Results of the \emph{ceteris paribus} experiment for the hand part model $f_H$, the key signature model $f_K$ and the time signature model $f_T$. The hand part model is robust to note duration changes while it is susceptible to velocity manipulation. On the other hand, the time signature model is sensitive to note duration changes, which is expected to some extent, and relatively robust to other transformations. The key signature model is robust to all perturbations.}
+\label{ceteris_paribus}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{images/hand_part1.png}
+\includegraphics[width=0.95\textwidth]{images/hand_part2.png}
+\caption[The piano roll for the hand part model output]{The piano roll for the hand part model output. Each note is represented as a (blue or red) block, indicating a pitch (note), duration and velocity. The first graph represents an original sequence while the second has perturbed velocity. Left-hand notes are marked as red. We can see that there are much many misalignment in the hand assignment in the second output. As a rule of thumb, the left hand notes (red) should be at the bottom while the right hand ones (blue) should be at the top.}\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{images/lime_hand_part.png}
+\caption[A graph showing how the velocity of a note influences hand part assignments of other notes]{A graph showing how the velocity of the second C5 note (with a thick outline) influences hand part assignments of other notes. It can be observed that the current velocity of this note makes the model think of the first F3 note as a left hand note. Reducing the note C5 velocity to a low value results in a misassigning F3 as the right hand note. This is, of course, a undesired behavior of the model.}
+\label{hand_part_misalignment}\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.95\textwidth]{images/note_removing.png}
+\caption[A key signature alignment for D$\sharp$ scale]{A key signature alignment for D$\sharp$ scale. The names on the notes represent the model key signature attribution. There are two different scales assigned by the model: D$\sharp$ scale and G$\sharp$ scale. Notes: D, E and A are not in the scale and have a negative influence on the assignment.}
+\label{note_removing}\end{figure}
