@@ -54,8 +54,6 @@ These metrics include: \begin{itemize}
 	\item $E_{\textrm{all}}$ being an average of all previous metrics
 \end{itemize}
 
-The aforementioned research \cite{Holzapfel2021} shows that some of presented metrics don't correlate with human experts. 
-
 \subsubsection{Note Alignment}
 
 The transcription metrics used to evaluate the performance of a model depend on determining how many notes are ``correct'' or ``incorrect'' based on several criteria: whether the notes are missing, superfluous, or played with incorrect pitch. Classifying notes in these categories is a non-trivial task. Due to timing variations, missing or extra notes\footnote{Note that intended ornament notes are classified as superfluous too, henceforth incorrect.}, a direct note-by-note comparison is not a viable approach.
@@ -72,11 +70,26 @@ For more information the exact problem statement, the procedure and algorithm ev
 
 \subsection{Rhythm Correction Cost}
 
+Note values are not absolute and depend on the tempo marking. A quarter note in tempo $60$ (denoted by $\quarterNote = 60$) has the same length as a half note played in the tempo 120 ($\halfNote = 120$). The choice of the unit is arbitrary, yet doubling the tempo may negatively impact certain metric structure metrics. This remark points out that the metric values should be analyzed in relationship to other notes, not in absolute values \cite{Nakamura2017c}.
 
+In a tempo-free scenario it may happen that the automatic
+
+\emph{Rhythm Correction Cost} (RCC) is defined as: \begin{quote}``the minimum number of scale and shift operations for onset score times'' \cite{Nakamura2017b}\end{quote}
+
+\begin{figure}[ht!]
+\centering
+\includesvg[width=0.25\textheight]{images/rcc1_gen.svg} \\
+\includesvg[width=0.25\textheight]{images/rcc2_gen.svg} \\
+\includesvg[width=0.25\textheight]{images/rcc3_gen.svg}
+\caption[Scaling and shift operations that recover the rhythm structure]{Scaling and shift operations that recover the rhythm structure \cite{Nakamura2017b}.}
+\end{figure}
 
 \subsection{Metrics}
 
-The \emph{pitch error rate} metric quantifies how many notes are detected with incorrect pitch. The formula is simple: \[E_{\textrm{p}}=\frac{\textrm{number of notes with incorrect pitch}}{\textrm{total number of ground-truth notes}}\] The \emph{missing note rate} and \emph{extra note rate} values are derived similarly: \begin{flalign*}E_{\textrm{m}}&=\frac{\textrm{number of missing notes}}{\textrm{total number of ground-truth notes}} \\ E_{\textrm{e}}&=\frac{\textrm{number of extra notes}}{\textrm{total number of ground-truth notes}}\end{flalign*} For onset/offset 
+The \emph{pitch error rate} metric quantifies how many notes are detected with incorrect pitch. The formula is rather straightforward: \[E_{\textrm{p}}=\frac{\textrm{number of notes with incorrect pitch}}{\textrm{total number of ground-truth notes}}\] The \emph{missing note rate} and \emph{extra note rate} values are derived similarly: \begin{flalign*}E_{\textrm{m}}&=\frac{\textrm{number of missing notes}}{\textrm{total number of ground-truth notes}} \\ E_{\textrm{e}}&=\frac{\textrm{number of extra notes}}{\textrm{total number of ground-truth notes}}\end{flalign*} For onset/offset 
+
+
+The aforementioned research \cite{Holzapfel2021} shows that some of presented metrics don't correlate with human experts. 
 
 \subsection{MV2H}
 

@@ -16,7 +16,7 @@ clean:
 	rm -rf svg-inkscape
 	rm -f images/*_gen.svg
 	rm -f lily/*.svg
-	rm -f *.aux *.bbg *.bbl *.blg *.loa *.lof *.log *.lot *.out *.pdf *.toc
+	rm -f *.aux *.bbg *.bbl *.blg *.loa *.lof *.log *.lot *.out *.pdf *.toc *.mid
 
 process_lily:
 	cd lily && \
