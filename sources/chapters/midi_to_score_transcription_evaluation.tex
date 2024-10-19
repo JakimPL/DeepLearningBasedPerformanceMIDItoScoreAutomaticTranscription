@@ -1,19 +1,40 @@
 \chapter{MIDI-to-Score Transcription Evaluation}
 
-When predicting a score out of a performance MIDI, one needs to evaluate how faithful an output is to the original sheet.
+When predicting a score out of a performance MIDI, one needs to evaluate how faithful an output is to the original sheet. A transcription quality metric should take a transcription of a performance-MIDI and a ground-truth score as input, and serve a non-negative real number as an output, ideally from the range $[0, 1]$.
 
-A score evaluation is far from a trivial task, and there are many reasons behind that. Music notation is complex enough, contains a variety of different elements, and solely for that reason it is hard to propose a metric that fairly encompasses all different elements of a musical notation structure, and assigns a single value in a reasonable way.
+As the musical transcription is a multifaceted process, measuring transcription fidelity is a far from trivial task. Music notation is complex and made up of a variety of elements, and solely for that reason it is hard to propose a metric that simultaneously: \begin{itemize}
+	\item assigns a single value for an entire transcription
+	\item encompasses all aspects mentioned in the Section \ref{music_score_encoding}. 
+\end{itemize}
 
-There can be many mistakes during a
+On top of that, there are additional layers of complications: \begin{itemize}
+	\item Even for a single aspect it may be not clear how to measure quality of a transcription. For example, assessing voice separation is a hard task on its own\footnote{The term \emph{voice} itself is ambiguous and there is no single definition what constitutes a voice, let alone how to separate voices. An extensive discussion on that topic can be found in \cite{Cambouropoulos2008}.}.
+	\item Performers tend to deviate from the musical notation, whether intentional or not. For example, a pianist can introduce own ornaments or simply make a mistake in the execution by omitting or pressing wrong keys. While the basic structure seems should be rather preserved, that is the key and metric signature, we may expect that there may be some differences in the note stream. 
+	\item Musical elements are interconnected. Transcription mistake in one area may transfer to another area, e.g. incorrect beat recognition may make difficult to assign a proper time signature. It is not clear how to penalize a single transcription error only once. It is also not easy to fairly attribute the faithfulness of a transcription of an interpretation substantially diverging from the sheet.
+	\item In general, there may be multiple ways of denoting the same thing, and in some case neither of them are more correct than other ones. A well-designed metric should allows some degree of freedom when it does not hurt the quality of the transcription.
+\end{itemize}
 
-Notice that an error in determining the rhythm structure of a affects further onset
+As a result, more often than not, single aspects of a model are being analyzed and evaluated in isolation to other parts of a transcription. The overall result may be taken as the average of submetrics \missing, but that heuristic is rather unjustified.
 
-Notation is sometimes ambiguous
+The earlier quality assessment methods left much to be desired. Common pitfalls in the research papers include:\begin{itemize}
+	\item {\bf Lack of thorough analysis}. A rigorous approach requires judgment on all relevant aspects of a proposed solution. Failing to attribute vital parts of a model or algorithm render the analysis incomplete.
+	\item {\bf Single case demonstration}. The results of a algorithm were often demonstrated on a very limited set of musical pieces (\cite{Takeda2002} or \cite{Yang2005}). It is not obvious how a model performs outside showcased examples, and it endangers the research to cherry-picking \missing.
+	\item {\bf No public dataset or reproducibility} In case of either training or evaluation, a detailed information on the used dataset should be provided. If not, a result is hardly reproducible. This is the case of \cite{Takeda2002}.
+	\item {\bf Absence of human expert evaluation}. While all statistical benchmarks are necessary for quantitative assessment, there may miss nuances that are desired by performers relying on transcriptions.
+\end{itemize}
 
-Conversely, sometimes, there are many ways to denote the same thing, and there are some equivalences in music notation [example \missing].
+In the following sections we are going to explore attempts to provide transcription quality metrics in scientific literature. We will start from single aspects of transcription that can be quantified and measured.
+
+\section{Evaluation Methods and Metrics}
+
+\subsection{Manual Attribution}
 
 \subsection{MV2H}
 
 \cite{McLeod2018}
+
+\section{Simplifications}
+
+\section{Evaluation of Beat Quantization}
 
 \missing

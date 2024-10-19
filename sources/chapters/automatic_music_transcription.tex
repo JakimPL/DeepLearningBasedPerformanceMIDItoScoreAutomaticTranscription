@@ -271,7 +271,7 @@ The ambiguity can be resolved through assigning the key signature, that is deter
 
 \subsubsection{Voicing}
 
-A \emph{voice} (or \emph{stream}) is defined as "a monophonic sequence of successive, non-overlapping musical tones" \cite{Karydis2007}. This notion can be broadened to any sequence of notes, whether monophonic or polyphonic, that is perceived as a single musical entity. 
+A \emph{voice} (or \emph{stream}) is defined as "a monophonic sequence of successive, non-overlapping musical tones" \cite{Karydis2007}. This notion can be broadened to any sequence of notes, whether monophonic or polyphonic, that is perceived as a single musical entity \ref{Cambouropoulos2008}.
 
 \begin{figure}[ht!]
 \centering
@@ -324,10 +324,11 @@ Each of these subtasks will be implemented as a separate module within the main 
 While AMT systems aim to convert performance data into a readable musical score, only a subset of musical elements is typically included in the generated output. Many nuances remain beyond the scope of current AMT systems, including the main model described here.
 
 Key limitations include: \begin{itemize}
-	\item {\bf Accents and articulation marks}: Elements such as \emph{staccato}, \emph{tenuto}, or accents are vital for conveying how each note should be played in terms of attack, duration, and emphasis. 
+	\item {\bf Accents and articulation marks}: Elements such as \emph{staccato}, \emph{tenuto}, or accents are vital for conveying how each note should be played in terms of attack, duration, and emphasis. None of them are handled by presented AMT models.
 	\item {\bf Pedalization}: While MIDI files capture pedal events, the transcription process does not typically translate these events into notated pedal marks. A human intervention is often needed to transform raw MIDI signals into a clean notation.
 	\item {\bf Ornaments}: Grace notes, trills, mordents, and other ornaments add complexity to both performance and notation. As the MIDI does not distinguish special notes, all of such ornaments are shown as ordinary notes. To the author's knowledge, there is no model that attempts to transcribe performance recording recognizing ornaments.
 	\item {\bf Dynamics and expression marks}: While note velocity can give a rough indication of dynamics, AMT systems do not capture more complex dynamic markings like crescendo, diminuendo, or sudden dynamic shifts. A partial work in that matter can be found in the Chapter \ref{experiments_and_improvements}.
+	\item {\bf Clefs}: The changes in the clefs are not registered in a MIDI stream. Thus, it is not a task of the model to assign clefs \footnote{Musical software often interprets MIDI files and handles clef assignments for the user \missing.}. For simplicity, we may assume that the treble clef constantly corresponds to the right hand, while the left hand is governed by the bass clef.
 	\item {\bf Phrasing}: The subtle shaping of musical phrases, which performers use to convey musical direction and intention. Common group indications like slurs are absent in the generated scores. \end{itemize}
 
 This is, of course, by no means an exhaustive list.
