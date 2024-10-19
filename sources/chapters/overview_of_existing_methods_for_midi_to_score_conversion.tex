@@ -10,12 +10,13 @@ Cogliati et al. present a brief but succinct history of the development of AMT s
 	\item Takeda et al. \cite{Takeda2002} introduce the use of Hidden Markov Models (HMMs) for the automatic transcription of monophonic recordings.
 	\item Karydis et al. \cite{Karydis2007} address the problem of assigning note clusters to separate voices, of which the hand separation is a subproblem.
 	\item In 2005, Yang et al. \cite{Yang2005} propose a dynamic programming approach to solve beat quantization problem.
+	\item Temperley provides a unified approach to solve three problems of a music transcription: metrical analysis, harmonic analysis, and stream segregation \cite{Temperley2009}.
 	\item Grohganz et al. \cite{Grohganz2014} define the concepts of score-performed and score-informed MIDI files and propose a method for transforming the former to the latter.
 \end{itemize}
 
 After the formulation, the problem has continued to evolve, incorporating the advancements from machine learning. Some of the more recent advances include:
 \begin{enumerate}
-	\item Nakamura et al. \cite{Nakamura2017} apply Markov Random Fields for piano transcription.
+	\item Nakamura et al. \cite{Nakamura2017a} apply Markov Random Fields for piano transcription.
 	\item Liu et al. \cite{Liu2022} use a deep-learning method involving convolutional neural networks and gated recurrent units, which is the main focus of the thesis.
 \end{enumerate}
 
@@ -49,8 +50,8 @@ An HMM is specified by the following components: \begin{itemize}
 \end{itemize}
 
 The HMM framework operates on two fundamental assumptions for the model: \begin{itemize}
-	\item {\bf Markov Assumption}: The probability of being in a particular state depends only on the previous state: $$P\left(q_i|q_1\,\ldots,q_{i-1}\right) = P(q_i|q_{i-1})$$
-	\item {\bf Output Independence}: The probability of an output observation $o_i$ depends only on the state that generated the observation $q_i$: $$P\left(x_i|q_1,\ldots,q_i,\ldots,q_T,x_1,\ldots,x_i,\ldots, x_T\right)=P(x_i|q_i)$$
+	\item {\bf Markov Assumption}: The probability of being in a particular state depends only on the previous state: \[P\left(q_i|q_1\,\ldots,q_{i-1}\right) = P(q_i|q_{i-1})\]
+	\item {\bf Output Independence}: The probability of an output observation $o_i$ depends only on the state that generated the observation $q_i$: \[P\left(x_i|q_1,\ldots,q_i,\ldots,q_T,x_1,\ldots,x_i,\ldots, x_T\right)=P(x_i|q_i)\]
 \end{itemize}
 
 HMMs are said to be characterized by \emph{three fundamental problems} \cite[p. 213]{Jurafsky2009}: \begin{enumerate}
@@ -65,22 +66,22 @@ These problems can be solved algorithmically. For further details, see \cite[p. 
 
 Takeda et al. \cite{Takeda2002} employed HMMs to solve the beat quantization problem for performance MIDI streams in a tempo-free scenario.
 
-The core idea behind the approach is to treat performance note durations as \emph{observations} of some unknown, ,,ideal'' (nominal, intended time value). The fluctuations in actual note lengths can be modeled by some Gaussian distribution with the mean of the length of the nominal note duration. The performed note duration $x_t$ at time $t$ is represented by a probability density function $b_i(x_t)$ where $i$ denotes the\emph{intention}, i.e. nominal time value of the note. The observations are measured via \emph{inter-onset intervals} (IOI), which are the time intervals between consecutive note onsets.
+The core idea behind the approach is to treat performance note durations as \emph{observations} of some unknown, ``ideal'' (nominal, intended time value). The fluctuations in actual note lengths can be modeled by some Gaussian distribution with the mean of the length of the nominal note duration. The performed note duration $x_t$ at time $t$ is represented by a probability density function $b_i(x_t)$ where $i$ denotes the\emph{intention}, i.e. nominal time value of the note. The observations are measured via \emph{inter-onset intervals} (IOI), which are the time intervals between consecutive note onsets.
 
-Let $Q = \{q_1,q_2,\ldots, q_N\}$ be the time sequence of identified intentions, and let $X=\{x_1,x_2,\ldots,x_N\}$ be the observations: the sequence of actual durations (observations). The probability of observing the entire sequence is given by: $$P(X|Q)=\prod_{t=1}^N b_{q_t}(x_t)$$ 
+Let $Q = \{q_1,q_2,\ldots, q_N\}$ be the time sequence of identified intentions, and let $X=\{x_1,x_2,\ldots,x_N\}$ be the observations: the sequence of actual durations (observations). The probability of observing the entire sequence is given by: \[P(X|Q)=\prod_{t=1}^N b_{q_t}(x_t)\]
 
 The authors introduce two models for predicting note lengths: \begin{itemize}
 	\item \emph{Note $n$-gram Model}. Note length is predicted based on preceding $n - 1$ notes. For example, in a bigram model, the length of note is predicted base on the previous note's length.
 	\item \emph{Rhythm Vocabulary Model}. The model consists of predefined rhythmic patterns for a unit time. The collection of all patterns makes a \emph{vocabulary}.\end{itemize}
 	
-Both models are represented as probabilistic state transition networks. Each state is associated with an intended note length. For example, in a $3$-gram model we may represent a state as $a_{ij,jk}$, where two preceding notes are of length $i$ and $j$, and the succeeding note length is $k$. In general, instead of using tuplets, all possible stats are labeled and enumerated, yielding transition matrix $(a_{ij})_{i,j}$. Thus, the probability that state number changes along a time sequence $Q=\{q_1,q_2,\ldots,q_N\}$ is given by the product: $$P(Q)=\pi_{q_0}\prod_{t=1}^N a_{q_{t-1},q_t}$$ for some initial probability $\pi_i$ starting with a state $i$. This the foundation of Hidden Markov Model: \begin{itemize}
+Both models are represented as probabilistic state transition networks. Each state is associated with an intended note length. For example, in a $3$-gram model we may represent a state as $a_{ij,jk}$, where two preceding notes are of length $i$ and $j$, and the succeeding note length is $k$. In general, instead of using tuplets, all possible stats are labeled and enumerated, yielding transition matrix $(a_{ij})_{i,j}$. Thus, the probability that state number changes along a time sequence $Q=\{q_1,q_2,\ldots,q_N\}$ is given by the product: \[P(Q)=\pi_{q_0}\prod_{t=1}^N a_{q_{t-1},q_t}\] for some initial probability $\pi_i$ starting with a state $i$. This the foundation of Hidden Markov Model: \begin{itemize}
 	\item The matrix $A=(a_{ij})_{i,j}$ constitutes a \emph{transition probability matrix}.
 	\item The sequence $B=\{b_i(x_t)\}_{i}$ is a sequence of \emph{emission probabilities}.
 \end{itemize}
 
 \subsection{Optimal Sequence of States}
 
-From the Bayes theorem, one have: $$P(Q|X)=\frac{P(X|Q)P(Q)}{P(X)}$$ To maximize a posteriori probability $P(Q|X)$, one needs to maximize $P(Q|X)$ as for given sequence $X$, the probability $P(X)$ is constant. Although it is theoretically possible to examine all possible state sequences and compute the likelihood for each, the number of possible sequences grows exponentially, rendering this approach infeasible.
+From the Bayes theorem, one have: \[P(Q|X)=\frac{P(X|Q)P(Q)}{P(X)}\] To maximize a posteriori probability $P(Q|X)$, one needs to maximize $P(Q|X)$ as for given sequence $X$, the probability $P(X)$ is constant. Although it is theoretically possible to examine all possible state sequences and compute the likelihood for each, the number of possible sequences grows exponentially, rendering this approach infeasible.
 
 Instead, the optimal sequence of states is efficiently found using the \emph{Viterbi algorithm}, which is an established dynamic programming algorithm  \cite[p.210--220]{Jurafsky2009}. 
 
@@ -88,7 +89,7 @@ Given the HMM $\lambda = (A, B)$, the procedure is as follows:
 
 \input{sources/algorithms/viterbi}
 
-The procedure returns the optimal sequence of intended notes: $$\hat{Q} = \argmax_Q P(X|Q)P(Q)$$
+The procedure returns the optimal sequence of intended notes: \[\hat{Q} = \argmax_Q P(X|Q)P(Q)\]
 
 \subsection{Training}
 
@@ -108,7 +109,7 @@ No public implementation of the algorithm is available, making it difficult to c
 
 \section{Dynamic Programming Approach}
 
-In 2005, Yang et al. proposed another method for solving beat quantization problem \cite{Yang2005}. The authors used dynamical programming approach to segment a piece into sections with different \emph{tatums}. A \emph{tatum} is often defined as ,,the smallest cognitively meaningful
+In 2005, Yang et al. proposed another method for solving beat quantization problem \cite{Yang2005}. The authors used dynamical programming approach to segment a piece into sections with different \emph{tatums}. A \emph{tatum} is often defined as ``the smallest cognitively meaningful
 subdivision of the main beat''\footnote{Usually coincides with sixteenth-, twenty-fourth- or thirty-second notes.} \cite{Iyer1997}. The resulted tatums form a grid to which notes are spanned for quantization.
 
 \begin{figure}[!ht]
@@ -127,9 +128,9 @@ The size of the window needs to be carefully adjusted: too small window may not 
 
 The central component of the algorithm is \emph{Tatum Segmentation} for finding an optimal metric grid that minimizes the tatum-to-note error. The algorithm takes only onsets as inputs $\mathcal{O}=\mathcal{O}_1^n=\{o_i\}_{i=1}^n$ and disregards note-off events\footnote{This means that inter-onset intervals (IOI) are used for beat quantization.}. The output of the algorithm is a sequence of segmentation points $S=\{S_j\}_{j=1}^m$ within the optimal tatums $\{T_j\}_{j=1}^m$.
 
-The authors define recursively the \emph{optimal segmentation function} as: $$\operatorname{OPT}(k) = \min_{1\leq i \leq k}\left[\operatorname{OPT}(i) + \operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)\right]$$ where $\mathcal{O}_{i+1}^k=\{o_{i+1},\ldots,o_k\}$ The function $\operatorname{ERR}$ describes the error obtained by the best tatum assignment for the sequence of onsets $\mathcal{O}_{i+1}^k$: $$\operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)=\min_p e\left(p,i+1,k\right)=\min_p \sum_{j=1}^{k-i-1}d_{\mathbb{Z}}\left(\frac{o_{j+1}-o_j}{p}\right)^2$$ where $d_{\mathbb{Z}}(x)$ is the distance of $x$ to the nearest integer, defined as $\left|x - \left\lfloor x + \tfrac{1}{2}\right\rfloor\right|$ The error function represents the remainder squared error (RSE), and the expression $o_{j+1}-o_j$ is the IOI between onsets $j$ and $j+1$. In other words, the error quantifies the total error of snapping onsets to the grid. An observant reader may have noticed that the optimal tatum segmentation minimizes the RSE of the entire piece, that is $\operatorname{ERR}\left(\operatorname{\mathcal{O}}\right)$. 
+The authors define recursively the \emph{optimal segmentation function} as: \[\operatorname{OPT}(k) = \min_{1\leq i \leq k}\left[\operatorname{OPT}(i) + \operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)\right]\] where $\mathcal{O}_{i+1}^k=\{o_{i+1},\ldots,o_k\}$ The function $\operatorname{ERR}$ describes the error obtained by the best tatum assignment for the sequence of onsets $\mathcal{O}_{i+1}^k$: \[\operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)=\min_p e\left(p,i+1,k\right)=\min_p \sum_{j=1}^{k-i-1}d_{\mathbb{Z}}\left(\frac{o_{j+1}-o_j}{p}\right)^2\] where $d_{\mathbb{Z}}(x)$ is the distance of $x$ to the nearest integer, defined as $\left|x - \left\lfloor x + \tfrac{1}{2}\right\rfloor\right|$ The error function represents the remainder squared error (RSE), and the expression $o_{j+1}-o_j$ is the IOI between onsets $j$ and $j+1$. In other words, the error quantifies the total error of snapping onsets to the grid. An observant reader may have noticed that the optimal tatum segmentation minimizes the RSE of the entire piece, that is $\operatorname{ERR}\left(\operatorname{\mathcal{O}}\right)$.
 
-Let $S(k)$ be the \emph{segmentation boundary}: an argument that minimizes the cost function: $$S(k)=\argmin_{1\leq i \leq k}\left[\operatorname{OPT}(i) + \operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)\right]$$ Similarly, let the best \emph{tatum level} minimizing $\operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)$ be: $$T(k)=\argmin_{p} e(p,i+1,k)$$ 
+Let $S(k)$ be the \emph{segmentation boundary}: an argument that minimizes the cost function: \[S(k)=\argmin_{1\leq i \leq k}\left[\operatorname{OPT}(i) + \operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)\right]\] Similarly, let the best \emph{tatum level} minimizing $\operatorname{ERR}\left(\mathcal{O}_{i+1}^k\right)$ be: \[T(k)=\argmin_{p} e(p,i+1,k)\]
 
 With the notation settled down, we can outline the main algorithm consisted of two parts: the main procedure, which determines the optimal tatums, and the trace-back that finds the segmentation boundaries. The entire algorithm has time complexity of $O\left(n^3\right)$.
 

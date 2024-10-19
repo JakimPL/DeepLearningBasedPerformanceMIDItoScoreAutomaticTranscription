@@ -8,8 +8,8 @@ As the musical transcription is a multifaceted process, measuring transcription 
 \end{itemize}
 
 On top of that, there are additional layers of complications: \begin{itemize}
-	\item Even for a single aspect it may be not clear how to measure quality of a transcription. For example, assessing voice separation is a hard task on its own\footnote{The term \emph{voice} itself is ambiguous and there is no single definition what constitutes a voice, let alone how to separate voices. An extensive discussion on that topic can be found in \cite{Cambouropoulos2008}.}.
-	\item Performers tend to deviate from the musical notation, whether intentional or not. For example, a pianist can introduce own ornaments or simply make a mistake in the execution by omitting or pressing wrong keys. While the basic structure seems should be rather preserved, that is the key and metric signature, we may expect that there may be some differences in the note stream. 
+	\item Even for a single aspect it may be not clear how to measure quality of a transcription. For example, assessing voice separation is a hard task on its own\footnote{The term \emph{voice} itself is ambiguous and there is no single definition that tells exactly what constitutes a voice, let alone how to separate voices. An extensive discussion on that topic can be found in \cite{Cambouropoulos2008}.}.
+	\item Performers tend to deviate from the musical notation, whether intentional or not. For example, a pianist can introduce own ornaments or simply make a mistake in the execution by omitting or pressing wrong keys. While the basic structure seems should be rather preserved, that is the key and metric signature, we may expect that there may be some differences in the note stream. The goal of the evaluation is not to judge the performance's fidelity to the notation but rather the accuracy of a transcription.
 	\item Musical elements are interconnected. Transcription mistake in one area may transfer to another area, e.g. incorrect beat recognition may make difficult to assign a proper time signature. It is not clear how to penalize a single transcription error only once. It is also not easy to fairly attribute the faithfulness of a transcription of an interpretation substantially diverging from the sheet.
 	\item In general, there may be multiple ways of denoting the same thing, and in some case neither of them are more correct than other ones. A well-designed metric should allows some degree of freedom when it does not hurt the quality of the transcription.
 \end{itemize}
@@ -28,6 +28,55 @@ In the following sections we are going to explore attempts to provide transcript
 \section{Evaluation Methods and Metrics}
 
 \subsection{Manual Attribution}
+
+Manual attribution involves any form of quality assessment involving human intervention. It almost exclusively requires experts, as the task of evaluating music transcription demands an understanding of both musical theory and performance practice. Human evaluators are typically trained musicians, musicologists, or composers who can assess various dimensions of a transcription beyond what automated systems can measure. These experts are called upon to determine not only the technical accuracy of a transcription but also its musicality, readability, and adherence to stylistic norms. The output of human evaluation may be either qualitative or quantitative. 
+
+One of the key benefits of manual attribution is its ability to handle complex, nuanced and multi-layered aspects of transcription. Trained musicians are well-equipped to judge how well a transcription serve musicians.
+
+There were some research conducted on how computational metrics and human align with each other. A fairly recent study shows that, surprisingly enough, there is no significant correlation between certain transcription metrics\footnote{Two metrics \emph{missing note rate} and \emph{onset time error} had no significant correlation with human score. These metrics are going to be explained in further sections.} and human quality ratings \cite{Holzapfel2021}. Still, the combined metric is of rather strong correlation (0.682) with mean expert rating, however lower than the correlation between two human experts (0.754).
+
+Despite a large value of human evaluation, this method is not without flaws. Human expert evaluation is time-consuming and labor-intensive. Carefully reviewing a transcription requires domain expertise, time and effort. For this reason not only access to experts is limited and costly, but also not scalable. Another drawback coming from manual attribution that evaluators may be subjective and biased towards certain notation practices. This of course not to say, that quantitative benchmarks are free of such biases.
+
+\subsection{$F_1$-score for Beat Quantization}
+
+Classic measures
+
+\subsection{Integrated Multi-Pitch Detection and Rhythm Quantization}
+
+Nakamura et al. in 2018 proposed a set of metrics to evaluate their extension of a Hidden Markov Model \cite{Nakamura2018} for the automatic transcription task. Some of these metrics have been already established in some earlier works \cite{Nakamura2017}.
+
+These metrics include: \begin{itemize}
+	\item \emph{Pitch error rate} $E_{\textrm{p}}$
+	\item \emph{Missing note rate} $E_{\textrm{m}}$
+	\item \emph{Extra note rate} $E_{\textrm{e}}$
+	\item \emph{Onset-time error rate} $E_{\textrm{on}}$
+	\item \emph{Offset-time error rate} $E_{\textrm{off}}$
+	\item $E_{\textrm{all}}$ being an average of all previous metrics
+\end{itemize}
+
+The aforementioned research \cite{Holzapfel2021} shows that some of presented metrics don't correlate with human experts. 
+
+\subsubsection{Note Alignment}
+
+The transcription metrics used to evaluate the performance of a model depend on determining how many notes are ``correct'' or ``incorrect'' based on several criteria: whether the notes are missing, superfluous, or played with incorrect pitch. Classifying notes in these categories is a non-trivial task. Due to timing variations, missing or extra notes\footnote{Note that intended ornament notes are classified as superfluous too, henceforth incorrect.}, a direct note-by-note comparison is not a viable approach.
+
+The note alignment process used in this work is based on the algorithm described by Nakamura et al. \cite{Nakamura2017b}, which is designed to robustly align the performed MIDI notes with the corresponding score notes. The algorithm’s objective is to identify and categorize notes into three main groups: \begin{itemize}
+	\item {\bf Matched notes}. These include both notes that are correctly matched in terms of pitch and onset time, and notes that have correct onset timing but pitch errors (wrong pitch).
+	\item {\bf Extra notes}. These are notes that appear in the performance but do not exist in the original score (false positives). They may occur due to performance errors or expressive choices like embellishments.
+	\item {\bf Missing notes}. Notes that are present in the score but were omitted in the performance or failed to be detected by the transcription system (false negatives) are considered missing.
+\end{itemize}
+
+The inventory of notes serves for all subsequent metrics.
+
+For more information the exact problem statement, the procedure and algorithm evaluation, refer to \cite{Nakamura2017b}.
+
+\subsection{Rhythm Correction Cost}
+
+
+
+\subsection{Metrics}
+
+The \emph{pitch error rate} metric quantifies how many notes are detected with incorrect pitch. The formula is simple: \[E_{\textrm{p}}=\frac{\textrm{number of notes with incorrect pitch}}{\textrm{total number of ground-truth notes}}\] The \emph{missing note rate} and \emph{extra note rate} values are derived similarly: \begin{flalign*}E_{\textrm{m}}&=\frac{\textrm{number of missing notes}}{\textrm{total number of ground-truth notes}} \\ E_{\textrm{e}}&=\frac{\textrm{number of extra notes}}{\textrm{total number of ground-truth notes}}\end{flalign*} For onset/offset 
 
 \subsection{MV2H}
 

@@ -36,7 +36,7 @@ For predicting in-note beats, one can reduce the problem to a binary classificat
 \caption[In-note beat prediction model]{In-note beat prediction model with a CRNN with 3 convolutional layers and 2 bi-directional gated recurrent unit (GRU) layers.}
 \end{figure}
 
-The probability $P_n$ that $n$-th note is concurrent with a beat is defined as: $$P_n = \mathbb{P}\left(B_n|\mathbf{X}\right)$$ where $B_n\in\{0,1\}$ is the ground-truth beat label for the $n$-th note from the note sequence. The model is trained using the standard cross-entropy loss function: $$\mathcal{L}=-\frac{1}{N}\sum_{n=1}^N B_n\ln P_n + \left(1-B_n\right)\ln\left(1-P_n\right)$$ The authors used CRNN with 3 convolutional layers and 2 bidirectional gated recurrent unit (GRU) layers. The probability threshold for positive classification has been set dynamically, depending on the maximum probability in a fixed segment length.
+The probability $P_n$ that $n$-th note is concurrent with a beat is defined as: \[P_n = \mathbb{P}\left(B_n|\mathbf{X}\right)\] where $B_n\in\{0,1\}$ is the ground-truth beat label for the $n$-th note from the note sequence. The model is trained using the standard cross-entropy loss function: \[\mathcal{L}=-\frac{1}{N}\sum_{n=1}^N B_n\ln P_n + \left(1-B_n\right)\ln\left(1-P_n\right)\] The authors used CRNN with 3 convolutional layers and 2 bidirectional gated recurrent unit (GRU) layers. The probability threshold for positive classification has been set dynamically, depending on the maximum probability in a fixed segment length.
 
 \subsection{Out-of-note Beat Prediction}
 
@@ -103,7 +103,7 @@ Each transformation is applied separately to each feature, note by note. Notice 
 
 For each feature model $f$: \emph{hand part} $f_H$, \emph{key signature} $f_K$, \emph{time signature} $f_T$, we calculated the average error between the output sequence and the output of a perturbed sequence.
 
-For each element ${\bf x}_i$ in the dataset sample $i\in\{1,2,\ldots,50\}$ and for each change, we sampled $m=10$ perturbations ${\bf x}^{(j)}$ of the original item and measured the error: $$\operatorname{error}\left(f\right) = \frac{1}{M}\sum_{i=1}^{M}\frac{1}{m}\sum_{j=1}^{m}\operatorname{error}\left(f\left({\bf x}_i\right), f\left({\bf x}_i^{(j)}\right)\right)$$ Here, $\operatorname{error}$ between two sequences ${\bf x} = (x_i)_{i=1}^N$ and ${\bf y} = (y_i)_{i=1}^N$ is defined as: $$\operatorname{error}({\bf x},{\bf y}) = \frac{1}{N}\sum_{i=1}^N \left[x_i \neq y_i\right]$$ Higher error values indicate greater influence on the output $f$ from a transformation.
+For each element ${\bf x}_i$ in the dataset sample $i\in\{1,2,\ldots,50\}$ and for each change, we sampled $m=10$ perturbations ${\bf x}^{(j)}$ of the original item and measured the error: \[\operatorname{error}\left(f\right) = \frac{1}{M}\sum_{i=1}^{M}\frac{1}{m}\sum_{j=1}^{m}\operatorname{error}\left(f\left({\bf x}_i\right), f\left({\bf x}_i^{(j)}\right)\right)\] Here, $\operatorname{error}$ between two sequences ${\bf x} = (x_i)_{i=1}^N$ and ${\bf y} = (y_i)_{i=1}^N$ is defined as: \[\operatorname{error}({\bf x},{\bf y}) = \frac{1}{N}\sum_{i=1}^N \left[x_i \neq y_i\right]\] Higher error values indicate greater influence on the output $f$ from a transformation.
 
 This analysis directly measures the model's robustness to specific transformations and does not rely on the model's overall performance.
 
