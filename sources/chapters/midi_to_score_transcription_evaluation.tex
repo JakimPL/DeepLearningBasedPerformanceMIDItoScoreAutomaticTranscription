@@ -37,13 +37,21 @@ There were some research conducted on how computational metrics and human align 
 
 Despite a large value of human evaluation, this method is not without flaws. Human expert evaluation is time-consuming and labor-intensive. Carefully reviewing a transcription requires domain expertise, time and effort. For this reason not only access to experts is limited and costly, but also not scalable. Another drawback coming from manual attribution that evaluators may be subjective and biased towards certain notation practices. This of course not to say, that quantitative benchmarks are free of such biases.
 
-\subsection{$F_1$-score for Beat Quantization}
+\subsection{Evaluation of Beat Quantization}
 
-Classic measures
+\missing
+
+\subsubsection{Binary Cross-Entropy}
+
+\missing
+
+\subsubsection{$F_1$-score}
+
+\missing
 
 \subsection{Integrated Multi-Pitch Detection and Rhythm Quantization}
 
-Nakamura et al. in 2018 proposed a set of metrics to evaluate their extension of a Hidden Markov Model \cite{Nakamura2018} for the automatic transcription task. Some of these metrics have been already established in some earlier works \cite{Nakamura2017}.
+Nakamura et al. in 2018 proposed a set of metrics to evaluate their extension of a Hidden Markov Model \cite{Nakamura2018} for the automatic transcription task. Some of these metrics have been already established in some earlier works \cite{Nakamura2017a}.
 
 These metrics include: \begin{itemize}
 	\item \emph{Pitch error rate} $E_{\textrm{p}}$
@@ -70,33 +78,33 @@ For more information the exact problem statement, the procedure and algorithm ev
 
 \subsection{Rhythm Correction Cost}
 
-Note values are not absolute and depend on the tempo marking. A quarter note in tempo $60$ (denoted by $\quarterNote = 60$) has the same length as a half note played in the tempo 120 ($\halfNote = 120$). The choice of the unit is arbitrary, yet doubling the tempo may negatively impact certain metric structure metrics. This remark points out that the metric values should be analyzed in relationship to other notes, not in absolute values \cite{Nakamura2017c}.
+Note values are not absolute and depend on the tempo marking. A quarter note in tempo $60$ (denoted by $\quarterNote = 60$) has the same length as a half note played in the tempo 120 ($\halfNote = 120$). The choice of the unit is arbitrary, yet doubling the tempo may negatively impact certain metric structure metrics. Naive metrics could mark such entire fragment as completely incorrect. This remark points out that the metric values should be analyzed in relationship to other notes, not in absolute values \cite{Nakamura2017c}.
 
-In a tempo-free scenario it may happen that the automatic
-
-\emph{Rhythm Correction Cost} (RCC) is defined as: \begin{quote}``the minimum number of scale and shift operations for onset score times'' \cite{Nakamura2017b}\end{quote}
+To take these into account, Nakamura et al. introduce \emph{Rhythm Correction Cost}, which is defined as: ``the minimum number of scale and shift operations for onset score times'' \cite{Nakamura2017b}. 
 
 \begin{figure}[ht!]
 \centering
-\includesvg[width=0.25\textheight]{images/rcc1_gen.svg} \\
-\includesvg[width=0.25\textheight]{images/rcc2_gen.svg} \\
-\includesvg[width=0.25\textheight]{images/rcc3_gen.svg}
+\input{sources/graphs/rhythm_correction}
 \caption[Scaling and shift operations that recover the rhythm structure]{Scaling and shift operations that recover the rhythm structure \cite{Nakamura2017b}.}
+\label{rhythm_correction}
 \end{figure}
+
+In the Figure \ref{rhythm_correction}, two scaling and two shift operations are needed to recover the ground-truth rhythm structure, and that number is minimal. Hence, the RCC is $4$.
 
 \subsection{Metrics}
 
-The \emph{pitch error rate} metric quantifies how many notes are detected with incorrect pitch. The formula is rather straightforward: \[E_{\textrm{p}}=\frac{\textrm{number of notes with incorrect pitch}}{\textrm{total number of ground-truth notes}}\] The \emph{missing note rate} and \emph{extra note rate} values are derived similarly: \begin{flalign*}E_{\textrm{m}}&=\frac{\textrm{number of missing notes}}{\textrm{total number of ground-truth notes}} \\ E_{\textrm{e}}&=\frac{\textrm{number of extra notes}}{\textrm{total number of ground-truth notes}}\end{flalign*} For onset/offset 
+The \emph{pitch error rate} metric quantifies how many notes are detected with incorrect pitch. The formula is rather straightforward: \[E_{\textrm{p}}=\frac{\textrm{number of notes with incorrect pitch}}{\textrm{total number of ground-truth notes}}\] The \emph{missing note rate} and \emph{extra note rate} values are derived similarly: \begin{flalign*}E_{\textrm{m}}&=\frac{\textrm{number of missing notes}}{\textrm{total number of ground-truth notes}} \\ E_{\textrm{e}}&=\frac{\textrm{number of extra notes}}{\textrm{total number of ground-truth notes}}\end{flalign*} 
 
+Onset/offset-time error rates rely on RCC. The \emph{onset-time error rate} is defined as \[E_{\textrm{on}} = \frac{\textrm{RCC}}{\textrm{number of matched notes}}\] while \emph{offset-time error rate} is derived from the number f notes with an incorrect offset score time after normalization using the closest onset score time: \[E_{\textrm{off}} = \frac{\textrm{number of notes with an incorrect offset score time after normalization}}{\textrm{number of matched notes}}\] The exact procedure of how to calculate the numerator is present in \cite{Nakamura2017a}.
+
+Finally, $E_{\textrm{all}}$ is the arithmetic mean of all metrics above.
+
+\subsection{Limitations}
+
+\missing
 
 The aforementioned research \cite{Holzapfel2021} shows that some of presented metrics don't correlate with human experts. 
 
 \subsection{MV2H}
 
 \cite{McLeod2018}
-
-\section{Simplifications}
-
-\section{Evaluation of Beat Quantization}
-
-\missing

@@ -34,31 +34,10 @@
 PartPOneVoiceOne = \relative f' {
     \key c \major
     \stemUp
-  \set Score.proportionalNotationDuration = #(ly:make-moment 1/4)
-    \override NoteHead.color = #(x11-color 'gray)
-    \override Stem.color = #(x11-color 'gray)
-    \override Beam.color = #(x11-color 'gray)
-    f4 f8 [f8 ]
-  \set Score.proportionalNotationDuration = #(ly:make-moment 1/2)
     \override NoteHead.color = #(x11-color 'gray50)
     \override Stem.color = #(x11-color 'gray50)
     \override Beam.color = #(x11-color 'gray50)
-    f4 f8 [f8]
-
-  \set Score.proportionalNotationDuration = #(ly:make-moment 1/2)
-    \override NoteHead.color = #(x11-color 'black)
-    \override Stem.color = #(x11-color 'black)
-    \override Beam.color = #(x11-color 'black)
-    f4
-    
-  \set Score.proportionalNotationDuration = #(ly:make-moment 1/2)
-    f8
-    
-  \set Score.proportionalNotationDuration = #(ly:make-moment 1/2)
-    f4 
-    
-  \set Score.proportionalNotationDuration = #(ly:make-moment 1/12)
-    f4 f8. [ f8 ]
+    f8 [ f16 f8 ]
 }
 
 \score {

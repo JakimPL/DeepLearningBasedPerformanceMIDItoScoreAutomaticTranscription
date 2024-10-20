@@ -1,0 +1,33 @@
+\begin{tikzpicture}
+    \tikzset{arrowstyle/.style={-{Latex[length=2mm]}}}
+    \node at (-5.0, 3.0) {\textbf{Estimation}};
+    \node at (-2.4, 3.0) (1a) {\includesvg{images/rcc1a_gen.svg}};
+    \node at (-0.8, 3.0) (1b) {\includesvg{images/rcc1b_gen.svg}};
+    \node at ( 0.8, 3.0) (1c) {\includesvg{images/rcc1c_gen.svg}};
+    \node at ( 2.4, 3.0) (1d) {\includesvg{images/rcc1d_gen.svg}};
+    \node at (0.0, 2.65) (1bc) {};
+
+    \node at (-5.0, 2.25) {Scaling};
+    \node at (-5.0, 0.75) {Shifting};
+    \node at (-2.4, 1.5) (2a) {\includesvg{images/rcc2a_gen.svg}};
+    \node at (-0.8, 1.5) (2b) {\includesvg{images/rcc2a_gen.svg}};
+    \node at ( 0.8, 1.5) (2c) {\includesvg{images/rcc2b_gen.svg}};
+    \node at ( 2.4, 1.5) (2d) {\includesvg{images/rcc2c_gen.svg}};
+    \node at (0.0, 1.85) (2bc) {};
+
+    \node at (-5.0, 0.0) {\textbf{Ground truth}};
+    \node at (-2.4, 0.0) (3a) {\includesvg{images/rcc2a_gen.svg}};
+    \node at (-0.8, 0.0) (3b) {\includesvg{images/rcc2a_gen.svg}};
+    \node at ( 0.8, 0.0) (3c) {\includesvg{images/rcc2a_gen.svg}};
+    \node at ( 2.4, 0.0) (3d) {\includesvg{images/rcc2a_gen.svg}};
+
+    \node at (1.2, 1.05) (2cr) {};
+    \node at (1.2, 0.35) (3cr) {};
+    \node at (2.35, 1.05) (2dr) {};
+    \node at (2.35, 0.35) (3dr) {};
+
+    \draw[arrowstyle] (1a.south) -- (2a.north) node[midway, right] {$\times 4$};
+    \draw[arrowstyle] (1bc.south) -- (2bc.north) node[midway, right] {$\times 2$};
+    \draw[arrowstyle] (2cr.south east) -- (3cr.north east) node[midway, right] {$-\quaver$};
+    \draw[arrowstyle] (2dr.south east) -- (3dr.north east) node[midway, right] {$-\semiquaver$};
+\end{tikzpicture}
