@@ -1,86 +1,82 @@
 \chapter{MIDI-to-Score Transcription Evaluation}
 
-When predicting a score out of a performance MIDI, one needs to evaluate how faithful an output is to the original sheet. A transcription quality metric should take a transcription of a performance-MIDI and a ground-truth score as input, and serve a non-negative real number as an output, ideally from the range $[0, 1]$.
+When transcribing a performance MIDI into a musical score, one needs to evaluate how faithful an output is to the original sheet. A transcription quality metric should take a transcription of a performance-MIDI and a ground-truth score as input, and produce a non-negative real number as an output, ideally within the range $[0, 1]$.
 
-As the musical transcription is a multifaceted process, measuring transcription fidelity is a far from trivial task. Music notation is complex and made up of a variety of elements, and solely for that reason it is hard to propose a metric that simultaneously: \begin{itemize}
-	\item assigns a single value for an entire transcription
+As the musical transcription is a multifaceted process, measuring transcription fidelity is far from a trivial task. Music notation is complex, consisting of a variety of interdependent elements. Solely for that reason, it is difficult to achieve metric that simultaneously: \begin{itemize}
+	\item assigns a single value to an entire transcription
 	\item encompasses all aspects mentioned in the Section \ref{music_score_encoding}. 
 \end{itemize}
 
 On top of that, there are additional layers of complications: \begin{itemize}
 	\item Even for a single aspect it may be not clear how to measure quality of a transcription. For example, assessing voice separation is a hard task on its own\footnote{The term \emph{voice} itself is ambiguous and there is no single definition that tells exactly what constitutes a voice, let alone how to separate voices. An extensive discussion on that topic can be found in \cite{Cambouropoulos2008}.}.
-	\item Performers tend to deviate from the musical notation, whether intentional or not. For example, a pianist can introduce own ornaments or simply make a mistake in the execution by omitting or pressing wrong keys. While the basic structure seems should be rather preserved, that is the key and metric signature, we may expect that there may be some differences in the note stream. The goal of the evaluation is not to judge the performance's fidelity to the notation but rather the accuracy of a transcription.
-	\item Musical elements are interconnected. Transcription mistake in one area may transfer to another area, e.g. incorrect beat recognition may make difficult to assign a proper time signature. It is not clear how to penalize a single transcription error only once. It is also not easy to fairly attribute the faithfulness of a transcription of an interpretation substantially diverging from the sheet.
-	\item In general, there may be multiple ways of denoting the same thing, and in some case neither of them are more correct than other ones. A well-designed metric should allows some degree of freedom when it does not hurt the quality of the transcription.
+	\item Performers tend to deviate from the written score, whether intentional through artistic interpretation or not due to errors. For example, a pianist can introduce own ornaments or make mistakes by omitting certain notes or playing wrong ones. While the basic structure, such as time and key signature, is usually preserved in a performance, we may expect differences in a note stream. The goal of the evaluation is not to judge the performance's fidelity to the notation but rather the accuracy of a transcription.
+	\item Musical elements are interconnected. A transcription error in one area can cascade into another. For instance, inaccurate beat recognition may make difficult to assign a proper time signature. It is not clear how to penalize a single transcription error once, and only once. It is also not easy to fairly attribute the faithfulness of a transcription of an interpretation that substantially diverges from the sheet.
+	\item In general, there can be multiple valid notations of the same musical idea, and in some case neither of them are more correct than other ones. A well-designed metric should allows some degree of freedom when it does not hurt the quality of the transcription.
 \end{itemize}
 
-As a result, more often than not, single aspects of a model are being analyzed and evaluated in isolation to other parts of a transcription. The overall result may be taken as the average of submetrics \missing, but that heuristic is rather unjustified.
+As a result, more often than not, single aspects of a model are being analyzed and evaluated in isolation to other parts of a transcription. The overall result may be an aggregation of sub-metrics, though this approach is not always justifiable.
 
-The earlier quality assessment methods left much to be desired. Common pitfalls in the research papers include:\begin{itemize}
-	\item {\bf Lack of thorough analysis}. A rigorous approach requires judgment on all relevant aspects of a proposed solution. Failing to attribute vital parts of a model or algorithm render the analysis incomplete.
-	\item {\bf Single case demonstration}. The results of a algorithm were often demonstrated on a very limited set of musical pieces (\cite{Takeda2002} or \cite{Yang2005}). It is not obvious how a model performs outside showcased examples, and it endangers the research to cherry-picking \missing.
-	\item {\bf No public dataset or reproducibility} In case of either training or evaluation, a detailed information on the used dataset should be provided. If not, a result is hardly reproducible. This is the case of \cite{Takeda2002}.
-	\item {\bf Absence of human expert evaluation}. While all statistical benchmarks are necessary for quantitative assessment, there may miss nuances that are desired by performers relying on transcriptions.
+Earlier approaches to assessing transcription quality were often lacking in rigor. Some common pitfalls in the literature include:\begin{itemize}
+	\item {\bf Lack of Thorough Analysis}. A rigorous evaluation requires an assessment of all relevant aspects of a proposed solution. Failing to attribute vital parts of a model or algorithm renders the analysis incomplete.
+	\item {\bf Limited Case Demonstration}. The results of a algorithm were often demonstrated on a very limited set of musical pieces (\cite{Takeda2002} or \cite{Yang2005}). It is not obvious how a model performs outside showcased examples, and it endangers the research to cherry-picking \missing.
+	\item {\bf No Public Dataset or Reproducibility}. For both training and evaluation, the dataset used should be clearly described and, ideally, made publicly available. Without this, results are difficult or impossible to reproduce, as seen in \cite{Takeda2002}.
+	\item {\bf Absence of Human Expert Evaluation}. While statistical benchmarks are necessary for quantitative assessment, there may overlook nuances that are essential for performers relying on transcriptions.
 \end{itemize}
 
-In the following sections we are going to explore attempts to provide transcription quality metrics in scientific literature. We will start from single aspects of transcription that can be quantified and measured.
+In the following sections we will explore various attempts from the literature to provide transcription quality metric.
 
-\section{Evaluation Methods and Metrics}
+\section{Manual Attribution}
 
-\subsection{Manual Attribution}
+Manual attribution refers to any form of quality assessment that involves human intervention. It almost exclusively requires experts, as the task of evaluating music transcription demands understanding of both musical theory and performance practice. Human evaluators are typically trained musicians, musicologists, or composers who can assess various dimensions of a transcription beyond what automated systems can measure. These experts are called upon to determine not only the technical accuracy of a transcription but also its musicality, readability, and adherence to stylistic norms. The output of human evaluation may be either qualitative or quantitative. 
 
-Manual attribution involves any form of quality assessment involving human intervention. It almost exclusively requires experts, as the task of evaluating music transcription demands an understanding of both musical theory and performance practice. Human evaluators are typically trained musicians, musicologists, or composers who can assess various dimensions of a transcription beyond what automated systems can measure. These experts are called upon to determine not only the technical accuracy of a transcription but also its musicality, readability, and adherence to stylistic norms. The output of human evaluation may be either qualitative or quantitative. 
+One of the key benefits of manual attribution is its ability to handle complex, nuanced and multi-layered aspects of transcription. Trained musicians are well-equipped to judge how well a transcription serves musicians.
 
-One of the key benefits of manual attribution is its ability to handle complex, nuanced and multi-layered aspects of transcription. Trained musicians are well-equipped to judge how well a transcription serve musicians.
+Some research has investigated the relationship between computational metrics and human evaluation. A fairly recent study shows that, surprisingly enough, there is no significant correlation between certain transcription metrics\footnote{Two metrics \emph{missing note rate} and \emph{onset time error} had no significant correlation with human score. These metrics are going to be explained in further sections.} and human quality ratings \cite{Holzapfel2021}. However, combined metrics correlated more strongly (0.682) with human expert evaluations, although this correlation was still lower than the inter-rater correlation between two human experts (0.754).
 
-There were some research conducted on how computational metrics and human align with each other. A fairly recent study shows that, surprisingly enough, there is no significant correlation between certain transcription metrics\footnote{Two metrics \emph{missing note rate} and \emph{onset time error} had no significant correlation with human score. These metrics are going to be explained in further sections.} and human quality ratings \cite{Holzapfel2021}. Still, the combined metric is of rather strong correlation (0.682) with mean expert rating, however lower than the correlation between two human experts (0.754).
+Despite a large value of human evaluation, it comes with limitations. Manual attribution is time-consuming and labor-intensive. Carefully reviewing a transcription requires domain expertise, time and effort. Access to qualified experts can be costly, and the process is not easily scalable. Another drawback coming from manual attribution that evaluators may be subjective and biased towards certain notation practices. This of course not to say, that quantitative benchmarks are free of biases.
 
-Despite a large value of human evaluation, this method is not without flaws. Human expert evaluation is time-consuming and labor-intensive. Carefully reviewing a transcription requires domain expertise, time and effort. For this reason not only access to experts is limited and costly, but also not scalable. Another drawback coming from manual attribution that evaluators may be subjective and biased towards certain notation practices. This of course not to say, that quantitative benchmarks are free of such biases.
-
-\subsection{Evaluation of Beat Quantization}
+\section{Evaluation of Beat Quantization}
 
 \missing
 
-\subsubsection{Binary Cross-Entropy}
+\subsection{Binary Cross-Entropy}
 
 \missing
 
-\subsubsection{$F_1$-score}
+\subsection{$F_1$-score}
 
 \missing
 
-\subsection{Integrated Multi-Pitch Detection and Rhythm Quantization}
+\section{Integrated Multi-Pitch Detection and Rhythm Quantization Metrics}
 
-Nakamura et al. in 2018 proposed a set of metrics to evaluate their extension of a Hidden Markov Model \cite{Nakamura2018} for the automatic transcription task. Some of these metrics have been already established in some earlier works \cite{Nakamura2017a}.
-
-These metrics include: \begin{itemize}
-	\item \emph{Pitch error rate} $E_{\textrm{p}}$
-	\item \emph{Missing note rate} $E_{\textrm{m}}$
-	\item \emph{Extra note rate} $E_{\textrm{e}}$
-	\item \emph{Onset-time error rate} $E_{\textrm{on}}$
-	\item \emph{Offset-time error rate} $E_{\textrm{off}}$
-	\item $E_{\textrm{all}}$ being an average of all previous metrics
+Nakamura et al. (2018) proposed a set of metrics to evaluate their extension of a Hidden Markov Model \cite{Nakamura2018} for automatic transcription. These metrics build upon earlier work \cite{Nakamura2017a} and include: \begin{itemize}
+	\item \textbf{Pitch error rate} $E_{\textrm{p}}$. Measures the proportion of notes detected with incorrect pitch.
+	\item \textbf{Missing note rate} $E_{\textrm{m}}$. Measures the proportion of notes that are present in the ground-truth score but missing from the transcription.
+	\item \textbf{Extra note rate} $E_{\textrm{e}}$. Measures the proportion of notes that appear in the transcription but are not present in the original score.
+	\item \textbf{Onset-time error rate} $E_{\textrm{on}}$. Quantifies errors in note onset times relative to the expected values.
+	\item \textbf{Offset-time error rate} $E_{\textrm{off}}$. Measures errors in note offset times after normalizing to the correct onset times.
+	\item \textbf{Overall Error Rate} $E_{\textrm{all}}$. The arithmetic mean of all other error rates.
 \end{itemize}
 
-\subsubsection{Note Alignment}
+The metrics rely on two components: \emph{note alignment} and \emph{rhythm correction cost}.
 
-The transcription metrics used to evaluate the performance of a model depend on determining how many notes are ``correct'' or ``incorrect'' based on several criteria: whether the notes are missing, superfluous, or played with incorrect pitch. Classifying notes in these categories is a non-trivial task. Due to timing variations, missing or extra notes\footnote{Note that intended ornament notes are classified as superfluous too, henceforth incorrect.}, a direct note-by-note comparison is not a viable approach.
+\subsection{Note Alignment}
 
-The note alignment process used in this work is based on the algorithm described by Nakamura et al. \cite{Nakamura2017b}, which is designed to robustly align the performed MIDI notes with the corresponding score notes. The algorithm’s objective is to identify and categorize notes into three main groups: \begin{itemize}
+The transcription metrics used to evaluate the performance of a model depend on determining how many notes are ``correct'' or ``incorrect'' based on several criteria: whether the notes are missing, superfluous, or played with incorrect pitch. Classifying notes in these categories is a non-trivial task. In particular, due to timing variations, missing or extra notes\footnote{Note that intended ornament notes are classified as superfluous too, henceforth incorrect.} a direct note-by-note comparison is not a viable approach.
+
+The note alignment process is designed by Nakamura et al. in \cite{Nakamura2017b} to robustly align the performed MIDI notes with the corresponding score notes. The algorithm's objective is to identify and categorize notes into three main groups: \begin{itemize}
 	\item {\bf Matched notes}. These include both notes that are correctly matched in terms of pitch and onset time, and notes that have correct onset timing but pitch errors (wrong pitch).
 	\item {\bf Extra notes}. These are notes that appear in the performance but do not exist in the original score (false positives). They may occur due to performance errors or expressive choices like embellishments.
 	\item {\bf Missing notes}. Notes that are present in the score but were omitted in the performance or failed to be detected by the transcription system (false negatives) are considered missing.
 \end{itemize}
 
-The inventory of notes serves for all subsequent metrics.
-
 For more information the exact problem statement, the procedure and algorithm evaluation, refer to \cite{Nakamura2017b}.
 
 \subsection{Rhythm Correction Cost}
 
-Note values are not absolute and depend on the tempo marking. A quarter note in tempo $60$ (denoted by $\quarterNote = 60$) has the same length as a half note played in the tempo 120 ($\halfNote = 120$). The choice of the unit is arbitrary, yet doubling the tempo may negatively impact certain metric structure metrics. Naive metrics could mark such entire fragment as completely incorrect. This remark points out that the metric values should be analyzed in relationship to other notes, not in absolute values \cite{Nakamura2017c}.
+In music, note values are not absolute and depend on the tempo choice. A quarter note played a tempo $60$ beats per minute ($\quarterNote = 60$) lasts the same duration as a half note played at a tempo 120 BPM ($\halfNote = 120$). The choice of the unit is to somewhat arbitrary. Yet, doubling or halving the tempo may disrupt transcription metrics, as some naive metrics might inaccurately an antire passage as incorrect when the tempo is altered. This remark points out that the metric values should be analyzed in relationship to other notes, not as absolute values \cite{Nakamura2017c}.
 
-To take these into account, Nakamura et al. introduce \emph{Rhythm Correction Cost}, which is defined as: ``the minimum number of scale and shift operations for onset score times'' \cite{Nakamura2017b}. 
+To address this issue, Nakamura et al. introduced \emph{Rhythm Correction Cost} (RCC), which is defined as: ``the minimum number of scale and shift operations for onset score times'' \cite{Nakamura2017b}. This metric takes into account tempo variations and adjusts for structural differences in note onsets between the transcription and the ground truth via two operations: scales and shifts.
 
 \begin{figure}[ht!]
 \centering
@@ -93,11 +89,13 @@ In the Figure \ref{rhythm_correction}, two scaling and two shift operations are 
 
 \subsection{Metrics}
 
+Let us review the definitions of metrics from the paper \cite{Nakamura2018}.
+
 The \emph{pitch error rate} metric quantifies how many notes are detected with incorrect pitch. The formula is rather straightforward: \[E_{\textrm{p}}=\frac{\textrm{number of notes with incorrect pitch}}{\textrm{total number of ground-truth notes}}\] The \emph{missing note rate} and \emph{extra note rate} values are derived similarly: \begin{flalign*}E_{\textrm{m}}&=\frac{\textrm{number of missing notes}}{\textrm{total number of ground-truth notes}} \\ E_{\textrm{e}}&=\frac{\textrm{number of extra notes}}{\textrm{total number of ground-truth notes}}\end{flalign*} 
 
-Onset/offset-time error rates rely on RCC. The \emph{onset-time error rate} is defined as \[E_{\textrm{on}} = \frac{\textrm{RCC}}{\textrm{number of matched notes}}\] while \emph{offset-time error rate} is derived from the number f notes with an incorrect offset score time after normalization using the closest onset score time: \[E_{\textrm{off}} = \frac{\textrm{number of notes with an incorrect offset score time after normalization}}{\textrm{number of matched notes}}\] The exact procedure of how to calculate the numerator is present in \cite{Nakamura2017a}.
+Onset/offset-time error rates rely on RCC. The \emph{onset-time error rate} is defined as: \[E_{\textrm{on}} = \frac{\textrm{RCC}}{\textrm{number of matched notes}}\] while \emph{offset-time error rate} is derived from the number of notes with an incorrect offset score time after normalization using the closest onset score time: \[E_{\textrm{off}} = \frac{\textrm{number of notes with an incorrect offset score time after normalization}}{\textrm{number of matched notes}}\] The exact procedure of how to calculate the numerator is present in \cite{Nakamura2017a}.
 
-Finally, $E_{\textrm{all}}$ is the arithmetic mean of all metrics above.
+Finally, $E_{\textrm{all}}$ is calculated as the arithmetic mean of all metrics above. It should reflect the overall error rate of a score.
 
 \subsection{Limitations}
 
@@ -105,6 +103,79 @@ Finally, $E_{\textrm{all}}$ is the arithmetic mean of all metrics above.
 
 The aforementioned research \cite{Holzapfel2021} shows that some of presented metrics don't correlate with human experts. 
 
-\subsection{MV2H}
+\section{MV2H Metric} \label{MV2H_section}
 
-\cite{McLeod2018}
+The MV2H (\emph{\textbf{M}ulti-pitch detection}, \emph{\textbf{V}oice separation}, \emph{\textbf{M}etrical alignment}, note \emph{\textbf{V}alue detection} and \emph{\textbf{H}armonic analysis}) metric, introduced by McLeod and Steedman \cite{McLeod2018}, is a comprehensive evaluation framework designed to assess AMT systems. The MV2H metric integrates several dimensions of transcription quality into a single evaluative measure. This section elaborates on the components of MV2H, the method of calculating the metric, and the advantages it offers over traditional evaluation metrics.
+
+The goal of the MV2H metric is to evaluate AMT systems comprehensively across five key aspects: \emph{multi-pitch detection}, \emph{voice separation}, \emph{metrical alignment}, \emph{note value detection} and \emph{harmonic analysis}. These components represent the essential features of music transcription, including pitch accuracy, rhythm, note durations, and harmony. 
+
+One of key assumptions of the MV2H metric is its \emph{disjoint penalty principle}, which prevents cascading penalties across multiple transcription aspects due to a single mistake.
+
+\subsection{Components of the MV2H Metric}
+
+The MV2H metric is composed of five sub-metrics, each targeting a distinct transcription task. These metrics are calculated independently and combined to form the overall MV2H score, which, as previously, the arithmetic mean of all sub-metrics.
+
+Below, we describe each component and how it is calculated.
+
+\subsubsection{Multi-pitch Detection}
+
+The multi-pitch detection sub-metric evaluates how well the AMT system detects the pitch and onset time of notes. A transcribed note is considered correctly detected if it satisfies two criteria: \begin{enumerate}
+	\item The onset time must be within a small threshold ($50$ ms by default) of the ground truth onset time.
+	\item The pitch of the transcribed note must match the corresponding pitch in the ground truth.\end{enumerate} Other detected notes are false positives, and unmatched ground-truth notes are false negatives. Note offsets are ignored.
+
+The metric used to evaluate this is the $F$-measure, which balances \emph{precision} and \emph{recall}. Precision refers to the proportion of correctly detected notes out of all detected notes, and recall refers to the proportion of correctly detected notes out of all ground-truth notes: \begin{flalign*}\textrm{precision} &= \frac{\textrm{True Positives}}{\textrm{True Positives} + \textrm{False Positives}}\\ \textrm{recall} &= \frac{\textrm{True Positives}}{\textrm{True Positives} + \textrm{False Negatives}}\end{flalign*} The $F$-measure is thus defined as: \[F_1 = 2 \times \frac{\textrm{precision} \times \textrm{recall}}{\textrm{precision} + \textrm{recall}}\] Notes that are not correctly detected in the multi-pitch detection stage are excluded from subsequent evaluations, such as voice separation or metrical alignment. This ensures that the multi-pitch detection errors are taken into account only once.
+
+A serious drawback of this approach is inability to compare a performance MIDI with a sheet that contains idealized note onsets. In the subsequent version of the metric \cite{McLeod2019}, the authors enhanced the metric to handle non-aligned musical scores.
+
+\subsubsection{Voice Separation}
+
+Voice separation evaluates how well an AMT system groups notes into coherent musical voices. This aspect is crucial for polyphonic music, where multiple voices may play simultaneously, such as in fugues or piano pieces.
+
+Voice separation is evaluated by comparing the system’s transcribed voices to the ground-truth voices in the score. A note is considered correctly placed if it is assigned to the correct voice in addition to its onset time and pitch being correct. The same $F$-measure used for multi-pitch detection is employed here, but only for notes that have already been correctly matched in terms of pitch and onset. This prevents over-penalization due to errors in the multi-pitch detection stage, aligning with the disjoint penalty principle.
+
+\subsubsection{Metrical Alignment}
+
+Metrical alignment measures how well the transcribed notes align rhythmically with the ground truth. Here, beat groupings (sub-beat, beat, and bar level) are evaluated to determine whether the system correctly identifies the temporal structure of the piece.
+
+To calculate the metrical alignment score, the system compares the onset and offset times of transcribed notes against those in the ground truth. A note is considered correctly aligned if its onset and offset times fall within a small threshold ($50$ ms by default) of the expected beat location. The metrical alignment is thus based on comparing the actual onset positions between a transcription and the corresponding ground-truth notation.
+
+\subsubsection{Note Value Detection}
+
+Note value detection evaluates the accuracy with which an AMT system transcribes the duration of each note. Note durations, referred to as note values in musical terminology, are normalized to account for tempo variations. This ensures that a note played in a faster tempo is still transcribed correctly relative to the piece's overall structure. For example, a quarter note at $60$ BPM ($\quarterNote = 90$) should be equivalent in duration to a half note at $120$ BPM ($\halfNote = 120$)\footnote{Unlike the previous set of metrics and the RCC component, the tempo misalignment is not considered here as an error.}.
+
+Only a subset of correctly identified notes is subject to the metric. A note is included in the analysis, if corresponds with a true positive ground-truth: \begin{enumerate}
+	\item multi-pitch detection
+	\item voice segment
+\end{enumerate}
+
+For each correctly matched note (in terms of pitch and onset), its duration is compared to the ground truth. The error in note duration is computed, with a score of $1$ indicating a perfect match and a score of $0$ for complete mismatch. For a single transcription note and its length $d_{\textrm{det}}$ and the corresponding ground-truth length $d_{\textrm{gt}}$, the individual note score is: \[\textrm{score} = \max\left(0, 1 - \frac{\left|d_{\textrm{gt}} - d_{\textrm{det}}\right|}{d_{\textrm{gt}}}\right)\] The overall note value detection score for a transcription is computed as the arithmetic mean of individual note value scores, evaluated for all correctly matched notes. 
+
+\subsubsection{Harmonic Analysis}
+
+Harmonic analysis assesses the system’s ability to correctly transcribe the harmonic structure of the music, which includes key and chord detection. 
+
+The metric is based on standard key detection evaluation \cite{Raffel2014}, which measures how closely the transcribed key signature matches the ground truth, with partial credit given for related keys (e.g., relative or parallel major/minor of the correct key or key a fifth too high).
+
+The standard chord tracking evaluation is \emph{chord symbol recall} (CSR), described in detail in \cite{Harte2010}. It can be defined as ``proportion of the input for which the annotated chord matches the ground truth chord'' \cite{McLeod2018}.
+
+The Harmonic Analysis metric is the arithmetic mean of key detection metric and CSR.
+
+\subsection{Disjoint Penalty Principle}
+
+The disjoint penalty principle is a core feature of MV2H, designed to prevent a single mistake from being penalized across multiple components of the metric. For example, if a note is missed during multi-pitch detection, it is excluded from the voice separation, metrical alignment, and note value detection evaluations. This prevents errors from compounding and ensures that the system is evaluated fairly across all aspects.
+
+The principle is applied by first evaluating multi-pitch detection and removing any unmatched notes from further evaluations. The remaining correctly transcribed notes are then used for evaluating voice separation, metrical alignment, note value detection, and harmonic analysis. Subsequently, note value detection is performed only on correctly metrically aligned notes.
+
+\subsection{Comparison to Other Metrics}
+
+\missing
+
+\subsection{Limitations of the MV2H Metric}
+
+\missing
+
+\section{Score Similarity}
+
+\missing
+
+\cite{Cogliati2017}

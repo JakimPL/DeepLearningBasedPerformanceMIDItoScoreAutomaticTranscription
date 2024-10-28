@@ -56,6 +56,17 @@ To discourage the procedure from adding too many out-of-note beats, which leads 
 
 \input{sources/algorithms/out_of_note}
 
+\section{Input Data Encoding}
+
+The entire score needs to be transformed to a suitable data format before passing to any of the model components. Given a note sequence tensor as described earlier, the data is encoded into a variety of features: \begin{itemize}
+	\item $128$-dimensional one-hot encoding of MIDI pitches.
+	\item One-hot onset time-shift ($o_i - o_{i-1}$) quantised by $10$ ms resolution, with maximum value of $4$ s, $401$ features in total.
+	\item Raw duration values in seconds.
+	\item Velocities normalized to the unit interval $[0, 1]$.
+\end{itemize}
+
+The authors tried different encoding schemes, for pitches, onset times and durations, including raw float values in seconds. The full study is available in the paper \cite{Liu2022}.
+
 \section{Score Elements Assignment}
 
 As discussed in the Section \ref{music_score_encoding}, score elements assignment may be viewed as a function from a note sequence $\mathbf{X}$ into a score encoded by a tensor $\mathbf{Y}_n$ representing musical onsets, note values, key signature, time signature, and hand parts, for each note separately.
@@ -72,7 +83,75 @@ Besides the quantization model, which relies on the beat tracking module, key si
 
 The final score generation process synthesizes the source MIDI stream, incorporating pitch sequence, with the model's output. The resultant annotated MIDI encompasses essential information for visual score generation, including key/time signatures, which are not typically present in standard MIDI files.
 
+\missing
+
+\section{Training}
+
+\subsection{Datasets}
+
+The dataset used by the authors of the paper \cite{Liu2022} integrates three sources of MIDI files: \begin{itemize}
+	\item The \emph{Classical Piano MIDI} (CPM) database \cite{Krueger1996}.
+	\item The \emph{Augmented MIDI Aligned Piano Sounds} (A-MAPS) \cite{Ycart2018}.
+	\item The \emph{Aligned Scores and Performances} (ASAP) dataset \cite{Foscarin2020}.
+\end{itemize}
+
+The datasets consists of a variety of classical piano pieces by composers including as Bach, Mozart, Beethoven, Schubert, Chopin, Liszt, and others from the Western European classica repertoire.
+
+Certain musical features, such as time and key signatures, are not always encoded in MIDI files. Consequently, the MIDI files have been annotated using different strategies.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/datasets}
+\caption[Statistics of the dataset used for training]{Statistics of the dataset used for training \cite{Liu2022}. Performances of the same piece are counted only once.}
+\end{table}
+
+The datasets partially overlap; for instance, A-MAPS is derived in part from CPM. Below is a brief overview of each data source.
+
+\subsubsection{Classical Piano MIDI Database}
+
+The \emph{Classical Piano MIDI} (CPM) database was created by Bernd Krüger, who produced hundreds of MIDI files containing interpretations of classical piano works. Krüger describes his motivation as follows \cite{Krueger1996}:
+
+\begin{quote}The page serves to describe and make available my interpretations of classical piano works. Although I am a layman in terms of music, I have set myself the goal of painstakingly interpreting difficult works. I would like to make these works accessible to as many musically interested people as possible.\end{quote}
+
+The dataset consists 337 pieces with a cumulative duration of approximately $23$ hours. All MIDI files are score-informed, with separate tracks for the left and right hands.  and time signatures are encoded in the MIDI files as meta messages.
+
+However, despite the fact that the MIDI files are tempo-varied, they were manually crafted, not performed. For instance, note onsets which lie on the same beat, occur simultaneously. In musical performance, even chords are played with certain time variation.
+
+\subsubsection{Augmented MIDI Aligned Piano Sounds}
+
+The \emph{Augmented MIDI Aligned Piano Sounds} (A-MAPS) dataset builds on the original \emph{MIDI Aligned Piano Sounds} (MAPS) dataset, introduced by Emiya et al. \cite{Emiya2010}. MAPS contains approximately 65 hours of data, including both MIDI and corresponding audio recordings, and is divided into four main categories:\begin{itemize}
+	\item \textbf{ISOL}: Isolated notes and monophonic excerpts.
+	\item \textbf{RAND}: Chords with random pitch notes.
+	\item \textbf{UCHO}: Usual chords from Western music.
+	\item \textbf{MUS}: Piano music pieces, sourced from the \emph{Classical Piano MIDI} database. \end{itemize}
+
+MAPS has been widely used as a benchmark for AMT systems \cite{Ycart2018}. However, the information provided by the MIDI files is limited to basic attributes: pitch, onsets and offsets in seconds, and velocity. The A-MAPS dataset enriches the original with additional annotations, including meter, note values, key signatures and hand separation. Moreover, A-MAPS provides also tempo curves and sustain pedal activations, although this information is not used by the considered model.
+
+The A-MAPS dataset contains 269 files of 159 unique pieces.
+
+\subsubsection{Aligned Scores and Performances}
+
+The \emph{Aligned Scores and Performances} (ASAP) dataset consists of 222 musical score aligned with 1068 performances, of the total duration of 92 hours \cite{Foscarin2020}.
+
+The ground truth is provided twofold: as musical scores in MusicXML format, and quantized MIDI files.
+
+For each performance, including the quantized MIDI file, annotations are provided in tab-separated values (TSV) format. These annotation specify timestamps for: \begin{itemize}
+	\item Beats (b) and downbeats (db).
+	\item Time signature changes.
+	\item Key signature changes.
+\end{itemize}
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/annotations}
+\caption[Example of performance MIDI annotation in TSV format]{An example of a performance MIDI annotation in TSV format. The first row indicates an initial time signature of ${6 \atop 8}$. The piece begins in the key of D major, encoded as 2.}
+\end{table}
+
+The MIDI are actual human performances recorded via digital instruments. 
+
 \section{Model Performance}
+
+\missing
 
 \section{Robustness Analysis}
 
