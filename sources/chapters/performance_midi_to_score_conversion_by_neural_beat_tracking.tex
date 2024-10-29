@@ -1,6 +1,8 @@
 \chapter{Performance MIDI-to-Score Conversion by Neural Beat Tracking}
 
-The main model of interest \cite{Liu2022} is composed of two parts:
+The main model of interest \cite{Liu2022}, developed by Liu et al. (2022), is a state-of-the-art machine learning model for complete music transcription. It has been awarded as the best paper of the \emph{International Society for Music Information Retrieval Conference} (ISMIR) in December 2022.
+
+The model is composed of two parts:
 \begin{itemize}
 	\item Beat Tracking.
 	\item Score Element Assignment.
@@ -65,6 +67,8 @@ The entire score needs to be transformed to a suitable data format before passin
 	\item Velocities normalized to the unit interval $[0, 1]$.
 \end{itemize}
 
+There are $531$ features in total.
+
 The authors tried different encoding schemes, for pitches, onset times and durations, including raw float values in seconds. The full study is available in the paper \cite{Liu2022}.
 
 \section{Score Elements Assignment}
@@ -83,9 +87,9 @@ Besides the quantization model, which relies on the beat tracking module, key si
 
 The final score generation process synthesizes the source MIDI stream, incorporating pitch sequence, with the model's output. The resultant annotated MIDI encompasses essential information for visual score generation, including key/time signatures, which are not typically present in standard MIDI files.
 
-\missing
+\section{Training and Evaluation}
 
-\section{Training}
+We reproduced the results declared by the authors of the paper.
 
 \subsection{Datasets}
 
@@ -105,7 +109,9 @@ Certain musical features, such as time and key signatures, are not always encode
 \caption[Statistics of the dataset used for training]{Statistics of the dataset used for training \cite{Liu2022}. Performances of the same piece are counted only once.}
 \end{table}
 
-The datasets partially overlap; for instance, A-MAPS is derived in part from CPM. Below is a brief overview of each data source.
+The datasets partially overlap; for instance, A-MAPS is derived in part from CPM. Authors avoid using the same pieces in train, validation and test sets by using distinct music piece labels coming from different datasets.
+
+Below is a brief overview of each data source.
 
 \subsubsection{Classical Piano MIDI Database}
 
@@ -147,50 +153,77 @@ For each performance, including the quantized MIDI file, annotations are provide
 \caption[Example of performance MIDI annotation in TSV format]{An example of a performance MIDI annotation in TSV format. The first row indicates an initial time signature of ${6 \atop 8}$. The piece begins in the key of D major, encoded as 2.}
 \end{table}
 
-The MIDI are actual human performances recorded via digital instruments. 
+The MIDI are actual human performances recorded via digital instruments. The annotations for performance provide ground-truth labels for all considered models. Otherwise, one would need to compare all different interpretations to a single score, risking judging the performance's fidelity to the original instead of transcription quality.
 
-\section{Model Performance}
+\subsection{Data Augmentation}
+
+To increase model's versatility, the authors considered four data augmentation techniques, that should not affect the transcription. The note sequence tensors have been transformed using the following methods: \begin{itemize}
+	\item \textbf{Pitch Shift}. Transpose all notes by a constant pitch from the range of $\{-12, -11, \ldots, 12\}$.
+	\item \textbf{Tempo Change}: Change the tempo by multiplication by a constant from the range $[0.8, 1.2]$.
+	\item \textbf{Note Removal}. For each group of $m$ concurrent notes, a random number from $0$ to $m - 1$ of notes is being removed.
+	\item \textbf{Note Introduction}. For some notes a concurrent ones are being added, with the same velocity and duration as 
+\end{itemize}
+
+Section \ref{beat_tracking} shows ablation studies for data augmentation, for the beat-tracking model.
+
+\subsection{Training}
 
 \missing
 
-\section{Robustness Analysis}
+\section{Model Performance}
+
+We reproduced the results using the training and evaluation setup provided by the authors. 
+
+\missing
+
+\section{Robustness Analysis} \label{robustness_analysis}
+
+The quality of the model can be considered in many dimensions. Besides the fidelity of the outputs to the ground truth, one can consider how a model is robust to certain transformations that should not affect the result.
+
+For such analysis, we assumed the following: \begin{itemize}
+	\item Note velocity should not affect time signature or hand part assignment.
+	\item Note pitch does not matter for the time signature.
+	\item Note pitch is crucial for key signature/hand part assigning, while other features should not contribute.
+	\item Note duration should not impact key signature.
+\end{itemize}
+
+These are not meant to be rigid principles, rather rules of thumb. It may be the case that in special situations some deviations from these rules may occur: for instance a chord played be one hand tend to be of uniform intensity. We can use another hand to play a certain note with a completely different articulation. This is also the reason why we cannot ditch all but main features completely\footnote{Ablation studies are at the end of the section.}.
+
+A robust model should obey to these rules. It is natural to expect the model to give the same time signatures for a transposition of a piece, that is shifting all pitches by a constant value.
+
+We have conducted an analysis of how the model is robust to transformation, for each of three components: \begin{itemize}
+	\item The \textbf{hand part} $f_H$.
+	\item The \textbf{key signature} model $f_K$.
+	\item The \textbf{time signature} model $f_T$.
+\end{itemize}
+
+In the subsequent sections, we use models pretrained by the authors unless stated otherwise.
 
 \subsection{Ceteris Paribus}
 
-We conducted a \emph{ceteris paribus} analysis focusing on musical element models, making several assumptions:
+We conducted a \emph{ceteris paribus} type of analysis by augmenting original note sequence tensors. We compared model outputs for transformed note sequences in order to measure strength or influence direction of certain features.
 
-\begin{itemize}[noitemsep, topsep=4pt]
-	\item Note velocity should not affect time signature or hand part assignment.
-	\item Note duration should not impact key signature.
-	\item Note pitch is crucial for key signature/hand part assigning, while other features should not contribute.
-	\item Note pitch does not matter for the time signature.
-\end{itemize}
+A natural way of augmenting data is to randomly distort a certain feature (e.g. pitch, duration or velocity), leaving all other ones intact. 
 
-These should be regarded as general guidelines rather than strict principles.
+\subsubsection{Perturbations} \label{perturbations}
 
-\subsubsection{Perturbations}
-
-For a sample $M=50$ musical pieces from the dataset, we introduced perturbations to test the assumptions:
-
-\begin{itemize}[noitemsep, topsep=4pt]
-	\item Changing velocity with standard deviations $\sigma_v$ of 8, 16, 32, and 64.
+For a sample $M = 50$ musical pieces from the dataset, we introduced perturbations to test the assumptions given in the Section \ref{robustness_analysis}: \begin{itemize}
+	\item Changing velocity with standard deviations $\sigma_v$ of 8, 16, 32, and 64, but with clipping to the range $[1, 127]$.
 	\item Scaling note lengths by a factor from an interval $\alpha\in(\alpha_l,1)$, where $\alpha_l\in\{0.9, 0.75, 0.5, 0.2\}$ (note extension may lead to overlapping).
-	\item Changing pitch with standard deviations $\sigma_p$ of 12 and 24 (whole octave, double octave).
+	\item Changing pitch with standard deviations $\sigma_p$ of 12 and 24 (whole octave, double octave). However, we ensure, that the entire piece stays in the playable range of pitches $[21, 108]$, corresponding to the range of a typical $88$-key piano.
 \end{itemize}
 
-Each transformation is applied separately to each feature, note by note. Notice that we don't change onsets as they change the musical structure of a piece.
+Each transformation is applied separately to each feature, note by note. Notice that we don't change onsets at all, as they change the musical structure of a piece.
 
 For each feature model $f$: \emph{hand part} $f_H$, \emph{key signature} $f_K$, \emph{time signature} $f_T$, we calculated the average error between the output sequence and the output of a perturbed sequence.
 
-For each element ${\bf x}_i$ in the dataset sample $i\in\{1,2,\ldots,50\}$ and for each change, we sampled $m=10$ perturbations ${\bf x}^{(j)}$ of the original item and measured the error: \[\operatorname{error}\left(f\right) = \frac{1}{M}\sum_{i=1}^{M}\frac{1}{m}\sum_{j=1}^{m}\operatorname{error}\left(f\left({\bf x}_i\right), f\left({\bf x}_i^{(j)}\right)\right)\] Here, $\operatorname{error}$ between two sequences ${\bf x} = (x_i)_{i=1}^N$ and ${\bf y} = (y_i)_{i=1}^N$ is defined as: \[\operatorname{error}({\bf x},{\bf y}) = \frac{1}{N}\sum_{i=1}^N \left[x_i \neq y_i\right]\] Higher error values indicate greater influence on the output $f$ from a transformation.
+For each element ${\bf x}_i$ in the dataset sample $i\in\{1,2,\ldots,50\}$ and for each change, we sampled $m=10$ perturbations ${\bf x}^{(j)}$ of the original item and measured the error: \[\operatorname{error}\left(f\right) = \frac{1}{M}\sum_{i=1}^{M}\frac{1}{m}\sum_{j=1}^{m}\operatorname{error}\left(f\left({\bf x}_i\right), f\left({\bf x}_i^{(j)}\right)\right)\] Here, $\operatorname{error}$ between two sequences ${\bf x} = (x_i)_{i=1}^N$ and ${\bf y} = (y_i)_{i=1}^N$ is defined as the mean number of indices for which these sequences differ: \[\operatorname{error}({\bf x},{\bf y}) = \frac{1}{N}\sum_{i=1}^N \left[x_i \neq y_i\right]\] Higher error values indicate greater influence on the output $f$ from a transformation. Notice that we don't measure if a particular change improved or worsened a model.
 
-This analysis directly measures the model's robustness to specific transformations and does not rely on the model's overall performance.
+This analysis directly measures the model's robustness to specific transformations and does not rely on the model overall performance.
 
 \subsubsection{Results}
 
 Among all three models, the key signature $f_K$ model proved to be robust to all proposed transformations, with an average error of less than $1.5\%$ in each category.
-
-The hand part model $f_H$ error is robust to note shortening (maximum average error of $3\%$), but inconsistent when note velocities are changed. This inconsistency is mitigated by maintaining consistent velocity for notes played simultaneously. We hypothesize that chords played by one hand typically have similar velocities (see Table \ref{perturbations_hand_part} for detailed results).
 
 The time signature model is quite robust to note velocity and pitch manipulations (average errors less than $13\%$), but loses consistency when notes are shortened. \begin{table}[ht!]
 \input{sources/tables/perturbations_errors}
@@ -198,55 +231,13 @@ The time signature model is quite robust to note velocity and pitch manipulation
 \label{perturbations}
 \end{table}
 
+The hand part model $f_H$ error is robust to note shortening (maximum average error of $3\%$), but inconsistent when note velocities are changed. This inconsistency is mitigated by maintaining consistent velocity for notes played simultaneously. We hypothesize that the difference stems from the fact that chords played by one hand typically have similar velocities (see Table \ref{hand_part_perturbations} for detailed results).
+
 \begin{table}[ht!]
 \input{sources/tables/hand_part_perturbations}
 \caption[The average errors for the hand part model]{The average errors for the hand part model $f_H$ for 1. standard perturbation, 2. uniform random change for notes played in the same time. The second transformation introduces less inconsistencies.}
 \label{hand_part_perturbations}
 \end{table} 
-
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=0.96\textwidth]{images/ceteris_paribus_results.png}
-\caption[\emph{Ceteris paribus} analysis model errors]{\emph{Ceteris paribus} analysis model errors.}
-\label{ceteris_paribus}
-\end{figure}
-
-\subsection{Local Feature Importance}
-
-We encountered challenges with common explainable machine learning tools: 
-
-\begin{itemize}[noitemsep, topsep=4pt]
-	\item Input data is a tensor of variable length, not conforming to tabular or image-like formats supported by many tools.
-	\item The input data is a very high-dimensional space, computationally infeasible for certain methods (e.g. Shapley values).
-	\item Pitch perturbations introduce non-integer values, and the pitch space lacks a meaningful measure of distance.
-	\item Some model components (e.g. GRU blocks, ELU activation function) are not supported by certain XAI libraries.
-\end{itemize} 
-
-We developed a custom solution to overcome these obstacles. For velocity, we applied a LIME-like approach due to the absence of metric structure in the pitch space. We generated a locally modified version of the MIDI stream tensor for each note, randomizing the velocity for one note. We created $100$ samples for each note, calculating model predictions to compare with the original prediction. This approach aids in explaining the findings from the previous section (see Figure \ref{hand_part_misalignment} for an example).
-
-We also measured the mean influence through this approach: the square root of the mean of squares of linear regression coefficients. This approach aligns with the \emph{ceteris paribus} analysis.
-
-\begin{table}[ht!]
-\input{sources/tables/lime_like_approach}
-\caption{The average influence of three models calculated by a LIME-like approach.}
-\end{table} 
-
-However, the proposed approach ignores the feature interaction and silently assumes variable independence, both horizontally and vertically. This is a serious limitation of this approach. 
-
-\subsection{Key Signature Assignment by Note Omission}
-
-For the key signature model, as the pitch space is not a metric space, we applied a different strategy. The method is as follows: 
-\begin{enumerate}[noitemsep, topsep=4pt]
-	\item Get the key signature prediction values (before the last activation function) for the entire sequence.
-	\item Individually remove each note in a sequence and calculate the difference between the original prediction and the prediction made on a sequence without a single note.
-	\item Compute a contribution score, represented by the mean of the differences for each note.
-	\end{enumerate} This approach enables the measurement of each note's contribution to the attribution of a specific scale. Refer to Figure \ref{note_removing} for an illustrative example.
-
-\subsection{Conclusion}
-
-We were able to discover certain artifacts of the score generation models, especially when it comes to velocity contribution to hand part assignment. The time signature model is not fully robust to alterations that should not have affect the output.
-
-Unfortunately, the proposed methods have drawbacks and are not fully justified. Current XAI methods do not work well with symbolic music data in general. Developing more tailored and adaptable XAI methods for musical applications could contribute to improved model interpretability. One of the challenge would be to find a reasonable (and interpretable) embedding of the pitch space that encodes musical features. 
 
 \begin{figure}[!ht]
 \centering
@@ -257,11 +248,39 @@ Unfortunately, the proposed methods have drawbacks and are not fully justified. 
 \label{ceteris_paribus}
 \end{figure}
 
+Figure \ref{hand_part_misalignment} shows the result of hand part assignment for velocity perturbation.
+
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.95\textwidth]{images/hand_part1.png}
 \includegraphics[width=0.95\textwidth]{images/hand_part2.png}
 \caption[The piano roll for the hand part model output]{The piano roll for the hand part model output. Each note is represented as a (blue or red) block, indicating a pitch (note), duration and velocity. The first graph represents an original sequence while the second has perturbed velocity. Left-hand notes are marked as red. We can see that there are much many misalignment in the hand assignment in the second output. As a rule of thumb, the left hand notes (red) should be at the bottom while the right hand ones (blue) should be at the top.}\end{figure}
+
+\section{Local Feature Importance}
+
+[XAI]
+
+To understand better the models' behavior, we tried to measure local influences of each feature onto models' decisions. In particularly, we posed several questions:
+
+\begin{itemize}
+	\item Is there any way to check which note features influenced models' decisions?
+	\item Can we pinpoint notes that contribute the most to a model assignment, for example key signature attribution?
+	\item Can we measure the strength and direction of a particular note feature? In particular, can we assign if a note feature voted for or against right hand assignment?
+\end{itemize}
+
+This type of questions, along with previous analysis, may help understanding the decision process of the model, facilitate recognizing weak spots of AMT systems and its limitations, and, finally, guide towards developing better AMT system.
+
+We encountered challenges with common explainable machine learning tools: 
+
+\begin{itemize}
+	\item The input data is a very high-dimensional space, computationally infeasible for certain methods (e.g. Shapley values).
+	\item Pitch space is a discrete space that lacks a meaningful measure of distance.
+	\item Input data is a tensor of variable length, not conforming to tabular or image-like formats supported by many tools. Some model components (e.g. GRU blocks, ELU activation function) are not supported by certain XAI libraries. \missing
+\end{itemize} 
+
+We developed a custom solution to overcome these obstacles. For velocity, we applied a LIME-like approach due to the absence of metric structure in the pitch space. We generated a locally modified version of the MIDI stream tensor for each note, randomizing the velocity for one note. We created $100$ samples for each note, calculating model predictions to compare with the original prediction. This approach aids in explaining the findings from the previous section (see Figure \ref{hand_part_misalignment} for an example).
+
+However, the proposed approach ignores the feature interaction and silently assumes variable independence, both horizontally and vertically. This is a serious limitation of this approach. 
 
 \begin{figure}[!ht]
 \centering
@@ -269,8 +288,79 @@ Unfortunately, the proposed methods have drawbacks and are not fully justified. 
 \caption[A graph showing how the velocity of a note influences hand part assignments of other notes]{A graph showing how the velocity of the second C5 note (with a thick outline) influences hand part assignments of other notes. It can be observed that the current velocity of this note makes the model think of the first F3 note as a left hand note. Reducing the note C5 velocity to a low value results in a misassigning F3 as the right hand note. This is, of course, a undesired behavior of the model.}
 \label{hand_part_misalignment}\end{figure}
 
+\subsection{Key Signature Assignment by Note Omission}
+
+For the key signature model, as the pitch space is not a metric space, we applied a different strategy. The method is as follows: \begin{enumerate}
+	\item Get the key signature prediction values (before the last activation function) for the entire sequence.
+	\item Individually remove each note in a sequence and calculate the difference between the original prediction and the prediction made on a sequence without a single note.
+	\item Compute a contribution score, represented by the mean of the differences for each note.
+	\end{enumerate} This approach enables the measurement of each note's contribution to the attribution of a specific scale. Refer to Figure \ref{note_removing} for an illustrative example.
+
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.95\textwidth]{images/note_removing.png}
 \caption[A key signature alignment for D$\sharp$ scale]{A key signature alignment for D$\sharp$ scale. The names on the notes represent the model key signature attribution. There are two different scales assigned by the model: D$\sharp$ scale and G$\sharp$ scale. Notes: D, E and A are not in the scale and have a negative influence on the assignment.}
 \label{note_removing}\end{figure}
+	
+\subsection{Ablation Studies} \label{ablation_studies}
+
+In order to enforce Section \ref{robustness_analysis} assumptions, we trained a set of models that take only a limited number of features. More precisely: \begin{itemize}
+	\item The \textbf{hand part} model has been trained only on note pitches and onsets.
+	\item The \textbf{key signature} model has been trained only on note pitches and onsets.
+	\item The \textbf{time signature} model has been trained only on note onsets.
+\end{itemize}
+
+As a result, all models became invulnerable to transformations described in the Section \ref{perturbations}. We are going to check check how such change affects the quality of models. 
+
+Each model has been evaluated in two ways, using: \begin{itemize}
+	\item model-specific $F_1$ metrics
+	\item the MV2H metric
+\end{itemize}
+
+The MV2H metric has been evaluated on the set of all original models with one replaced. Only the test subset of the dataset has been used. For a fair comparison, both base and restricted models have been trained on the training set only.
+
+For each ablation study, we picked the model that had the best $F_1$ score among all models trained in the span of 50 epochs.
+
+\subsubsection{Beat Tracking} \label{beat_tracking}
+
+The authors themselves provided ablation studies for the beat-tracking model. They analyzed how feature omission or data augmentation influences the beat-tracking model. The results of the analysis are provided in: Table \ref{beat_tracking_feature_omission} and Table \ref{beat_tracking_data_augmentation}.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/feature_omission}
+\caption[Feature omission study]{Feature omission study \cite{Liu2022}.}
+\label{beat_tracking_feature_omission}
+\end{table}
+
+Not surprisingly, note onsets are the most important feature used by the beat-tracking model. While neglecting other features doesn't hardly impact the model, still feature omission results in a slight quality degradation.
+
+Velocity may carry some information about beats as they tend to occur along with heavier notes \cite{Liu2022}. Harmonic structure inferred by pitch may also transfer such information, for example it is quite common to play chords at the beginning of a measure. On the other hand note durations may hint the metrical structure of a piece.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/data_augmentation}
+\caption[Ablation study for data augmentation]{Ablation study for data augmentation \cite{Liu2022}.}
+\label{beat_tracking_data_augmentation}
+\end{table}
+
+\subsubsection{Hand Part Model}
+
+A variant of the hand part model that does not use neither durations nor velocities has been evaluated.
+
+As the hand part affects only voice separation subscale of the MV2H metric, we omit remaining submetrics.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/hand_part_ablation}
+\caption[The hand part model]{Comparison of the velocity-free hand part model and the original.}
+\label{hand_part_ablation}
+\end{table}
+
+The results of both models are comparable (see the Figure \ref{hand_part_ablation}) in terms of $F_1$-score, although the voice separation MV2H submetric dropped. This suggests that the velocity may hint the hand assignment from time to time, but it is not (and it should not be) a direct indication of the
+
+\subsection{Conclusion}
+
+We were able to discover certain artifacts of the score generation models, especially when it comes to velocity contribution to hand part assignment. The time signature model is not fully robust to alterations that should not have affect the output.
+
+Unfortunately, the proposed methods have drawbacks and are not fully justified. Current XAI methods do not work well with symbolic music data in general. Developing more tailored and adaptable XAI methods for musical applications could contribute to improved model interpretability. One of the challenge would be to find a reasonable (and interpretable) embedding of the pitch space that encodes musical features. 
+
