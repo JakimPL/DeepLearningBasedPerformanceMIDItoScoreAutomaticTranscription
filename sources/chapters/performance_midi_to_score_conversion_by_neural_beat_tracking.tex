@@ -80,8 +80,10 @@ Besides the quantization model, which relies on the beat tracking module, key si
 \begin{figure}[!ht]
 \centering
 \input{sources/graphs/model_architecture}
-\caption[The architecture of the model.]{The architecture of the model. There are five separate modules of the entire model in total: \emph{beat}, \emph{quantization}, \emph{time signature}, \emph{key signature} and \emph{hand parts}.}
+\caption[The original architecture of the model.]{The original architecture of the model. There are five separate modules of the entire model in total: \emph{beat}, \emph{quantization}, \emph{time signature}, \emph{key signature} and \emph{hand parts}.}
 \end{figure}
+
+The initial version of time signature model handled a finite set of time signature numerators and denominators, as described in Section \ref{music_score_encoding}. One year after the paper release, the model has been reduced to recognize only two the most common time signatures: ${4 \atop 4}$ and ${3 \atop 4}$, with removed GRUBlock. With an additional support of beat quantizer, additional two time signatures ${2 \atop 4}$ and ${6 \atop 8}$ could be recognized.  For performance analysis, we use the latter approach.
 
 \section{Score Generation}
 
@@ -221,7 +223,7 @@ For each element ${\bf x}_i$ in the dataset sample $i\in\{1,2,\ldots,50\}$ and f
 
 This analysis directly measures the model's robustness to specific transformations and does not rely on the model overall performance.
 
-\subsubsection{Results}
+\subsubsection{Results} \label{results}
 
 Among all three models, the key signature $f_K$ model proved to be robust to all proposed transformations, with an average error of less than $1.5\%$ in each category.
 
@@ -258,8 +260,6 @@ Figure \ref{hand_part_misalignment} shows the result of hand part assignment for
 
 \section{Local Feature Importance}
 
-[XAI]
-
 To understand better the models' behavior, we tried to measure local influences of each feature onto models' decisions. In particularly, we posed several questions:
 
 \begin{itemize}
@@ -278,15 +278,30 @@ We encountered challenges with common explainable machine learning tools:
 	\item Input data is a tensor of variable length, not conforming to tabular or image-like formats supported by many tools. Some model components (e.g. GRU blocks, ELU activation function) are not supported by certain XAI libraries. \missing
 \end{itemize} 
 
-We developed a custom solution to overcome these obstacles. For velocity, we applied a LIME-like approach due to the absence of metric structure in the pitch space. We generated a locally modified version of the MIDI stream tensor for each note, randomizing the velocity for one note. We created $100$ samples for each note, calculating model predictions to compare with the original prediction. This approach aids in explaining the findings from the previous section (see Figure \ref{hand_part_misalignment} for an example).
+We developed a custom solution to overcome these obstacles, following \emph{Local Interpetable Model-agnostic Explanations} (LIME) approach \cite{Ribeiro2016}.
 
-However, the proposed approach ignores the feature interaction and silently assumes variable independence, both horizontally and vertically. This is a serious limitation of this approach. 
+We generated a locally modified version of the MIDI stream tensor for each note, randomizing the pitch/velocity for one note. We created $100$ samples for each note, calculating model predictions to compare with the original prediction. This approach aids in explaining the findings from the previous section (see Figure \ref{hand_part_misalignment} for an example).
+
+The exact procedure consists of several steps. Let assume that we have a note sequence tensor. Then:\begin{enumerate}
+	\item For each row, and for each feature (either pitch or velocity), prepare $n=50$ perturbations of a given feature, replacing exactly one value from the tensor ${\bf x}$ by a perturbed one.
+	\item Measure the distance $d$ between the original value and the replacement. For velocity, let the weight be $w=\exp\left(-\tfrac{|d|}{20}\right)$, for pitch let the weight be $1$ if the difference is non-zero\footnote{Pitch space is discrete. The choice of weight function for velocity perturbation is arbitrary.}.
+	\item Train a linear regression model on differences between the model prediction of the perturbed tensor and the original one, with weights $w$ dependent on the proximity $d$ to the original tensor.
+	\item Store the model coefficients to a vector.
+\end{enumerate}
+
+This yields a tensor of the size $2 \times N \times N$ where $N$ is the size of the note sequence tensor, corresponding to two features: pitch and velocity. A single vector contains influences of a particular feature onto a decision on the level of a single note.
+
+The proposed approach ignores temporal aspect of the sequence, as not taking onsets and durations into account. Moreover, the approach assumes feature independence, which is clearly not justified. However, it may give a basic insight into two influence of two basic MIDI elements: pitch and velocity.
+
+The technique has been used to support conclusions from Section \ref{results}, illustrated by concrete examples. Figure \ref{hand_part_misalignment} shows how changing velocity in the right-hand notes affects hand part assignment of neighborhood notes. 
 
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.95\textwidth]{images/lime_hand_part.png}
 \caption[A graph showing how the velocity of a note influences hand part assignments of other notes]{A graph showing how the velocity of the second C5 note (with a thick outline) influences hand part assignments of other notes. It can be observed that the current velocity of this note makes the model think of the first F3 note as a left hand note. Reducing the note C5 velocity to a low value results in a misassigning F3 as the right hand note. This is, of course, a undesired behavior of the model.}
 \label{hand_part_misalignment}\end{figure}
+
+As one-note replacement usually won't lead to key signature change, this practice is useful mostly for the hand-part assignment. For the key signature model we propose another technique.
 
 \subsection{Key Signature Assignment by Note Omission}
 
@@ -295,13 +310,15 @@ For the key signature model, as the pitch space is not a metric space, we applie
 	\item Individually remove each note in a sequence and calculate the difference between the original prediction and the prediction made on a sequence without a single note.
 	\item Compute a contribution score, represented by the mean of the differences for each note.
 	\end{enumerate} This approach enables the measurement of each note's contribution to the attribution of a specific scale. Refer to Figure \ref{note_removing} for an illustrative example.
+	
+Using this technique we were able to estimate the influence of certain note feature to a model's decision. While the key signature model turned out to be the most robust model of all three considered, 
 
 \begin{figure}[!ht]
 \centering
 \includegraphics[width=0.95\textwidth]{images/note_removing.png}
 \caption[A key signature alignment for D$\sharp$ scale]{A key signature alignment for D$\sharp$ scale. The names on the notes represent the model key signature attribution. There are two different scales assigned by the model: D$\sharp$ scale and G$\sharp$ scale. Notes: D, E and A are not in the scale and have a negative influence on the assignment.}
 \label{note_removing}\end{figure}
-	
+
 \subsection{Ablation Studies} \label{ablation_studies}
 
 In order to enforce Section \ref{robustness_analysis} assumptions, we trained a set of models that take only a limited number of features. More precisely: \begin{itemize}
@@ -343,6 +360,8 @@ Velocity may carry some information about beats as they tend to occur along with
 \label{beat_tracking_data_augmentation}
 \end{table}
 
+
+
 \subsubsection{Hand Part Model}
 
 A variant of the hand part model that does not use neither durations nor velocities has been evaluated.
@@ -352,15 +371,40 @@ As the hand part affects only voice separation subscale of the MV2H metric, we o
 \begin{table}[ht!]
 \centering
 \input{sources/tables/hand_part_ablation}
-\caption[The hand part model]{Comparison of the velocity-free hand part model and the original.}
+\caption[Ablation study for the hand part model]{Ablation study for the hand part model.}
 \label{hand_part_ablation}
 \end{table}
 
-The results of both models are comparable (see the Figure \ref{hand_part_ablation}) in terms of $F_1$-score, although the voice separation MV2H submetric dropped. This suggests that the velocity may hint the hand assignment from time to time, but it is not (and it should not be) a direct indication of the
+The results of both models are comparable in terms of $F_1$-score, although the voice separation MV2H submetric dropped. This suggests that the velocity may hint the hand assignment from time to time, but it is not (and it should not be) a direct indication of the hand assignment. Since durations and velocities make only two float features, including them into the model is of little computational cost.
 
-\subsection{Conclusion}
+\subsubsection{Key Signature Model}
 
-We were able to discover certain artifacts of the score generation models, especially when it comes to velocity contribution to hand part assignment. The time signature model is not fully robust to alterations that should not have affect the output.
+Restricted to note pitches and onsets key signature model turned out to be of the same performance as the original one. 
 
-Unfortunately, the proposed methods have drawbacks and are not fully justified. Current XAI methods do not work well with symbolic music data in general. Developing more tailored and adaptable XAI methods for musical applications could contribute to improved model interpretability. One of the challenge would be to find a reasonable (and interpretable) embedding of the pitch space that encodes musical features. 
+\begin{table}[ht!]
+\centering
+\input{sources/tables/key_signature_ablation}
+\caption[Ablation study for the key signature model]{Ablation study for the key signature model.}
+\label{key_signature_ablation}
+\end{table}
 
+Table \ref{key_signature_ablation} shows the results with included harmony MV2H subsccale. Weighted metric results are calculated independently, and weighted by the number of true labels of each class. Macro is unweighted.
+
+The differences of the model lie in the expected range of model stochasticity. The result agrees also with the negligible influence of other factors to the final model decision on key signature, described in Section \ref{results}.
+
+\subsubsection{Time Signature Model}
+
+With no changes to the architecture, the restricted time signature model to only note onsets achieved better scores that the vanilla convolutional network classifier.  
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/time_signature_ablation}
+\caption[Ablation study for the time signature model]{Ablation study for the time signature model.}
+\label{time_signature_ablation}
+\end{table}
+
+As the MV2H metric does not rely on time signature estimation directly, the change has not impacted the evaluation.
+
+This shows that not only introducing full information to the model is not beneficial, but actually hurts the performance of the model. 
+
+The original network has not been tested in this regard.
