@@ -230,7 +230,7 @@ Among all three models, the key signature $f_K$ model proved to be robust to all
 The time signature model is quite robust to note velocity and pitch manipulations (average errors less than $13\%$), but loses consistency when notes are shortened. \begin{table}[ht!]
 \input{sources/tables/perturbations_errors}
 \caption{The average errors of certain perturbations (in percent).}
-\label{perturbations}
+\label{perturbations_errors}
 \end{table}
 
 The hand part model $f_H$ error is robust to note shortening (maximum average error of $3\%$), but inconsistent when note velocities are changed. This inconsistency is mitigated by maintaining consistent velocity for notes played simultaneously. We hypothesize that the difference stems from the fact that chords played by one hand typically have similar velocities (see Table \ref{hand_part_perturbations} for detailed results).
@@ -243,9 +243,9 @@ The hand part model $f_H$ error is robust to note shortening (maximum average er
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.7\textwidth]{images/ceteris_paribus_results_h.png}
-\includegraphics[width=0.7\textwidth]{images/ceteris_paribus_results_k.png}
-\includegraphics[width=0.7\textwidth]{images/ceteris_paribus_results_t.png}
+\includesvg[width=0.9\textwidth]{images/ceteris_paribus_results_h.svg}
+\includesvg[width=0.9\textwidth]{images/ceteris_paribus_results_k.svg}
+\includesvg[width=0.9\textwidth]{images/ceteris_paribus_results_t.svg}
 \caption[Results of the \emph{ceteris paribus} experiment]{Results of the \emph{ceteris paribus} experiment for the hand part model $f_H$, the key signature model $f_K$ and the time signature model $f_T$. The hand part model is robust to note duration changes while it is susceptible to velocity manipulation. On the other hand, the time signature model is sensitive to note duration changes, which is expected to some extent, and relatively robust to other transformations. The key signature model is robust to all perturbations.}
 \label{ceteris_paribus}
 \end{figure}
@@ -254,9 +254,9 @@ Figure \ref{hand_part_misalignment} shows the result of hand part assignment for
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[width=0.95\textwidth]{images/hand_part1.png}
-\includegraphics[width=0.95\textwidth]{images/hand_part2.png}
-\caption[The piano roll for the hand part model output]{The piano roll for the hand part model output. Each note is represented as a (blue or red) block, indicating a pitch (note), duration and velocity. The first graph represents an original sequence while the second has perturbed velocity. Left-hand notes are marked as red. We can see that there are much many misalignment in the hand assignment in the second output. As a rule of thumb, the left hand notes (red) should be at the bottom while the right hand ones (blue) should be at the top.}\end{figure}
+\includesvg[width=1.0\textwidth]{images/hand_part1.svg}
+\includesvg[width=1.0\textwidth]{images/hand_part2.svg}
+\caption[The piano roll for the hand part model output.]{The piano roll for the hand part model output. Each note is represented as a block, indicating a pitch (note), duration and velocity (by opacity). The first graph represents an original sequence while the second has perturbed velocity. Left-hand notes with a diagonal pattern. We can see that there are many misalignment in the hand assignment in the second output. As a rule of thumb, the left hand notes should be at the bottom while the right hand ones should be on the top.}\end{figure}
 
 \section{Local Feature Importance}
 

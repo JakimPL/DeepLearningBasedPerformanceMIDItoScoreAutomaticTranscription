@@ -74,9 +74,9 @@ For more information the exact problem statement, the procedure and algorithm ev
 
 \subsection{Rhythm Correction Cost}
 
-In music, note values are not absolute and depend on the tempo choice. A quarter note played a tempo $60$ beats per minute ($\quarterNote = 60$) lasts the same duration as a half note played at a tempo 120 BPM ($\halfNote = 120$). The choice of the unit is to somewhat arbitrary. Yet, doubling or halving the tempo may disrupt transcription metrics, as some naive metrics might inaccurately an antire passage as incorrect when the tempo is altered. This remark points out that the metric values should be analyzed in relationship to other notes, not as absolute values \cite{Nakamura2017c}.
+In music, note values are not absolute and depend on the tempo choice. A quarter note played a tempo $60$ beats per minute ($\quarterNote = 60$) lasts the same duration as a half note played at a tempo 120 BPM ($\halfNote = 120$). The choice of the unit is to somewhat arbitrary. Yet, doubling or halving the tempo may disrupt transcription metrics, as some naive metrics might inaccurately treat an entire passage as incorrect when the tempo is altered. This remark points out that the metric values should be analyzed in relationship to other notes, not as absolute values \cite[p. 7]{Nakamura2017c}.
 
-To address this issue, Nakamura et al. introduced \emph{Rhythm Correction Cost} (RCC), which is defined as: ``the minimum number of scale and shift operations for onset score times'' \cite{Nakamura2017b}. This metric takes into account tempo variations and adjusts for structural differences in note onsets between the transcription and the ground truth via two operations: scales and shifts.
+To address this issue, Nakamura et al. introduced \emph{Rhythm Correction Cost} (RCC), which is defined as: ``the minimum number of scale and shift operations for onset score times'' \cite{Nakamura2018}. This metric takes into account tempo variations and adjusts for structural differences in note onsets between the transcription and the ground truth via two operations: scales and shifts.
 
 \begin{figure}[ht!]
 \centering
@@ -125,7 +125,7 @@ The multi-pitch detection sub-metric evaluates how well the AMT system detects t
 
 The metric used to evaluate this is the $F$-measure, which balances \emph{precision} and \emph{recall}. Precision refers to the proportion of correctly detected notes out of all detected notes, and recall refers to the proportion of correctly detected notes out of all ground-truth notes: \begin{flalign*}\textrm{precision} &= \frac{\textrm{True Positives}}{\textrm{True Positives} + \textrm{False Positives}}\\ \textrm{recall} &= \frac{\textrm{True Positives}}{\textrm{True Positives} + \textrm{False Negatives}}\end{flalign*} The $F$-measure is thus defined as: \[F_1 = 2 \times \frac{\textrm{precision} \times \textrm{recall}}{\textrm{precision} + \textrm{recall}}\] Notes that are not correctly detected in the multi-pitch detection stage are excluded from subsequent evaluations, such as voice separation or metrical alignment. This ensures that the multi-pitch detection errors are taken into account only once.
 
-A serious drawback of this approach is inability to compare a performance MIDI with a sheet that contains idealized note onsets. In the subsequent version of the metric \cite{McLeod2019}, the authors enhanced the metric to handle non-aligned musical scores.
+A serious drawback of this approach is inability to compare a performance MIDI with a sheet that contains idealized note onsets. In the subsequent version of the metric \cite{McLeod2019}, the authors enhanced the metric to handle non-aligned musical scores, using a variant of \emph{Dynamic Time Warping} (DTW), a dynamic programming algorithm introduced in 1978 by Sakoe et al. \cite{Sakoe1978} to compare two time-dependent sequences that may vary in speed or length. 
 
 \subsubsection{Voice Separation}
 
@@ -166,16 +166,49 @@ The disjoint penalty principle is a core feature of MV2H, designed to prevent a 
 
 The principle is applied by first evaluating multi-pitch detection and removing any unmatched notes from further evaluations. The remaining correctly transcribed notes are then used for evaluating voice separation, metrical alignment, note value detection, and harmonic analysis. Subsequently, note value detection is performed only on correctly metrically aligned notes.
 
-\subsection{Comparison to Other Metrics}
+\subsection{Limitations}
 
-\missing
+The metric assumes linear, measure-by-measure alignment with limited ability to handle structural variations such as repeats, cuts, or large-scale rearrangements of musical sections. 
 
-\subsection{Limitations of the MV2H Metric}
+It is also highly dependent of the multi-pitch detection as the subsequent components rely on the result of the alignment. The design of the metric prevents a cascade of a single error, however since the later submetrics operate on filtered data, the result may be biased.
 
-\missing
+Additionally, the harmony submetric implicitly assumes tonal framework. This is a non-issue in the case of classical music datasets, however this limitation should be acknowledged.
+
+Finally, to the author’s knowledge, the MV2H metric has not yet been rigorously evaluated through human expert assessment, and the relevance and weight of each submetric remain to be validated against expert judgment.
 
 \section{Score Similarity}
 
-\missing
+Most methods of score comparison operate at the level of MIDI files. As previously discussed, several limitations in the MIDI format complicate its use as a reliable representation of scores. These limitations include the absence of key and time signatures, pitch spelling, clefs, dynamics, and articulation markings. Such issues are sometimes addressed by adding supplementary information as annotations, either embedded as meta messages within the MIDI file or in external files.
 
-\cite{Cogliati2017}
+In 2017, Cogliati et al. \cite{Cogliati2017} proposed a metric that directly compares scores in the MusicXML format, allowing for the evaluation of musical elements not typically encoded in MIDI. The \emph{Score Similarity} metric is calculated in two stages: note alignment and musical element comparison.
+
+\subsection{Note Alignment}
+
+To prepare for comparison, the transcription is aligned to a ground-truth reference based solely on pitch content, disregarding all other musical elements at this stage.
+
+The alignment process employs \emph{Dynamic Time Warping}, similarly to the revised MV2H metric for non-aligned transcriptions. In this application, DTW minimizes mismatched pitches, irrespective of duration, pitch spelling, or staff position \cite[p. 409]{Cogliati2016}. This ensures that transcription musical elements are being properly compared to the ground-truth counterparts, even if the transcription meter alignment is incorrect.
+
+\subsection{Comparison}
+
+Once the transcription is aligned with the reference, musical objects inside each portion of the two scores are grouped into sets. These sets are then compared according to several categories: \begin{itemize}
+	\item barlines
+	\item clefs
+	\item key signatures
+	\item time signatures
+	\item rests
+	\item notes (with grouping)
+\end{itemize}
+
+For barlines, clefs, key signature and time signatures binary matching is used. Rests are evaluated not only for duration, but also staff assignment. Missing or extra rests are considered as errors. Notes are matched for the following qualities: spelling, duration, stem direction, staff assignment, and grouping into chords. Incorrect note spelling (of a correct pitch) counts as an error.
+
+Each category is analyzed for discrepancies, and errors are recorded based on the alignment. Some errors, such as clefs and key signatures, are counted globally, while others, like notes and durations, are normalized by the total number of instances.
+
+Not all musical errors are of equal importance. For that reason, each categotry is weighted according to its perceptual importance, based on a linear regression model trained to align with human ratings. Additional details on the weighting procedure are available in \cite[p. 410--411]{Cogliati2017}.
+
+\subsection{Limitations}
+
+The metric is designed specifically for MusicXML\footnote{The metric code uses \emph{music21} \cite{Cuthbert2010} as the backend, so it is possible to measure scores faithfully represented within this framework.}. This renders it incompatible with MIDI files, as MIDI lacks many of these musical components required for a complete comparison.
+
+As in the case of the MV2H metric, the score similarity measure use of DTW, while effective for basic alignment, assumes linear relationships between elements in both sequences. This makes it less effective in cases of large-scale reordering or insertion/deletion of structural elements, such as repeats or cuts in the transcription.
+
+Finally, the human-rating alignment is fixed for all evaluations, which may be inadequate for certain musical styles or genres. The weighting parameters were calibrated using musical examples from a single source \cite{Kostka1994}, making the metric particularly suited to classical piano compositions but potentially less applicable to other genres, such as jazz.
