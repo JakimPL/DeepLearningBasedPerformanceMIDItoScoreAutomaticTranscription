@@ -35,7 +35,7 @@ For predicting in-note beats, one can reduce the problem to a binary classificat
 \begin{figure}[!ht]
 \centering
 \input{sources/graphs/in_note}
-\caption[In-note beat prediction model]{In-note beat prediction model with a CRNN with 3 convolutional layers and 2 bi-directional gated recurrent unit (GRU) layers.}
+\caption[In-note beat prediction model.]{In-note beat prediction model with a CRNN with 3 convolutional layers and 2 bi-directional gated recurrent unit (GRU) layers.}
 \end{figure}
 
 The probability $P_n$ that $n$-th note is concurrent with a beat is defined as: \[P_n = \mathbb{P}\left(B_n|\mathbf{X}\right)\] where $B_n\in\{0,1\}$ is the ground-truth beat label for the $n$-th note from the note sequence. The model is trained using the standard cross-entropy loss function: \[\mathcal{L}=-\frac{1}{N}\sum_{n=1}^N B_n\ln P_n + \left(1-B_n\right)\ln\left(1-P_n\right)\] The authors used CRNN with 3 convolutional layers and 2 bidirectional gated recurrent unit (GRU) layers. The probability threshold for positive classification has been set dynamically, depending on the maximum probability in a fixed segment length.
@@ -93,7 +93,7 @@ The final score generation process synthesizes the source MIDI stream, incorpora
 
 We reproduced the results declared by the authors of the paper.
 
-\subsection{Datasets}
+\subsection{Datasets}\label{datasets}
 
 The dataset used by the authors of the paper \cite{Liu2022} integrates three sources of MIDI files: \begin{itemize}
 	\item The \emph{Classical Piano MIDI} (CPM) database \cite{Krueger1996}.
@@ -108,10 +108,13 @@ Certain musical features, such as time and key signatures, are not always encode
 \begin{table}[ht!]
 \centering
 \input{sources/tables/datasets}
-\caption[Statistics of the dataset used for training]{Statistics of the dataset used for training \cite{Liu2022}. Performances of the same piece are counted only once.}
+\caption[Statistics of the dataset used for training.]{Statistics of the dataset used for training \cite{Liu2022}. Performances of the same piece are counted only once.}
+\label{train_valid_test}
 \end{table}
 
 The datasets partially overlap; for instance, A-MAPS is derived in part from CPM. Authors avoid using the same pieces in train, validation and test sets by using distinct music piece labels coming from different datasets.
+
+All dataset are jointly combined into one dataset, \emph{A Dataset of Aligned Classical Piano Audio and Scores} (ACPAS) \cite{Liu2021}.
 
 Below is a brief overview of each data source.
 
@@ -152,12 +155,12 @@ For each performance, including the quantized MIDI file, annotations are provide
 \begin{table}[ht!]
 \centering
 \input{sources/tables/annotations}
-\caption[Example of performance MIDI annotation in TSV format]{An example of a performance MIDI annotation in TSV format. The first row indicates an initial time signature of ${6 \atop 8}$. The piece begins in the key of D major, encoded as 2.}
+\caption[Example of performance MIDI annotation in TSV format.]{An example of a performance MIDI annotation in TSV format. The first row indicates an initial time signature of ${6 \atop 8}$. The piece begins in the key of D major, encoded as 2.}
 \end{table}
 
 The MIDI are actual human performances recorded via digital instruments. The annotations for performance provide ground-truth labels for all considered models. Otherwise, one would need to compare all different interpretations to a single score, risking judging the performance's fidelity to the original instead of transcription quality.
 
-\subsection{Data Augmentation}
+\subsection{Data Augmentation} \label{data_augmentation}
 
 To increase model's versatility, the authors considered four data augmentation techniques, that should not affect the transcription. The note sequence tensors have been transformed using the following methods: \begin{itemize}
 	\item \textbf{Pitch Shift}. Transpose all notes by a constant pitch from the range of $\{-12, -11, \ldots, 12\}$.
@@ -168,15 +171,31 @@ To increase model's versatility, the authors considered four data augmentation t
 
 Section \ref{beat_tracking} shows ablation studies for data augmentation, for the beat-tracking model.
 
-\subsection{Training}
+\subsection{Training and Evaluation}
 
-\missing
+To reproduce results, we have followed the authors' training and evaluation setup, on the same train/validation/test dataset division. 
+
+\subsubsection{Feature Preparation}
+
+As the data comes from different sources, they need to be unified before training any model.
+
+Initially, all MIDI files are gathered from datasets described in Section \ref{datasets}. According to authors, all pieces from the \texttt{ENSTDkCl} subset of the MAPS dataset are prepared for the test set. All other pieces are randomly assigned to the validation test, where $90\%$ of the data is training data\footnote{More precisely, pieces with id divisible by 10 are assigned to the validation set.}. See Table \ref{train_valid_test} for details.
+
+A second step is to extract note sequence tensors and features from MIDI files and annotations in the case of the ASAP dataset. These features include all elements needed for the transcription: beats, downbeats, time signatures, key signatures, onsets, note values and hand part assignments.
+
+After the preparation, the dataset is ready to be digested by models.
+
+\subsubsection{Training}
+
+For each trained model we set the maximum number of 50 epochs. Usually, models stabilized after 20 epochs. Training examples are augmented (refer to Section \ref{data_augmentation} for more information).
 
 \section{Model Performance}
 
 We reproduced the results using the training and evaluation setup provided by the authors. 
 
-\missing
+\subsection{$F_1$-measures}
+
+\subsection{MV2H Metric}
 
 \section{Robustness Analysis} \label{robustness_analysis}
 
@@ -189,7 +208,7 @@ For such analysis, we assumed the following: \begin{itemize}
 	\item Note duration should not impact key signature.
 \end{itemize}
 
-These are not meant to be rigid principles, rather rules of thumb. It may be the case that in special situations some deviations from these rules may occur: for instance a chord played be one hand tend to be of uniform intensity. We can use another hand to play a certain note with a completely different articulation. This is also the reason why we cannot ditch all but main features completely\footnote{Ablation studies are at the end of the section.}.
+These are not meant to be rigid principles, rather rules of thumb. It may be the case that in special situations some deviations from these rules may occur: for instance a chord played be one hand tend to be of uniform intensity. We can use another hand to play a certain note with a completely different articulation. This is also the reason why we cannot ditch all but main features completely in general. See Section \ref{ablation_studies} for a more detailed analysis.
 
 A robust model should obey to these rules. It is natural to expect the model to give the same time signatures for a transposition of a piece, that is shifting all pitches by a constant value.
 
@@ -203,9 +222,9 @@ In the subsequent sections, we use models pretrained by the authors unless state
 
 \subsection{Ceteris Paribus}
 
-We conducted a \emph{ceteris paribus} type of analysis by augmenting original note sequence tensors. We compared model outputs for transformed note sequences in order to measure strength or influence direction of certain features.
+We conducted a \emph{ceteris paribus} (Latin for ,,all other things being equal'') type of analysis by augmenting original note sequence tensors. This approach allowed us to compare model outputs for transformed note sequences, isolating and measuring the influence of specific features.
 
-A natural way of augmenting data is to randomly distort a certain feature (e.g. pitch, duration or velocity), leaving all other ones intact. 
+A natural way of augmenting data in this context is to randomly distort a single feature (e.g., pitch, duration, or velocity), while keeping all others intact.
 
 \subsubsection{Perturbations} \label{perturbations}
 
@@ -229,24 +248,24 @@ Among all three models, the key signature $f_K$ model proved to be robust to all
 
 The time signature model is quite robust to note velocity and pitch manipulations (average errors less than $13\%$), but loses consistency when notes are shortened. \begin{table}[ht!]
 \input{sources/tables/perturbations_errors}
-\caption{The average errors of certain perturbations (in percent).}
-\label{perturbations_errors}
+\caption[The average errors of certain perturbations (in percent).]{The average errors of certain perturbations (in percent).}
+\label{perturbations}
 \end{table}
 
 The hand part model $f_H$ error is robust to note shortening (maximum average error of $3\%$), but inconsistent when note velocities are changed. This inconsistency is mitigated by maintaining consistent velocity for notes played simultaneously. We hypothesize that the difference stems from the fact that chords played by one hand typically have similar velocities (see Table \ref{hand_part_perturbations} for detailed results).
 
 \begin{table}[ht!]
 \input{sources/tables/hand_part_perturbations}
-\caption[The average errors for the hand part model]{The average errors for the hand part model $f_H$ for 1. standard perturbation, 2. uniform random change for notes played in the same time. The second transformation introduces less inconsistencies.}
+\caption[The average errors for the hand part model.]{The average errors for the hand part model $f_H$ for 1. standard perturbation, 2. uniform random change for notes played in the same time. The second transformation introduces less inconsistencies.}
 \label{hand_part_perturbations}
 \end{table} 
 
-\begin{figure}[!ht]
+\begin{figure}[ht!]
 \centering
 \includesvg[width=0.9\textwidth]{images/ceteris_paribus_results_h.svg}
 \includesvg[width=0.9\textwidth]{images/ceteris_paribus_results_k.svg}
 \includesvg[width=0.9\textwidth]{images/ceteris_paribus_results_t.svg}
-\caption[Results of the \emph{ceteris paribus} experiment]{Results of the \emph{ceteris paribus} experiment for the hand part model $f_H$, the key signature model $f_K$ and the time signature model $f_T$. The hand part model is robust to note duration changes while it is susceptible to velocity manipulation. On the other hand, the time signature model is sensitive to note duration changes, which is expected to some extent, and relatively robust to other transformations. The key signature model is robust to all perturbations.}
+\caption[Results of the \emph{ceteris paribus} experiment.]{Results of the \emph{ceteris paribus} experiment for the hand part model $f_H$, the key signature model $f_K$ and the time signature model $f_T$. The hand part model is robust to note duration changes while it is susceptible to velocity manipulation. On the other hand, the time signature model is sensitive to note duration changes, which is expected to some extent, and relatively robust to other transformations. The key signature model is robust to all perturbations.}
 \label{ceteris_paribus}
 \end{figure}
 
@@ -295,10 +314,10 @@ The proposed approach ignores temporal aspect of the sequence, as not taking ons
 
 The technique has been used to support conclusions from Section \ref{results}, illustrated by concrete examples. Figure \ref{hand_part_misalignment} shows how changing velocity in the right-hand notes affects hand part assignment of neighborhood notes. 
 
-\begin{figure}[!ht]
+\begin{figure}[ht!]
 \centering
-\includegraphics[width=0.95\textwidth]{images/lime_hand_part.png}
-\caption[A graph showing how the velocity of a note influences hand part assignments of other notes]{A graph showing how the velocity of the second C5 note (with a thick outline) influences hand part assignments of other notes. It can be observed that the current velocity of this note makes the model think of the first F3 note as a left hand note. Reducing the note C5 velocity to a low value results in a misassigning F3 as the right hand note. This is, of course, a undesired behavior of the model.}
+\includesvg[width=0.95\textwidth]{images/lime_hand_part.svg}
+\caption[Velocity influence on hand part assignment.]{A graph showing how the hand part assignment of the G2 note (with a thick outline) is influenced by the velocity of other notes. The negative direction of influence is indicated by the diagonal pattern. Increasing the volume of the low note leads to misalignment of G3 and B3 notes to the left hand. On the contrary, reducing the velocity of G2 note switches the note to a right-hand note. This is, of course, an undesired behavior of the model.}
 \label{hand_part_misalignment}\end{figure}
 
 As one-note replacement usually won't lead to key signature change, this practice is useful mostly for the hand-part assignment. For the key signature model we propose another technique.
@@ -308,15 +327,15 @@ As one-note replacement usually won't lead to key signature change, this practic
 For the key signature model, as the pitch space is not a metric space, we applied a different strategy. The method is as follows: \begin{enumerate}
 	\item Get the key signature prediction values (before the last activation function) for the entire sequence.
 	\item Individually remove each note in a sequence and calculate the difference between the original prediction and the prediction made on a sequence without a single note.
-	\item Compute a contribution score, represented by the mean of the differences for each note.
+	\item Compute a contribution score, represented by the mean of the prediction differences for each note, in the neighborhood of a note. Only predictions on the current key signature are taken into account.
 	\end{enumerate} This approach enables the measurement of each note's contribution to the attribution of a specific scale. Refer to Figure \ref{note_removing} for an illustrative example.
 	
-Using this technique we were able to estimate the influence of certain note feature to a model's decision. While the key signature model turned out to be the most robust model of all three considered, 
+Using this technique we were able to estimate the influence of certain note feature to a model's decision.
 
-\begin{figure}[!ht]
+\begin{figure}[ht!]
 \centering
-\includegraphics[width=0.95\textwidth]{images/note_removing.png}
-\caption[A key signature alignment for D$\sharp$ scale]{A key signature alignment for D$\sharp$ scale. The names on the notes represent the model key signature attribution. There are two different scales assigned by the model: D$\sharp$ scale and G$\sharp$ scale. Notes: D, E and A are not in the scale and have a negative influence on the assignment.}
+\includesvg[width=0.95\textwidth]{images/note_removing.svg}
+\caption[A key signature alignment for G scale.]{A key signature alignment for G major scale. Note's key signature assignment intensity is represented using gray scale, where the diagonal pattern indicates that notes voted against the current key signature. Notes D$\sharp$ and G$\sharp$ are out of the scale, and have negative influence on the assignment most of the time. Sporadically, some other notes in the scale, especially B, voted slightly against the current key signature. The strongest negative vote changes the assignment probability by $6$ percentage points.}
 \label{note_removing}\end{figure}
 
 \subsection{Ablation Studies} \label{ablation_studies}
@@ -345,7 +364,7 @@ The authors themselves provided ablation studies for the beat-tracking model. Th
 \begin{table}[ht!]
 \centering
 \input{sources/tables/feature_omission}
-\caption[Feature omission study]{Feature omission study \cite{Liu2022}.}
+\caption[Feature omission study.]{Feature omission study \cite{Liu2022}.}
 \label{beat_tracking_feature_omission}
 \end{table}
 
@@ -356,11 +375,9 @@ Velocity may carry some information about beats as they tend to occur along with
 \begin{table}[ht!]
 \centering
 \input{sources/tables/data_augmentation}
-\caption[Ablation study for data augmentation]{Ablation study for data augmentation \cite{Liu2022}.}
+\caption[Ablation study for data augmentation.]{Ablation study for data augmentation \cite{Liu2022}.}
 \label{beat_tracking_data_augmentation}
 \end{table}
-
-
 
 \subsubsection{Hand Part Model}
 
@@ -371,7 +388,7 @@ As the hand part affects only voice separation subscale of the MV2H metric, we o
 \begin{table}[ht!]
 \centering
 \input{sources/tables/hand_part_ablation}
-\caption[Ablation study for the hand part model]{Ablation study for the hand part model.}
+\caption[Ablation study for the hand part model.]{Ablation study for the hand part model.}
 \label{hand_part_ablation}
 \end{table}
 
@@ -384,7 +401,7 @@ Restricted to note pitches and onsets key signature model turned out to be of th
 \begin{table}[ht!]
 \centering
 \input{sources/tables/key_signature_ablation}
-\caption[Ablation study for the key signature model]{Ablation study for the key signature model.}
+\caption[Ablation study for the key signature model.]{Ablation study for the key signature model.}
 \label{key_signature_ablation}
 \end{table}
 
@@ -399,7 +416,7 @@ With no changes to the architecture, the restricted time signature model to only
 \begin{table}[ht!]
 \centering
 \input{sources/tables/time_signature_ablation}
-\caption[Ablation study for the time signature model]{Ablation study for the time signature model.}
+\caption[Ablation study for the time signature model.]{Ablation study for the time signature model.}
 \label{time_signature_ablation}
 \end{table}
 

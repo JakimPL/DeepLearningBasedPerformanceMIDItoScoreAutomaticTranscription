@@ -39,14 +39,15 @@
 
 \usepackage{caption}
 \usepackage{float}
-\DeclareCaptionFormat{algorithmformat}{Algorithm \arabic{section}.\arabic{algorithm}: #3}
-\captionsetup[algorithm]{format=algorithmformat}
 
 % Ensure that algorithms are numbered within sections
 \makeatletter
 \@addtoreset{algorithm}{section}
 \makeatother
 
+\DeclareCaptionFormat{algorithmformat}{Algorithm \arabic{section}.\arabic{algorithm}: #3}
+\captionsetup[algorithm]{format=algorithmformat}
+\numberwithin{algorithm}{chapter}
 
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{calc}
