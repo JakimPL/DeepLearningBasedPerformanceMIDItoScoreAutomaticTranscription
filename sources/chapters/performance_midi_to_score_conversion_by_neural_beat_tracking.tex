@@ -80,10 +80,12 @@ Besides the quantization model, which relies on the beat tracking module, key si
 \begin{figure}[!ht]
 \centering
 \input{sources/graphs/model_architecture}
-\caption[The original architecture of the model.]{The original architecture of the model. There are five separate modules of the entire model in total: \emph{beat}, \emph{quantization}, \emph{time signature}, \emph{key signature} and \emph{hand parts}.}
+\caption[The initial architecture of the model.]{The initial architecture of the model proposed in \cite{Liu2022}. There are five separate modules of the entire model in total: \emph{beat}, \emph{quantization}, \emph{time signature}, \emph{key signature} and \emph{hand parts}.}
 \end{figure}
 
 The initial version of time signature model handled a finite set of time signature numerators and denominators, as described in Section \ref{music_score_encoding}. One year after the paper release, the model has been reduced to recognize only two the most common time signatures: ${4 \atop 4}$ and ${3 \atop 4}$, with removed GRUBlock. With an additional support of beat quantizer, additional two time signatures ${2 \atop 4}$ and ${6 \atop 8}$ could be recognized.  For performance analysis, we use the latter approach.
+
+Instead of direct tempo estimation, for each note an \emph{inter-beat-interval} time is estimated using classification, capturing time intervals between successive beats with 10 ms resolution, up to $4$ seconds (401 features).
 
 \section{Score Generation}
 
@@ -91,7 +93,7 @@ The final score generation process synthesizes the source MIDI stream, incorpora
 
 \section{Training and Evaluation}
 
-We reproduced the results declared by the authors of the paper.
+The training and evaluation procedures were implemented to closely replicate those described by the original authors. In the following sections, we provide a detailed overview of the datasets, augmentation techniques, and specific configurations for training and evaluation setups.
 
 \subsection{Datasets}\label{datasets}
 
@@ -173,29 +175,79 @@ Section \ref{beat_tracking} shows ablation studies for data augmentation, for th
 
 \subsection{Training and Evaluation}
 
-To reproduce results, we have followed the authors' training and evaluation setup, on the same train/validation/test dataset division. 
+To reproduce the original results, we followed the authors' training and evaluation setup, adhering to the same training, validation, and test dataset divisions. In the following sections, we provide a detailed examination of the training and evaluation pipeline, including feature preparation and the training and evaluation scheme.
 
 \subsubsection{Feature Preparation}
 
-As the data comes from different sources, they need to be unified before training any model.
+As the data comes from different sources, they need to be unified before training.
 
-Initially, all MIDI files are gathered from datasets described in Section \ref{datasets}. According to authors, all pieces from the \texttt{ENSTDkCl} subset of the MAPS dataset are prepared for the test set. All other pieces are randomly assigned to the validation test, where $90\%$ of the data is training data\footnote{More precisely, pieces with id divisible by 10 are assigned to the validation set.}. See Table \ref{train_valid_test} for details.
+Initially, all MIDI files were gathered from the datasets outlined in Section \ref{datasets}. Following the authors' methodology, all pieces in the \texttt{ENSTDkCl} subset of the MAPS dataset were designated as the test set. The remaining pieces were randomly allocated to the validation set, with $90\%$ reserved for training\footnote{Specifically, pieces with an ID divisible by 10 were assigned to the validation set.}. Refer to Table \ref{train_valid_test} for dataset division details.
 
-A second step is to extract note sequence tensors and features from MIDI files and annotations in the case of the ASAP dataset. These features include all elements needed for the transcription: beats, downbeats, time signatures, key signatures, onsets, note values and hand part assignments.
+The next step involved extracting note sequence tensors and additional features from MIDI files and, where relevant, from external annotations, as in the case of the ASAP dataset. The features encompassed all essential elements for transcription, including beats, downbeats, time signatures, key signatures, onsets, note durations, and hand part assignments.
 
-After the preparation, the dataset is ready to be digested by models.
+Once processed, the datasets were ready for model training.
 
 \subsubsection{Training}
 
-For each trained model we set the maximum number of 50 epochs. Usually, models stabilized after 20 epochs. Training examples are augmented (refer to Section \ref{data_augmentation} for more information).
+Each model was trained with a maximum of 50 epochs. Training examples were augmented according to the procedures discussed in Section \ref{data_augmentation}.
+
+\subsubsection{Evaluation}
+
+During training, validation metrics were calculated after each epoch. The metrics used varied by model: for binary classifiers (such as the time signature and hand part models), standard metrics—accuracy, precision, recall, and $F_1$ score—were employed. For the key signature model, which is a multiclass classifier, both micro and macro metrics were used (see Section \ref{binary_and_multiclass_classifier_metrics}).
+
+Upon completion of training, the model with the highest $F_1$ score on the validation set was selected for further evaluation on the test set. A joint performance score across all models was then calculated using the MV2H metric on the test set.
 
 \section{Model Performance}
 
-We reproduced the results using the training and evaluation setup provided by the authors. 
+We reproduced the results using the training and evaluation setup provided by the authors, described in the previous sections. We achieved a comparable MV2H metric scores on the test set as the paper's authors.
 
-\subsection{$F_1$-measures}
+\subsection{Validation Metrics}
+
+Below, we present the validation metrics, including $F_1$ scores, for each submodel.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/f1_hand_part}
+\caption[Validation metrics of the hand part model.]{Validation metrics of the hand part model.}
+\end{table}
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/f1_key_signature}
+\caption[Validation metrics of the time signature model.]{Validation metrics of the time signature model.}
+\end{table}
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/f1_time_signature}
+\caption[Validation metrics of the key signature model.]{Validation metrics of the key signature model.}
+\end{table}
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/f1_beat}
+\caption[Validation metrics of the beat quantization model.]{Validation metrics of the beat quantization model.}
+\end{table}
 
 \subsection{MV2H Metric}
+
+The MV2H metric results on the test set are presented below, alongside the original authors' evaluation results. It should be noted that minor changes have been introduced since the release of the model, so the comparison is not exact.
+
+We use the following notation for the MV2H components: \begin{itemize}
+	\item Multi-pitch detection $F_{\textrm{p}}$
+	\item Voice separation $F_{\textrm{vs}}$
+	\item Metrical alignment $F_{\textrm{ma}}$
+	\item Note value detection $F_{\textrm{nv}}$
+	\item Harmonic analysis $F_{\textrm{ha}}$
+\end{itemize}
+
+$F$ stands for the final MV2H metric, the average of all submetrics.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/mv2h}
+\caption[MV2H metric evaluation on the test set.]{MV2H metric evaluation on the test set, with results compared to the original model evaluation.}
+\end{table}
 
 \section{Robustness Analysis} \label{robustness_analysis}
 

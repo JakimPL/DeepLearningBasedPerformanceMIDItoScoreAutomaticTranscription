@@ -14,14 +14,14 @@ On top of that, there are additional layers of complications: \begin{itemize}
 	\item In general, there can be multiple valid notations of the same musical idea, and in some case neither of them are more correct than other ones. A well-designed metric should allows some degree of freedom when it does not hurt the quality of the transcription.
 \end{itemize}
 
-As a result, more often than not, single aspects of a model are being analyzed and evaluated in isolation to other parts of a transcription. The overall result may be an aggregation of sub-metrics, though this approach is not always justifiable.
+As a result, more often than not, single aspects of a model are being analyzed and evaluated in isolation to other parts of a transcription. The overall result may be an aggregation of submetrics, though this approach is not always justifiable.
 
 Earlier approaches to assessing transcription quality were often lacking in rigor. Some common pitfalls in the literature include:\begin{itemize}
 	\item {\bf Lack of Thorough Analysis}. A rigorous evaluation requires an assessment of all relevant aspects of a proposed solution. Failing to attribute vital parts of a model or algorithm renders the analysis incomplete.
 	\item {\bf Limited Case Demonstration}. The results of a algorithm were often demonstrated on a very limited set of musical pieces (\cite{Takeda2002} or \cite{Yang2005}). It is not obvious how a model performs outside showcased examples, and it endangers the research to cherry-picking \missing.
 	\item {\bf No Public Dataset or Reproducibility}. For both training and evaluation, the dataset used should be clearly described and, ideally, made publicly available. Without this, results are difficult or impossible to reproduce, as seen in \cite{Takeda2002}.
 	\item {\bf Absence of Human Expert Evaluation}. While statistical benchmarks are necessary for quantitative assessment, there may overlook nuances that are essential for performers relying on transcriptions.
-\end{itemize}
+\end{itemize} 
 
 In the following sections we will explore various attempts from the literature to provide transcription quality metric.
 
@@ -35,17 +35,30 @@ Some research has investigated the relationship between computational metrics an
 
 Despite a large value of human evaluation, it comes with limitations. Manual attribution is time-consuming and labor-intensive. Carefully reviewing a transcription requires domain expertise, time and effort. Access to qualified experts can be costly, and the process is not easily scalable. Another drawback coming from manual attribution that evaluators may be subjective and biased towards certain notation practices. This of course not to say, that quantitative benchmarks are free of biases.
 
-\section{Evaluation of Beat Quantization}
+\section{Binary and Multiclass Classifier Metrics} \label{binary_and_multiclass_classifier_metrics}
 
-\missing
+The transcription problem can be viewed as a set of interdependent classification tasks. In particular: \begin{itemize}
+	\item Beat quantization can be thought as the classification of beats and downbeats.
+	\item The hand part model is a binary classifier (left or right hand).
+	\item Time and key signatures assignment is a multiclass classification problem\footnote{The time signature model has been further reduced to a binary classifier.}. \end{itemize} Hence, all loss functions and metrics that apply to classifiers can be used both for both training and evaluation. Since these are standard measures, they won't be discussed in much detail, and notions of true/false positive and negatives are assumed to be known\footnote{A discussion on these metrics can be found in \cite[p. 142--144]{Manning2008}.}.
 
-\subsection{Binary Cross-Entropy}
+\subsection{Cross-entropy Loss}
 
-\missing
+The \emph{cross-entropy loss} is a commonly used loss function for training classifiers in machine learning, derived from the \emph{cross-entropy} between two probability distributions over a shared set of events: \[H(X, Y) = -\mathbb{E}_{t\sim X}\log Y(t) = -\sum_t P_X(t)\log P_Y(t)\] For a dataset with true labels $y_n$ and model predictions $\hat{y}_n$, where $n=1,\ldots,N$, the \emph{cross-entropy loss function} is defined as: \[\mathcal{L} = -\frac{1}{N}\sum_{n=1}^N\left[y_n\log \hat{y}_n + (1 - y_n)\log(1 - \hat{y}_n)\right]\] Further discussion with justification of cross-entropy can be found in \cite[p. 73--75, 178]{Goodfellow2016}.
 
-\subsection{$F_1$-score}
+\subsection{Accuracy, Precision and Recall}
 
-\missing
+In binary classification, one class is labeled as \emph{positive} (or \emph{true}) and the other as \emph{negative} (or \emph{false}). Items belonging to a class are \emph{relevant}, while those predicted by the model as belonging to the class are considered \emph{retrieved} \cite[p. 76]{Roelleke2022}.
+
+The \emph{accuracy} of a predictor is defined as the ratio of correctly identified elements to the total number of elements: \[\textrm{accuracy} = \frac{\textrm{true positives} + \textrm{true negatives}}{\textrm{true positives} + \textrm{false positives} +\textrm{true negatives} + \textrm{false negatives}}\] emph{Precision} represents the proportion of correctly retrieved items to the total number of items retrieved: \[\textrm{precision} = \frac{\textrm{true positives}}{\textrm{true positives} + \textrm{false positives}}\] \emph{Recall} measures the proportion of correctly retrieved items to the total number of relevant items: \[\textrm{recall} = \frac{\textrm{true positives}}{\textrm{true positives} + \textrm{false negatives}}\] These definitions naturally extend to multiclass classification.
+
+\subsection{$F_1$ score}
+
+\emph{$F_1$ score} (\emph{$F$-measure}) is a measure that equally balances precision and recall. It is defined as a harmonic mean of the precision and recall: \[F_1 = 2 \times \frac{\textrm{precision} \times \textrm{recall}}{\textrm{precision} + \textrm{recall}}\] In case of multiclass classification, we may distinguish two methods of calculating the metrics: \emph{micro} and \emph{macro} \cite[p. 259--261]{Manning2008}. For multiclass classification, two common methods can be used to compute the $F$-measure: \emph{macro} and \emph{micro} averaging \cite[p. 259--261]{Manning2008}. These approaches handle cases of class imbalance differently:\begin{itemize}
+	\item \textbf{Macro $F_1$}: The unweighted average of $F_1$ scores across all classes, treating each class equally.
+	\item \textbf{Micro $F_1$}: A weighted average of $F_1$ scores, where weights correspond to the number of instances in each class.\end{itemize}
+
+In the context of hand part assignment, applying the $F_1$ score is dubious. It stems from the fact that the metric is sensitive to label switching; the score is affected by which hand is labeled as ``true'' \cite{Sokolova2009}, whether the labeling of hands should not matter at all. Nevertheless, we adopt this measure for consistency with the considered work.
 
 \section{Integrated Multi-Pitch Detection and Rhythm Quantization Metrics}
 
@@ -56,9 +69,7 @@ Nakamura et al. (2018) proposed a set of metrics to evaluate their extension of 
 	\item \textbf{Onset-time error rate} $E_{\textrm{on}}$. Quantifies errors in note onset times relative to the expected values.
 	\item \textbf{Offset-time error rate} $E_{\textrm{off}}$. Measures errors in note offset times after normalizing to the correct onset times.
 	\item \textbf{Overall Error Rate} $E_{\textrm{all}}$. The arithmetic mean of all other error rates.
-\end{itemize}
-
-The metrics rely on two components: \emph{note alignment} and \emph{rhythm correction cost}.
+\end{itemize} The metrics rely on two components: \emph{note alignment} and \emph{rhythm correction cost}.
 
 \subsection{Note Alignment}
 
@@ -99,9 +110,11 @@ Finally, $E_{\textrm{all}}$ is calculated as the arithmetic mean of all metrics 
 
 \subsection{Limitations}
 
-\missing
+The metrics proposed by Nakamura et al. primarily evaluate specific aspects of musical transcription accuracy, focusing on note-related parameters such as pitch, onset, and offset times. While effective for assessing the correctness of a note stream, these metrics do not encompass broader transcription dimensions, including voice leading, harmonic context, or overall musical structure. Consequently, they are limited in their ability to fully represent a broader musical context of a transcription.
 
-The aforementioned research \cite{Holzapfel2021} shows that some of presented metrics don't correlate with human experts. 
+The overall metric allows penalty accumulation, meaning that a single transcription error may impact several ratings. For example, a misplaced note may be marked as ``missing'' from its expected position while also counted as ``extra'' in its actual position, leading to compounded penalties.
+
+Additionally, empirical studies, such as Holzapfel et al. (2021) \cite{Holzapfel2021}, suggest that several of these metrics may not align closely with human expert evaluations. 
 
 \section{MV2H Metric} \label{MV2H_section}
 
@@ -115,17 +128,17 @@ The metric is the main evaluation tool used for the main model quality assessmen
 
 \subsection{Components of the MV2H Metric}
 
-The MV2H metric is composed of five sub-metrics, each targeting a distinct transcription task. These metrics are calculated independently and combined to form the overall MV2H score, which, as previously, the arithmetic mean of all sub-metrics.
+The MV2H metric is composed of five submetrics, each targeting a distinct transcription task. These metrics are calculated independently and combined to form the overall MV2H score, which, as previously, the arithmetic mean of all sub-metrics.
 
 Below, we describe each component and how it is calculated.
 
 \subsubsection{Multi-pitch Detection}
 
-The multi-pitch detection sub-metric evaluates how well the AMT system detects the pitch and onset time of notes. A transcribed note is considered correctly detected if it satisfies two criteria: \begin{enumerate}
+The multi-pitch detection submetric evaluates how well the AMT system detects the pitch and onset time of notes. A transcribed note is considered correctly detected if it satisfies two criteria: \begin{enumerate}
 	\item The onset time must be within a small threshold ($50$ ms by default) of the ground truth onset time.
-	\item The pitch of the transcribed note must match the corresponding pitch in the ground truth.\end{enumerate} Other detected notes are false positives, and unmatched ground-truth notes are false negatives. Note offsets are ignored.
+	\item The pitch of the transcribed note must match the corresponding pitch in the ground truth.\end{enumerate} Other detected notes are false positives, and unmatched ground-truth notes are false negatives. Note offsets are ignored. Then, the multi-pitch detection metric is defined as the $F$-measure.
 
-The metric used to evaluate this is the $F$-measure, which balances \emph{precision} and \emph{recall}. Precision refers to the proportion of correctly detected notes out of all detected notes, and recall refers to the proportion of correctly detected notes out of all ground-truth notes: \begin{flalign*}\textrm{precision} &= \frac{\textrm{True Positives}}{\textrm{True Positives} + \textrm{False Positives}}\\ \textrm{recall} &= \frac{\textrm{True Positives}}{\textrm{True Positives} + \textrm{False Negatives}}\end{flalign*} The $F$-measure is thus defined as: \[F_1 = 2 \times \frac{\textrm{precision} \times \textrm{recall}}{\textrm{precision} + \textrm{recall}}\] Notes that are not correctly detected in the multi-pitch detection stage are excluded from subsequent evaluations, such as voice separation or metrical alignment. This ensures that the multi-pitch detection errors are taken into account only once.
+Notes that are not correctly detected in the multi-pitch detection stage are excluded from subsequent evaluations, such as voice separation or metrical alignment. This ensures that the multi-pitch detection errors are taken into account only once.
 
 A serious drawback of this approach is inability to compare a performance MIDI with a sheet that contains idealized note onsets. In the subsequent version of the metric \cite{McLeod2019}, the authors enhanced the metric to handle non-aligned musical scores, using a variant of \emph{Dynamic Time Warping} (DTW), a dynamic programming algorithm introduced in 1978 by Sakoe et al. \cite{Sakoe1978} to compare two time-dependent sequences that may vary in speed or length. 
 
