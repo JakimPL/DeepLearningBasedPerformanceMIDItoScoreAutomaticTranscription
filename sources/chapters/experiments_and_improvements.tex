@@ -1,21 +1,58 @@
 \chapter{Experiments and Improvements}\label{experiments_and_improvements}
 
+In order to enhance the proposed model, we employed different strategies for finding improvements: \begin{itemize}
+	\item We tried smaller and faster networks that are data efficient to optimize the current architecture.
+	\item We tested more powerful architectures that proved to be successful (Transformers) in the case of natural language processing.
+	\item We extended a model with an additional module for handling other musical elements: dynamics.\end{itemize}
+	
+Let us present results of these experiments.
+
 \section{Transformers}
 
-[a brief description transformer, Attention is all you need, ChatGPT]
+\emph{Transformers} are a class of neural network architectures introduced by Vaswani et al. in the landmark paper \emph{Attention Is All You Need} \cite{Vaswani2017}. Originally developed for natural language processing (NLP), have since become versatile and powerful framework for modeling sequential data across numerous other fields, including image processing \cite{Dosovitskiy2020}, audio generation \cite{Borsos2023} and even symbolic music analysis \cite{Zhu2021}.
 
-As the authors state at the end of the paper \cite{Liu2022}:
+\begin{figure}[ht!]
+\centering
+\input{sources/graphs/transformer}
+\caption[The Transformer architecture.]{The Transformer architecture \cite{Vaswani2017}.}
+\end{figure}
 
-\begin{quote}Possible next steps include investigating more powerful model architectures such as the Transformer.\end{quote}
+The key innovation in Transformers is the \emph{self-attention} mechanism, which enables the model to weigh the relevance of each part of an input sequence relative to other parts, regardless of their distance from each other in the sequence. Unlike recurrent neural networks, which process data sequentially and can struggle with long-range dependencies, Transformers use that mechanism to directly model these dependencies in parallel.
 
-We analyzed various setups involving Transformer and attention mechanisms, preserving . 
+As the authors state at the end of the paper \cite{Liu2022}: \begin{quote}Possible next steps include investigating more powerful model architectures such as the Transformer.\end{quote} We analyzed various setups involving Transformer and attention mechanisms, preserving the training and evaluation setup.
 
-The vanilla Transformer tur
-We hypothesize that Transformer architecture could outperform the proposed network but in a data-abundant scenario, but the entire dataset is still too small and needs more data-efficient models.
+\subsection{Vanilla Transformer}
+
+\missing
+
+% We hypothesize that Transformer architecture could outperform the proposed network but in a data-abundant scenario, but the entire dataset is still too small and needs more data-efficient models.
+
+% Moreover, the models' assignment heavy rely on small context of the piece. In other words, musical information that lies far apart from notes is not particularly useful for the inference.
+
+\subsection{Attention}
+
+\missing
+
+% We hypothesize that Transformer architecture could outperform the proposed network but in a data-abundant scenario, but the entire dataset is still too small and needs more data-efficient models.
+
+% Moreover, the models' assignment heavy rely on small context of the piece. In other words, musical information that lies far apart from notes is not particularly useful for the inference.
+
+\section{Temporal Convolutional Network}
+
+\missing
+
+\begin{figure}[ht!]
+\centering
+\input{sources/graphs/temporal_convolutional_network}
+\caption[The Temporal Convolutional Block.]{The Temporal Convolutional Block.}
+\end{figure}
+
+\section{Dynamics}
+
+\missing
 
 \begin{figure}[!ht]
 \centering
 \input{sources/graphs/model_architecture_extended}
 \caption[The extended architecture of the model.]{The extended architecture of the model by the \emph{dynamics} model.}
 \end{figure}
- 

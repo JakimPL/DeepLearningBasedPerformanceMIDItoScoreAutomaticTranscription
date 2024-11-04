@@ -1,0 +1,76 @@
+\begin{tikzpicture}
+    \tikzset{block/.style={fill=gray!20, text width=3.5cm, draw=black, thick, text centered, align=center, rounded corners, minimum height=1.5em, minimum width=3.5cm}}
+    \tikzset{input/.style={fill=gray!30, text width=3.5cm, draw=black, thick, text centered, rounded corners, minimum height=1.5em, minimum width=3.5cm}}
+    \tikzset{operation/.style={draw, circle, thick, minimum size=0.75cm}}
+    \tikzset{arrowstyle/.style={-{Latex[length=3mm]}}}
+
+    \node (inputs) at (0, 1.5) {Inputs};
+    \node (outputs) at (6, 1.5) {Shifted Outputs};
+
+    \node[input] (input_embed) at (0, 0) {Input Embedding};
+    \node[block] (pos_encoding) at (-3, -1.2) {Positional \\ Encoding};
+    \node[operation] (add1) at (0, -1.2) {$+$};
+
+    \node[block] (multihead1) at (0, -3.25) {Multi-Head \\ Attention};
+    \node[block] (add_norm1) at (0, -4.5) {Add \& Norm};
+    \node[block] (ffn1) at (0, -6.25) {Feed \\ Forward};
+    \node[block] (add_norm2) at (0, -7.5) {Add \& Norm};
+
+    \draw[rounded corners, thick] (-2.75, -2) rectangle (2.75, -8.25) node[pos=0.5, xshift=-3.1cm] {$N \times \;$};
+
+    \node[input] (output_embed) at (6, 0) {Output Embedding};
+    \node[block] (pos_encoding_dec) at (9, -1.2) {Positional \\ Encoding};
+    \node[operation] (add2) at (6, -1.2) {$+$};
+
+    \node[block] (masked_mha) at (6, -3.25) {Masked Multi-Head \\ Attention};
+    \node[block] (add_norm_dec1) at (6, -4.5) {Add \& Norm};
+    \node[block] (mha_dec) at (6, -6.40) {Multi-Head \\ Attention};
+    \node[block] (add_norm_dec2) at (6, -7.50) {Add \& Norm};
+    \node[block] (ffn2) at (6, -9.25) {Feed \\ Forward};
+    \node[block] (add_norm_dec3) at (6, -10.50) {Add \& Norm};
+
+    \draw[rounded corners, thick] (3.25, -2) rectangle (8.75, -11.25) node[pos=0.5, xshift=3.1cm] {$\, \times N$};
+
+    \node[block] (linear) at (6, -12.2) {Linear};
+    \node[block] (softmax) at (6, -13.6) {Softmax};
+    \node (output_probs) at (6, -15.1) {Output Probabilities};
+
+    \draw[arrowstyle] (inputs.south) -- (input_embed.north);
+    \draw[arrowstyle] (input_embed.south) -- (add1.north);
+    \draw[arrowstyle] (pos_encoding.east) -- (add1.west);
+    \draw[arrowstyle] (add1) -- (multihead1);
+    \draw[arrowstyle] (multihead1) -- (add_norm1);
+    \draw[arrowstyle] (add_norm1) -- (ffn1);
+    \draw[arrowstyle] (ffn1) -- (add_norm2);
+
+    \draw[arrowstyle] (outputs.south) -- (output_embed.north);
+    \draw[arrowstyle] (output_embed.south) -- (add2.north);
+    \draw[arrowstyle] (pos_encoding_dec.west) -- (add2.east);
+    \draw[arrowstyle] (add2) -- (masked_mha);
+    \draw[arrowstyle] (masked_mha) -- (add_norm_dec1);
+    \draw[arrowstyle] (mha_dec) -- (add_norm_dec2);
+    \draw[arrowstyle] (add_norm_dec2) -- (ffn2);
+    \draw[arrowstyle] (ffn2) -- (add_norm_dec3);
+    \draw[arrowstyle] (add_norm_dec3) -- (linear);
+    \draw[arrowstyle] (linear) -- (softmax);
+    \draw[arrowstyle] (softmax) -- (output_probs);
+
+    \draw[arrowstyle] (add_norm2.east) -| ++(0.325, 0) |- ++(0, 2.05) -| ($(mha_dec.north) - (1.0, 0.0)$);
+    \draw[arrowstyle] (add_norm2.east) -| ++(0.325, 0) |- ++(0, 2.05) -| (mha_dec.north);
+
+    \draw[arrowstyle] (0, -2.25) -| ++(-2.325,0) |- (add_norm1.west);
+    \draw[arrowstyle] (0, -5.25) -| ++(-2.325,0) |- (add_norm2.west);
+
+    \draw[arrowstyle] (0, -2.35) -| ++(-1.0,0) -- ($(multihead1.north) - (1.0, 0.0)$);
+    \draw[arrowstyle] (0, -2.35) -| ++(1.0,0) -- ($(multihead1.north) + (1.0, 0.0)$);
+
+    \draw[arrowstyle] (6, -2.35) -| ++(-1.0,0) -- ($(masked_mha.north) - (1.0, 0.0)$);
+    \draw[arrowstyle] (6, -2.35) -| ++(1.0,0) -- ($(masked_mha.north) + (1.0, 0.0)$);
+
+    \draw[arrowstyle] (add_norm_dec1) -- (6, -5.25) -| ++(1.0,0) -- ($(mha_dec.north) + (1.0, 0.0)$);
+
+    \draw[arrowstyle] (6, -2.25) -| ++(2.325,0) |- (add_norm_dec1.east);
+    \draw[arrowstyle] (6, -5.25) -| ++(2.325,0) |- (add_norm_dec2.east);
+    \draw[arrowstyle] (6, -8.25) -| ++(2.325,0) |- (add_norm_dec3.east);
+
+\end{tikzpicture}

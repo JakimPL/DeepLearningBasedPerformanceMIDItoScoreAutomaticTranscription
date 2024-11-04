@@ -193,7 +193,7 @@ Each model was trained with a maximum of 50 epochs. Training examples were augme
 
 \subsubsection{Evaluation}
 
-During training, validation metrics were calculated after each epoch. The metrics used varied by model: for binary classifiers (such as the time signature and hand part models), standard metrics—accuracy, precision, recall, and $F_1$ score—were employed. For the key signature model, which is a multiclass classifier, both micro and macro metrics were used (see Section \ref{binary_and_multiclass_classifier_metrics}).
+During training, validation metrics were calculated after each epoch. The metrics used varied by model: for binary classifiers (such as the time signature and hand part models), standard metrics (accuracy, precision, recall, and $F_1$ score) were employed. For the key signature model, which is a multiclass classifier, both micro and macro metrics were used (see Section \ref{binary_and_multiclass_classifier_metrics}).
 
 Upon completion of training, the model with the highest $F_1$ score on the validation set was selected for further evaluation on the test set. A joint performance score across all models was then calculated using the MV2H metric on the test set.
 
@@ -248,6 +248,10 @@ $F$ stands for the final MV2H metric, the average of all submetrics.
 \input{sources/tables/mv2h}
 \caption[MV2H metric evaluation on the test set.]{MV2H metric evaluation on the test set, with results compared to the original model evaluation.}
 \end{table}
+
+\section{Case Studies}
+
+\missing
 
 \section{Robustness Analysis} \label{robustness_analysis}
 

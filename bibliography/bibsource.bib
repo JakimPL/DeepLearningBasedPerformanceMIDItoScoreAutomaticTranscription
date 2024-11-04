@@ -798,3 +798,59 @@ Dong Xu},
     Address = {Cambridge, MA, USA},
     Note = {\url{http://www.deeplearningbook.org}}
 }
+
+@inproceedings{Vaswani2017,
+    author = {Ashish Vaswani and Noam Shazeer and Niki Parmar and Jakob Uszkoreit and Llion Jones and Aidan N. Gomez and Łukasz Kaiser and Illia Polosukhin},
+    booktitle = {Advances in Neural Information Processing Systems},
+    editor = {I. Guyon and U. Von Luxburg and S. Bengio and H. Wallach and R. Fergus and S. Vishwanathan and R. Garnett},
+    pages = {},
+    publisher = {Curran Associates, Inc.},
+    title = {Attention is All you Need},
+    url = {https://proceedings.neurips.cc/paper_files/paper/2017/file/3f5ee243547dee91fbd053c1c4a845aa-Paper.pdf},
+    volume = {30},
+    year = {2017}
+}
+
+@article{Dosovitskiy2020,
+    title = {An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale},
+    author = {Alexey Dosovitskiy and Lucas Beyer and Alexander Kolesnikov and Dirk Weissenborn and Xiaohua Zhai and Thomas Unterthiner and Mostafa Dehghani and Matthias Minderer and Georg Heigold and Sylvain Gelly and Jakob Uszkoreit
+ and Neil Houlsby},
+    journal = {ICLR},
+    year = {2021}
+}
+
+@inproceedings{Zhu2021,
+    author = {Hongyuan Zhu and Ye Niu and Di Fu and Hao Wang},
+    title = {MusicBERT: A Self-supervised Learning of Music Representation},
+    year = {2021},
+    isbn = {9781450386517},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/3474085.3475576},
+    doi = {10.1145/3474085.3475576},
+    abstract = {Music recommendation has been one of the most used information retrieval services on internet. Finding suitable music for users' demands from tens of millions of music relies on the understanding of music content. Traditional studies usually focus on music representation based on massive user behavioral data and music meta-data, which ignore the audio characteristic of music. However, it is found that the melodic characteristics of music themselves can be further used to understand music. Moreover, how to utilize large-scale audio data to learn music representation is not well explored. To this end, we propose a self-supervised learning model for music representation. We firstly utilize a beat-level music pre-training model to learn the structure of music. Then, we use a multi-task learning framework to model music self-representation and co-relations between music, concurrently. Besides, we propose several downstream tasks to evaluate music representation, including music genre classification, music highlight, and music similarity retrieval. Extensive experiments on multiple music datasets demonstrate our model's superiority over baselines on learning music representation.},
+    booktitle = {Proceedings of the 29th ACM International Conference on Multimedia},
+    pages = {3955–3963},
+    numpages = {9},
+    keywords = {music information retrieval, music representation, pre-training},
+    location = {Virtual Event, China},
+    series = {MM '21}
+}
+
+@article{Borsos2023,
+    author = {Zal\'{a}n Borsos and Rapha\"{e}l Marinier and Damien Vincent and Eugene Kharitonov and Olivier Pietquin and Matt Sharifi and Dominik Roblek and Olivier Teboul and David Grangier and Marco Tagliasacchi and Neil Zeghidour},
+    title = {AudioLM: A Language Modeling Approach to Audio Generation},
+    year = {2023},
+    issue_date = {2023},
+    publisher = {IEEE Press},
+    volume = {31},
+    issn = {2329-9290},
+    url = {https://doi.org/10.1109/TASLP.2023.3288409},
+    doi = {10.1109/TASLP.2023.3288409},
+    abstract = {We introduce AudioLM, a framework for high-quality audio generation with long-term consistency. AudioLM maps the input audio to a sequence of discrete tokens and casts audio generation as a language modeling task in this representation space. We show how existing audio tokenizers provide different trade-offs between reconstruction quality and long-term structure, and we propose a hybrid tokenization scheme to achieve both objectives. Namely, we leverage the discretized activations of a masked language model pre-trained on audio to capture long-term structure and the discrete codes produced by a neural audio codec to achieve high-quality synthesis. By training on large corpora of raw audio waveforms, AudioLM learns to generate natural and coherent continuations given short prompts. When trained on speech, and without any transcript or annotation, AudioLM generates syntactically and semantically plausible speech continuations while also maintaining speaker identity and prosody for unseen speakers. Furthermore, we demonstrate how our approach extends beyond speech by generating coherent piano music continuations, despite being trained without any symbolic representation of music.},
+    journal = {IEEE/ACM Trans. Audio, Speech and Lang. Proc.},
+    month = jun,
+    pages = {2523–2533},
+    numpages = {11}
+}
+

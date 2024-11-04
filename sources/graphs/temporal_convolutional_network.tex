@@ -1,0 +1,41 @@
+\begin{tikzpicture}
+    \tikzset{layer1/.style={fill=gray!10, draw=gray, thick, text centered}}
+    \tikzset{layer2/.style={fill=gray!30, draw=gray, thick, text centered}}
+    \tikzset{operation/.style={draw, circle, thick, minimum size=0.75cm}}
+    \tikzset{arrowstyle/.style={-{Latex[length=3mm]}}}
+
+    \fill[fill=gray!50, fill opacity=0.5, draw=gray, thick, line width=2pt] (0.0, -2.0) rectangle (12.0, 7.0);
+    \fill[fill=white!50, fill opacity=1.0, draw=black, thick, line width=1pt] (0.5, 0.0) rectangle (10.5, 6.5);
+    \fill[fill=white!50, fill opacity=1.0, draw=black, thick, line width=1pt] (1.0, -0.5) rectangle (11.0, 6.0);
+    \fill[fill=white!50, fill opacity=1.0, draw=black, thick, line width=1pt] (1.5, -1.0) rectangle (11.5, 5.5);
+
+    \draw (6.5, 9.00) node (note_sequence) {Note sequence};
+    \draw (6.5, 8.00) node[layer1] (embedding) {Linear};
+    \draw (4.0, 4.50) node[layer1] (layerA1) {Dilated Convolutional};
+    \draw (4.0, 3.50) node[layer1] (layerA2) {ReLU};
+    \draw (4.0, 2.50) node[layer1] (layerA3) {Dropout};
+    \draw (4.0, 1.50) node[layer1] (layerA4) {Dilated Convolutional};
+    \draw (6.5, 0.75) node[operation] (add) {$+$};
+    \draw (6.5, -0.50) node[layer2] (layerA5) {Layer Normalization};
+    \draw[anchor=south, inner sep=2pt] (6.5, -2.0) node (outputA) {To the next convolutional layer};
+
+    \draw (6.5, -3.00) node[layer1] (output) {Linear};
+
+    \node[anchor=south west, inner sep=2pt] at (0.2, -1.8) {TCNBlock};
+
+    \node[anchor=north west, inner sep=2pt] at (1.55, 5.45) {\small{9, 1, 256}};
+    \node[anchor=north west, inner sep=2pt] at (1.05, 5.95) {\small{9, 2, 256}};
+    \node[anchor=north west, inner sep=2pt] at (0.55, 6.45) {\small{9, 4, 256}};
+    \node[anchor=north west, inner sep=2pt] at (0.05, 6.95) {\small{kernel size, dilation, hidden size}};
+
+    \draw[arrowstyle] (note_sequence.south) to (embedding.north);
+    \draw[arrowstyle] (embedding.south) -| ++(0.0, -2.5) -| (layerA1.north);
+    \draw[arrowstyle] (embedding.south) -| ++(0.0, -2.5) -| ++(2.5, 0.0) |- (add.east);
+    \draw[arrowstyle] (layerA1.south) to (layerA2.north);
+    \draw[arrowstyle] (layerA2.south) to (layerA3.north);
+    \draw[arrowstyle] (layerA3.south) to (layerA4.north);
+    \draw[arrowstyle] (layerA4.south) |- (add.west);
+    \draw[arrowstyle] (add.south) to (layerA5.north);
+    \draw[arrowstyle] (layerA5.south) to (outputA.north);
+    \draw[arrowstyle] (outputA.south) to (output.north);
+\end{tikzpicture}
