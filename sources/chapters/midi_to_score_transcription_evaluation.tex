@@ -60,7 +60,7 @@ The \emph{accuracy} of a predictor is defined as the ratio of correctly identifi
 
 In the context of hand part assignment, applying the $F_1$ score is dubious. It stems from the fact that the metric is sensitive to label switching; the score is affected by which hand is labeled as ``true'' \cite{Sokolova2009}, whether the labeling of hands should not matter at all. Nevertheless, we adopt this measure for consistency with the considered work.
 
-\section{Integrated Multi-Pitch Detection and Rhythm Quantization Metrics}
+\section{MUSTER: Music Score Transcription Error Rates}
 
 Nakamura et al. (2018) proposed a set of metrics to evaluate their extension of a Hidden Markov Model \cite{Nakamura2018} for automatic transcription. These metrics build upon earlier work \cite{Nakamura2017a} and include: \begin{itemize}
 	\item \textbf{Pitch error rate} $E_{\textrm{p}}$. Measures the proportion of notes detected with incorrect pitch.
@@ -70,6 +70,8 @@ Nakamura et al. (2018) proposed a set of metrics to evaluate their extension of 
 	\item \textbf{Offset-time error rate} $E_{\textrm{off}}$. Measures errors in note offset times after normalizing to the correct onset times.
 	\item \textbf{Overall Error Rate} $E_{\textrm{all}}$. The arithmetic mean of all other error rates.
 \end{itemize} The metrics rely on two components: \emph{note alignment} and \emph{rhythm correction cost}.
+
+The overall set of all metrics is called \emph{MUSTER}: \emph{MUsic Score Transcription Error Rates} \cite{Hiramatsu2021}.
 
 \subsection{Note Alignment}
 
@@ -218,7 +220,7 @@ For barlines, clefs, key signature and time signatures binary matching is used. 
 
 Each category is analyzed for discrepancies, and errors are recorded based on the alignment. Some errors, such as clefs and key signatures, are counted globally, while others, like notes and durations, are normalized by the total number of instances.
 
-Not all musical errors are of equal importance. For that reason, each categotry is weighted according to its perceptual importance, based on a linear regression model trained to align with human ratings. Additional details on the weighting procedure are available in \cite[p. 410--411]{Cogliati2017}.
+Not all musical errors are of equal importance. For that reason, each category is weighted according to its perceptual importance, based on a linear regression model trained to align with human ratings. Additional details on the weighting procedure are available in \cite[p. 410--411]{Cogliati2017}.
 
 \subsection{Limitations}
 

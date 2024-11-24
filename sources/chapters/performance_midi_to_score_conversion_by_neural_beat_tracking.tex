@@ -128,7 +128,7 @@ The \emph{Classical Piano MIDI} (CPM) database was created by Bernd Krüger, who
 
 The dataset consists 337 pieces with a cumulative duration of approximately $23$ hours. All MIDI files are score-informed, with separate tracks for the left and right hands.  and time signatures are encoded in the MIDI files as meta messages.
 
-However, despite the fact that the MIDI files are tempo-varied, they were manually crafted, not performed. For instance, note onsets which lie on the same beat, occur simultaneously. In musical performance, even chords are played with certain time variation.
+However, despite the fact that the MIDI files are tempo-varied, they were manually crafted, not performed. For instance, note onsets which lie on the same beat, occur simultaneously. In musical performance, even chords are played with certain time variation. Some authors disregard the source as not reliable. Beyer and Dai claim \cite{Beyer2024}: \begin{quote}he underlying data is score-derived and has been manually adjusted to represent aspects of performance and score at the same time. This leads to information leakage as highly regular onset/offset alignment remains in the \emph{performance} data.\end{quote}
 
 \subsubsection{Augmented MIDI Aligned Piano Sounds}
 
@@ -255,26 +255,17 @@ $F$ stands for the final MV2H metric, the average of all submetrics.
 
 \section{Robustness Analysis} \label{robustness_analysis}
 
-The quality of the model can be considered in many dimensions. Besides the fidelity of the outputs to the ground truth, one can consider how a model is robust to certain transformations that should not affect the result.
+The quality of the model can be considered in many dimensions. Evaluating model quality extends beyond the accuracy of outputs relative to ground truth; it also includes assessing how robust the model is to transformations that should theoretically leave certain outputs unchanged.
 
-For such analysis, we assumed the following: \begin{itemize}
-	\item Note velocity should not affect time signature or hand part assignment.
-	\item Note pitch does not matter for the time signature.
-	\item Note pitch is crucial for key signature/hand part assigning, while other features should not contribute.
-	\item Note duration should not impact key signature.
-\end{itemize}
+For this analysis, we make the following assumptions: \begin{itemize} \item Note velocity should not influence time signature or hand part assignment. \item Note pitch should be irrelevant to time signature prediction. \item Note pitch is essential for determining key signature and hand part assignment, while other features should have minimal impact on these aspects. \item Note duration should not affect key signature assignment. \end{itemize} These are intended as general guidelines rather than strict rules. There may be situations where slight deviations occur. For instance, a chord played be one hand tend to be of uniform intensity but the second hand may play a note with markedly different articulation than the other. These nuances explain why certain features cannot be entirely disregarded across all cases. For a more in-depth analysis of feature importance, refer to Section \ref{ablation_studies}.
 
-These are not meant to be rigid principles, rather rules of thumb. It may be the case that in special situations some deviations from these rules may occur: for instance a chord played be one hand tend to be of uniform intensity. We can use another hand to play a certain note with a completely different articulation. This is also the reason why we cannot ditch all but main features completely in general. See Section \ref{ablation_studies} for a more detailed analysis.
-
-A robust model should obey to these rules. It is natural to expect the model to give the same time signatures for a transposition of a piece, that is shifting all pitches by a constant value.
+A robust model should obey to these rules to some reasonable extent. For example, it is natural  to expect the model to assign the same time signatures to a transposed version of a piece, as a pitch shift should not affect the time signature.
 
 We have conducted an analysis of how the model is robust to transformation, for each of three components: \begin{itemize}
 	\item The \textbf{hand part} $f_H$.
 	\item The \textbf{key signature} model $f_K$.
 	\item The \textbf{time signature} model $f_T$.
-\end{itemize}
-
-In the subsequent sections, we use models pretrained by the authors unless stated otherwise.
+\end{itemize} In the subsequent sections, we use models pretrained by the authors unless stated otherwise.
 
 \subsection{Ceteris Paribus}
 
@@ -309,6 +300,22 @@ The time signature model is quite robust to note velocity and pitch manipulation
 \end{table}
 
 The hand part model $f_H$ error is robust to note shortening (maximum average error of $3\%$), but inconsistent when note velocities are changed. This inconsistency is mitigated by maintaining consistent velocity for notes played simultaneously. We hypothesize that the difference stems from the fact that chords played by one hand typically have similar velocities (see Table \ref{hand_part_perturbations} for detailed results).
+
+To mitigate the effect of the velocity influence, we propose two techniques: \begin{enumerate}
+	\item {\bf Data Augmentation}: We augment the data by introducing noise to the velocity feature, controlling the probability of applying the noise ($\tfrac{1}{2}$ by default) and the standard deviation ($\sigma_v = 12$ by default).
+	\item {\bf Feature Removal}: We remove the velocity feature completely.
+\end{enumerate}
+
+The first augmentation resolved the problem without sacrificing the model performance. The error rate dropped from $34.80\%$ to $3.24\%$ in the most extreme perturbation scheme. See Figure \ref{ceteris_paribus_h_augmentation} for the results.
+
+\begin{figure}[ht!]
+\centering
+\includesvg[width=0.9\textwidth]{images/ceteris_paribus_results_h_augmentation.svg}
+\caption[Hand part assignment after data augmentation.]{Hand part assignment after data augmentation. Even for the extreme case of $\sigma_v = 64$, the model has been only slightly affected by the transformation.}
+\label{ceteris_paribus}
+\end{figure}
+
+The second option may seem rather radical, however the results from ablation studies (Section \ref{ablation_studies}) show that the trade-off between robustness and the model performanc2 on the test score is very small, although not negligible.
 
 \begin{table}[ht!]
 \input{sources/tables/hand_part_perturbations}

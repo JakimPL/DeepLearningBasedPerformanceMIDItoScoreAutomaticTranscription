@@ -39,13 +39,52 @@ As the authors state at the end of the paper \cite{Liu2022}: \begin{quote}Possib
 
 \section{Temporal Convolutional Network}
 
-\missing
+Classical convolutional networks usually have a rather small receptive field\footnote{\emph{Receptive field} can be understood as the size of the region in the input data that produces a feature \cite{Araujo2019}. For a point on a grid, these and only these parts in that region are accessible by the network.}, and the canonical way to enlarge the size is to stack several layers of the network. As the input sequence can be very large, covering greater portions of data requires more model parameters, which at some point may yield too complex architecture for a given data scenario.
+
+\subsection{Dilated Convolution}
+
+To keep the size of the model small, one could use a \emph{dilated convolution}, which expands the receptive field by spacing out the kernel element with gaps, called \emph{dilation rates}.
+
+\begin{figure}[ht!]
+\centering
+\input{sources/graphs/dilated_convolution}
+\caption[Dilated convolution.]{Dilated convolution with kernel size $k = 3$ and dilation rate $d = 2$, illustrated on the $(-1, 1)$ point on a $7 \times 7$ grid.}
+\end{figure}
+
+Dilated convolutional layers increase the receptive field of the network exponentially with linear parameter accretion. 
+
+While the idea can be traced back to wavelet decompositions from 1989 \cite{Holschneider1989}, the rediscovery of the method in the machine learning field can be attributed to Chen et al. \cite{Chen2015}.
+
+\subsection{Temporal Convolutional Network}
+
+Temporal Convolutional Network (TCN), introduced by \cite{Colin2016}, leverage the idea of dilated convolutions, to cover varied regions of data in a hierarchical way. The network consists of layers of dilated convolutions, where the dilation rate increases exponentially, starting from $d = 1, 2, 4$ and so on.
+
+For sequential or time-series data, this structure strikes a balance between capturing both short-term and long-term dependencies. While TCNs can look ahead in time, they exhibit behavior similar to recurrent networks.
+
+They are several advantages of using TCNs over recurrent networks: \begin{itemize}
+	\item Recurrent networks suffer from inability to parallelize computation, as the result of next state is dependent on the previous one. This is no longer a problem of convolutional networks. The TCNs can be trained much faster.
+	\item Recurrent networks need careful architecture adjustments to capture long-term relationships. Dilated convolutions allows to directly control the range of the field.
+	\item The training of convolutional networks is usually stable. Recurrent networks are reported to be unstable during training. One of the reasons behind that phenomenon is the problem of vanishing/exploding gradients. However, gated recurrent units mitigate some of these issues. 
+\end{itemize}
+
+In some cases, these advantages come without sacrificing the performance. In the next sections we are going to show that indeed is the case for certain transcription subtasks. Before that, let us provide more details on the exact model structure.
+
+\subsection{Model Architecture}
+
+Since the musical features are not spatial, the convolutions are one-dimensional. We used the TCN variant of the kernel size $9$, and dilation rates $1$, $2$ and $4$. The receptive field $r$ can be calculated as the following sum: \[r = 1 + \sum_{i=1}\left(k_i - 1\right)\cdot d_i\] where $k_i$ is the kernel size, and $d_i$ is the dilation rate at $i$-th layer. Here, the receptive field after $3$ layers is $r_3 = 57$. See Figure \ref{temporal_convolutional_network} for the architecture layout.
 
 \begin{figure}[ht!]
 \centering
 \input{sources/graphs/temporal_convolutional_network}
 \caption[The Temporal Convolutional Block.]{The Temporal Convolutional Block.}
+\label{temporal_convolutional_network}
 \end{figure}
+
+The training/evaluation setup remained exactly the same.
+
+\subsection{Results}
+
+The experiments conducted using TCNs shows that, for certain models, the networks achieved comparable of superior results while having smaller number of parameters, and, due to the nature of the architecture, training much faster than recurrent networks. 
 
 \section{Dynamics}
 
