@@ -1,0 +1,39 @@
+\scalebox{0.8}{
+    \begin{tikzpicture}
+    \tikzset{block/.style={fill=gray!20, text width=3.5cm, draw=black, thick, text centered, align=center, rounded corners, minimum height=1.5em, minimum width=3.5cm}}
+    \tikzset{input/.style={fill=gray!30, text width=3.5cm, draw=black, thick, text centered, rounded corners, minimum height=1.5em, minimum width=3.5cm}}
+    \tikzset{embedding/.style={fill=gray!40, text width=1.5cm, draw=black, thick, text centered, rounded corners, minimum height=1.5em, minimum width=1.5cm}}
+    \tikzset{operation/.style={draw, circle, thick, minimum size=0.75cm}}
+    \tikzset{arrowstyle/.style={-{Latex[length=3mm]}}}
+
+    \node (pitch) at (-3.0, 1.5) {Pitch};
+    \node (onset) at (-1.0, 1.5) {Onset};
+    \node (duration) at (1.0, 1.5) {Duration};
+    \node (velocity) at (3.0, 1.5) {Velocity};
+    \node[embedding] (pitch_embed) at (-3.0, 0) {Embed.};
+    \node[embedding] (onset_embed) at (-1.0, 0) {Embed.};
+    \node[embedding] (duration_embed) at (1.0, 0) {Embed.};
+    \node[embedding] (velocity_embed) at (3.0, 0) {Embed.};
+    \node[block] (pos_encoding) at (-3, -2.7) {Positional \\ Encoding};
+    \node[operation] (add1) at (0, -1.2) {$+$};
+    \node[operation] (add2) at (0, -2.7) {$+$};
+    \node[block] (transformer) at (0, -4.2) {Transformer Encoder};
+    \node[input] (linear) at (0, -5.7) {Linear};
+    \node (output) at (0, -7.2) {Output Probabilities};
+
+    \draw[arrowstyle] (pitch.south) -- (pitch_embed.north);
+    \draw[arrowstyle] (onset.south) -- (onset_embed.north);
+    \draw[arrowstyle] (duration.south) -- (duration_embed.north);
+    \draw[arrowstyle] (velocity.south) -- (velocity_embed.north);
+    \draw[arrowstyle] (pitch_embed.south) |- (add1.west);
+    \draw[arrowstyle] (onset_embed.south) |- (add1.west);
+    \draw[arrowstyle] (duration_embed.south) |- (add1.east);
+    \draw[arrowstyle] (velocity_embed.south) |- (add1.east);
+    \draw[arrowstyle] (pos_encoding.east) -- (add2.west);
+    \draw[arrowstyle] (add1) -- (add2);
+    \draw[arrowstyle] (add2) -- (transformer);
+    \draw[arrowstyle] (transformer) -- (linear);
+    \draw[arrowstyle] (linear) -- (output);
+
+\end{tikzpicture}
+}

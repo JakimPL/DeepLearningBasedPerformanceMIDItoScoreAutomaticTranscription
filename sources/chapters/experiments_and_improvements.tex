@@ -23,14 +23,48 @@ As the authors state at the end of the paper \cite{Liu2022}: \begin{quote}Possib
 
 \subsection{Vanilla Transformer}
 
-\missing
+We tested the vanilla architecture of the Transformer model, limited to the encoder only\footnote{There is no decoding in the transcription task.}. As a rule of thumb, we decided to keep the model size comparable to the original network. Different number of embedding sizes have been employed, ranging from $128$ to $512$. 
 
-% We hypothesize that Transformer architecture could outperform the proposed network but in a data-abundant scenario, but the entire dataset is still too small and needs more data-efficient models.
+As Transformers are primarily used for sequential discrete data, we used an additional encoding scheme with discretized note durations and note velocities. The note durations have been encoded using the same number of features as onsets, and the velocity, as a minor parameter, has been reduced to 8 discrete categories.
 
-% Moreover, the models' assignment heavy rely on small context of the piece. In other words, musical information that lies far apart from notes is not particularly useful for the inference.
+\begin{figure}[ht!]
+\centering
+\begin{tabular}{cc}a)
+\input{sources/graphs/vanilla_transformer_encoder.tex} & b)
+\input{sources/graphs/vanilla_transformer_encoder_with_embedding.tex}
+\end{tabular}
+\caption[The Transformer Encoder block.]{The Transformer Encoder block: a) default encoding, b) feature embedding. The positional encoding is optional.}
+\end{figure}
 
-\subsection{Attention}
+For the training, we decreased the learning rate from the default value \num{1e-3} to \num{1e-4} and we set a warmup of 2500 steps. Variants without positional encoding have been tested as well\footnote{Language models have been reported to learn comparably good without positional encodings \cite{Haviv2022}.}.
 
+We stick to the default \texttt{pytorch} implementation of the Transformer encoder layer.
+
+\subsection{Results}
+
+In general, Transformers didn't perform as good as the original model. Positional encoding worsened the results in almost all cases.
+
+We present various setups for all submodels: the beat model, the hand part model, the key and time signature models.
+
+\subsection{Beat Model}
+
+
+\subsection{Hand Part Model}
+
+The hand part model
+
+\subsection{Key Signature Model}
+
+\subsection{Time Signature Model}
+
+
+\section{Attention}
+
+In subsequent experiments we stepped out from the full Transformer for attention mechanism only. We wanted to check whether access to the entire tensor sequence is beneficial for the transcription task.
+
+We hypothesize that Transformer architecture could outperform the proposed network but in a data-abundant scenario, but the entire dataset is still too small and needs more data-efficient models.
+
+Moreover local features distilled from convolutional neural networks are sufficient most of the time. 
 \missing
 
 % We hypothesize that Transformer architecture could outperform the proposed network but in a data-abundant scenario, but the entire dataset is still too small and needs more data-efficient models.
@@ -80,11 +114,67 @@ Since the musical features are not spatial, the convolutions are one-dimensional
 \label{temporal_convolutional_network}
 \end{figure}
 
+We considered two variants of the model: with $128$ and $256$ number of filters per convolutional layer.
+
 The training/evaluation setup remained exactly the same.
 
 \subsection{Results}
 
 The experiments conducted using TCNs shows that, for certain models, the networks achieved comparable of superior results while having smaller number of parameters, and, due to the nature of the architecture, training much faster than recurrent networks. 
+
+\subsubsection{Beat Model}
+
+The neural network of the beat quantization model has been replaced by TCNn. The original model performed better than the both TCN variants, however the bigger TCN model performed only slightly worse than the original model.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/beat_tcn}
+\caption[Temporal Convolutional Network results for the beat model.]{Temporal Convolutional Network results for the beat model.}
+\label{beat_tcn}
+\end{table}
+
+Increasing the number of layers not only didn't improve the results but worsened the quality of the model.
+
+The dynamic programming algorithm for out-of-note beat prediction has been left intact.
+
+\subsubsection{Hand Part Model}
+
+The TCN hand part model comparable results for both two variants, while having a much smaller and faster network.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/hand_part_tcn}
+\caption[Temporal Convolutional Network results for the hand part model.]{Temporal Convolutional Network results for the hand part model.}
+\label{hand_part_tcn}
+\end{table}
+
+This shows no strong benefits of using recurrent networks in the case of hand part assignment.
+
+\subsubsection{Key Signature Model}
+
+The key signature model based on TCNs was not on par with the original model. The convolutional model struggled especially with rarer key signatures, which is visible by the discrepancy between macro and weighted metrics. 
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/key_signature_tcn}
+\caption[Temporal Convolutional Network results for the key signature model.]{Temporal Convolutional Network results for the key signature model.}
+\label{key_signature_tcn}
+\end{table}
+
+Variants with more layers didn't improve the quality of the model.
+
+\subsubsection{Time Signature Model}
+
+The second version of the model consisted only on convolutional layers, without GRUs. The TCN architecture outperformed this model greatly.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/time_signature_tcn}
+\caption[Temporal Convolutional Network results for the time signature model.]{Temporal Convolutional Network results for the time signature model.}
+\label{time_signature_tcn}
+\end{table}
+
+As in the case of ablation studies, the time signature model does not affect the MV2H metric.
 
 \section{Dynamics}
 

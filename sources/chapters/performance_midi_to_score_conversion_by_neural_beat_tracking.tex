@@ -315,7 +315,7 @@ The first augmentation resolved the problem without sacrificing the model perfor
 \label{ceteris_paribus}
 \end{figure}
 
-The second option may seem rather radical, however the results from ablation studies (Section \ref{ablation_studies}) show that the trade-off between robustness and the model performanc2 on the test score is very small, although not negligible.
+The second option may seem rather radical, however the results from ablation studies (Section \ref{ablation_studies}) show that there is no noticeable difference in the performance between hand part models with or without velocity feature.
 
 \begin{table}[ht!]
 \input{sources/tables/hand_part_perturbations}
@@ -455,11 +455,11 @@ As the hand part affects only voice separation subscale of the MV2H metric, we o
 \label{hand_part_ablation}
 \end{table}
 
-The results of both models are comparable in terms of $F_1$-score, although the voice separation MV2H submetric dropped. This suggests that the velocity may hint the hand assignment from time to time, but it is not (and it should not be) a direct indication of the hand assignment. Since durations and velocities make only two float features, including them into the model is of little computational cost.
+The results of both models are comparable in terms of all metrics. This suggests that the velocity may hint the hand assignment in some rare cases, but it is not (and it should not be) an indication of the hand assignment. 
 
 \subsubsection{Key Signature Model}
 
-Restricted to note pitches and onsets key signature model turned out to be of the same performance as the original one. 
+Restricted to note pitches and onsets key signature model turned out to be roughly of the same performance as the original one. 
 
 \begin{table}[ht!]
 \centering

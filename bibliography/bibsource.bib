@@ -922,3 +922,18 @@ Dong Xu},
     journal = {Wavelets, Time-Frequency Methods and Phase Space},
     doi = {10.1007/978-3-642-75988-8_28}
 }
+
+@inproceedings{Haviv2022,
+    title = "Transformer Language Models without Positional Encodings Still Learn Positional Information",
+    author = "Adi Haviv and Ori Ram and Ofir Press and Peter Izsak and Omer Levy",
+    editor = "Goldberg, Yoav and Kozareva, Zornitsa and Zhang, Yue",
+    booktitle = "Findings of the Association for Computational Linguistics: EMNLP 2022",
+    month = dec,
+    year = "2022",
+    address = "Abu Dhabi, United Arab Emirates",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.findings-emnlp.99",
+    doi = "10.18653/v1/2022.findings-emnlp.99",
+    pages = "1382--1390",
+    abstract = "Causal transformer language models (LMs), such as GPT-3, typically require some form of positional encoding, such as positional embeddings. However, we show that LMs without any explicit positional encoding are still competitive with standard models and that this phenomenon is robust across different datasets, model sizes, and sequence lengths.Probing experiments reveal that such models acquire an implicit notion of absolute positions throughout the network, effectively compensating for the missing information.We conjecture that causal attention enables the model to infer the number of predecessors that each token can attend to, thereby approximating its absolute position.Our findings indicate that causal LMs might derive positional awareness not only from the explicit positioning mechanism but also from the effects of the causal mask.",
+}

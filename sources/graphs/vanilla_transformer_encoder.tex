@@ -1,0 +1,24 @@
+\scalebox{0.8}{
+\begin{tikzpicture}
+    \tikzset{block/.style={fill=gray!20, text width=3.5cm, draw=black, thick, text centered, align=center, rounded corners, minimum height=1.5em, minimum width=3.5cm}}
+    \tikzset{input/.style={fill=gray!30, text width=3.5cm, draw=black, thick, text centered, rounded corners, minimum height=1.5em, minimum width=3.5cm}}
+    \tikzset{operation/.style={draw, circle, thick, minimum size=0.75cm}}
+    \tikzset{arrowstyle/.style={-{Latex[length=3mm]}}}
+
+    \node (inputs) at (0, 1.5) {Inputs};
+    \node[input] (input_embed) at (0, 0) {Input Embedding};
+    \node[block] (pos_encoding) at (-3, -1.2) {Positional \\ Encoding};
+    \node[operation] (add) at (0, -1.2) {$+$};
+    \node[block] (transformer) at (0, -2.7) {Transformer Encoder};
+    \node[input] (linear) at (0, -4.2) {Linear};
+    \node (output) at (0, -5.7) {Output Probabilities};
+
+    \draw[arrowstyle] (inputs.south) -- (input_embed.north);
+    \draw[arrowstyle] (input_embed.south) -- (add.north);
+    \draw[arrowstyle] (pos_encoding.east) -- (add.west);
+    \draw[arrowstyle] (add) -- (transformer);
+    \draw[arrowstyle] (transformer) -- (linear);
+    \draw[arrowstyle] (linear) -- (output);
+
+\end{tikzpicture}
+}
