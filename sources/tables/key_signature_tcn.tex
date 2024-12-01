@@ -1,6 +1,12 @@
 \begin{tabular}{cc|ccc}
     \multicolumn{2}{c|}{\textbf{Model}} & \textbf{Original} & \textbf{TCN 128} & \textbf{TCN 256} \\
     \multicolumn{2}{c|}{\textbf{Parameters}} & 10.5 M & 955 K & 3.7 M \\\hline
+    \multirow{3}{*}{Macro}    & Precision   & $\mathbf{0.741}$ & $0.447$          & $0.425$ \\
+    & Recall      & $\mathbf{0.697}$ & $0.345$          & $0.306$ \\
+    & $F_1$ score & $\mathbf{0.701}$ & $0.376$          & $0.344$ \\\hline
+    \multirow{3}{*}{Weighted} & Precision   & $0.891$          & $\mathbf{0.989}$ & $0.988$ \\
+    & Recall      & $\mathbf{0.785}$ & $0.657$          & $0.626$ \\
+    & $F_1$ score & $\mathbf{0.809}$ & $0.758$          & $0.736$ \\\hline
     \multirow{3}{*}{Macro}    & Precision   & $\mathbf{0.812}$ & $0.307$          & $0.351$ \\
     & Recall      & $\mathbf{0.789}$ & $0.239$          & $0.284$ \\
     & $F_1$ score & $\mathbf{0.787}$ & $0.260$          & $0.307$ \\\hline

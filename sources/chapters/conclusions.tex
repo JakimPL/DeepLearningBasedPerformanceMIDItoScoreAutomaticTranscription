@@ -1,10 +1,8 @@
 \chapter{Conclusions}
 
-We presented the performance MIDI to score automatic transcription task in detail, described the components and challenges 
+We presented the performance MIDI to score automatic transcription task in detail, described the components and challenges in that problem, presented earlier methods. Finally, we presented the state-of-the-art deep-learning model with in-depth analysis of its performance and behavior.
 
-and presented the state-of-the-art deep-learning model with in-depth analysis.
-
-The main goal of the work was to provide a detailed analysis on the state-of-the-art models for performance MIDI to score transcription. The analysis consisted of: \begin{itemize}
+The analysis consisted of: \begin{itemize}
 	\item Analyzing the performance and behavior of the main considered model.
 	\item Providing ablation studies due to found model anomalies, especially concerning undesired influence of velocity feature.
 	\item Developing local feature importance methods for further 
@@ -43,11 +41,13 @@ We are going to briefly describe all these experiments.
 
 \subsection{Transformers}
 
-Vanilla Transfomers didn't perform as good as other networks. We hypothesize that Transformer architecture could outperform the proposed network but in a data-abundant scenario. In the considered scenario the entire dataset is though too small (or not diverse enough) and needs more data-efficient models. The current dataset is rather small, and there is a need for more high-quality annotated performance MIDI data that is diverse and representative enough.
+Vanilla Transfomers didn't perform as good as other networks. We hypothesize that Transformer architecture could outperform the proposed network but in a data-abundant scenario. In the considered scenario the entire dataset is though too small (or not diverse enough) and needs more data-efficient models. The current dataset is rather small, and there is a need for more high-quality annotated performance MIDI data that is diverse and representative enough. For a limited amount of data, Transformers may be prone to overfitting.
 
 Another suspected reason is that some features like hand part assignment are local, and long-term dependencies are not that useful as they could be. 
 
 However, recently there were a successful use of Transformers in the field \cite{Beyer2024} on a subset of the considered dataset. The authors provide a Roformer encoder-decoder model with a custom token embedding. They also provided additional data augmentations as duration and onset jitter, introducing noise to the note beginning and ends. The authors modified the initial ACPAS dataset as they claim that a hand-crafted part of the is not representative for the performance. 
+
+This suggests that the traditional trigonometric positional encoding does not serve the purpose well, and some other form of positional encodings may significantly improve the quality of the model.
 
 However, the aforementioned work operates on different score format (MusicXML) and uses a different set of metrics than \cite{Liu2022}, making hard to compare both models without further investigation.
 

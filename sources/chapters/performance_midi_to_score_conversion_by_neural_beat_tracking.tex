@@ -75,7 +75,7 @@ The authors tried different encoding schemes, for pitches, onset times and durat
 
 As discussed in the Section \ref{music_score_encoding}, score elements assignment may be viewed as a function from a note sequence $\mathbf{X}$ into a score encoded by a tensor $\mathbf{Y}_n$ representing musical onsets, note values, key signature, time signature, and hand parts, for each note separately.
 
-Besides the quantization model, which relies on the beat tracking module, key signature, time signature and hand parts modules can be treated independently.
+Besides the quantization model, which relies on the beat tracking module, key signature, time signature and hand parts modules can be treated independently. \textbf{The quantization model is not used for the final MIDI creation, and we won't focus on that part in much detail}.
 
 \begin{figure}[!ht]
 \centering
@@ -83,9 +83,9 @@ Besides the quantization model, which relies on the beat tracking module, key si
 \caption[The initial architecture of the model.]{The initial architecture of the model proposed in \cite{Liu2022}. There are five separate modules of the entire model in total: \emph{beat}, \emph{quantization}, \emph{time signature}, \emph{key signature} and \emph{hand parts}.}
 \end{figure}
 
-The initial version of time signature model handled a finite set of time signature numerators and denominators, as described in Section \ref{music_score_encoding}. One year after the paper release, the model has been reduced to recognize only two the most common time signatures: ${4 \atop 4}$ and ${3 \atop 4}$, with removed GRUBlock. With an additional support of beat quantizer, additional two time signatures ${2 \atop 4}$ and ${6 \atop 8}$ could be recognized.  For performance analysis, we use the latter approach.
+The initial version of time signature model handled a finite set of time signature numerators and denominators, as described in Section \ref{music_score_encoding}, changing over time. Later, after the paper release, the model has been reduced to recognize only two the most common time signatures: ${4 \atop 4}$ and ${3 \atop 4}$, and only for the entire song. The architecture has been simplified to only convolutional layers, with the GRUBlock removed. With an additional support of beat quantizer, additional two time signatures ${2 \atop 4}$ and ${6 \atop 8}$ could be recognized. For performance analysis, we use the latter approach. Though, the role of the time signature model is rather supplementary: in principle, the time signature could be inferred from the beats and downbeats arrangement, obtained by the beat model.
 
-Instead of direct tempo estimation, for each note an \emph{inter-beat-interval} time is estimated using classification, capturing time intervals between successive beats with 10 ms resolution, up to $4$ seconds (401 features).
+Instead of direct tempo estimation, for each note an \emph{inter-beat-interval} time is estimated using classification, capturing time intervals between successive beats with 10 ms resolution, up to $4$ seconds. In the subsequent version of the beat model, the resolution has been increased to 401 features instead of 200.
 
 \section{Score Generation}
 
@@ -115,6 +115,13 @@ Certain musical features, such as time and key signatures, are not always encode
 \end{table}
 
 The datasets partially overlap; for instance, A-MAPS is derived in part from CPM. Authors avoid using the same pieces in train, validation and test sets by using distinct music piece labels coming from different datasets.
+
+\begin{table}[ht!]
+\begin{center}
+\input{sources/tables/dataset_annotations}
+\caption[Annotation structure for the subdatasets.]{Annotation structure for the subdatasets.}
+\end{center}
+\end{table}
 
 All dataset are jointly combined into one dataset, \emph{A Dataset of Aligned Classical Piano Audio and Scores} (ACPAS) \cite{Liu2021}.
 
@@ -158,6 +165,7 @@ For each performance, including the quantized MIDI file, annotations are provide
 \centering
 \input{sources/tables/annotations}
 \caption[Example of performance MIDI annotation in TSV format.]{An example of a performance MIDI annotation in TSV format. The first row indicates an initial time signature of ${6 \atop 8}$. The piece begins in the key of D major, encoded as 2.}
+\label{annotations}
 \end{table}
 
 The MIDI are actual human performances recorded via digital instruments. The annotations for performance provide ground-truth labels for all considered models. Otherwise, one would need to compare all different interpretations to a single score, risking judging the performance's fidelity to the original instead of transcription quality.

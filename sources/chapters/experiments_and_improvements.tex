@@ -5,6 +5,8 @@ In order to enhance the proposed model, we employed different strategies for fin
 	\item We tested more powerful architectures that proved to be successful (Transformers) in the case of natural language processing.
 	\item We extended a model with an additional module for handling other musical elements: dynamics.\end{itemize}
 	
+In subsequent experiments we stepped out from the full Transformer for attention mechanism only. We wanted to check whether access to the entire tensor sequence is beneficial for the transcription task. However, in the preliminary experiments combinations of self-attention mechanism with other components didn't perform as well as the base model nor Transformer-based ones.
+	
 Let us present results of these experiments.
 
 \section{Transformers}
@@ -23,9 +25,11 @@ As the authors state at the end of the paper \cite{Liu2022}: \begin{quote}Possib
 
 \subsection{Vanilla Transformer}
 
-We tested the vanilla architecture of the Transformer model, limited to the encoder only\footnote{There is no decoding in the transcription task.}. As a rule of thumb, we decided to keep the model size comparable to the original network. Different number of embedding sizes have been employed, ranging from $128$ to $512$. 
+We tested the vanilla architecture of the Transformer model, limited to the encoder only\footnote{There is no decoding in the transcription task.}. As a rule of thumb, we decided to keep the model size comparable to the original network. Different number of embedding sizes have been employed: $128$, $256$ and $512$ dimensions. 
 
-As Transformers are primarily used for sequential discrete data, we used an additional encoding scheme with discretized note durations and note velocities. The note durations have been encoded using the same number of features as onsets, and the velocity, as a minor parameter, has been reduced to 8 discrete categories.
+As Transformers are primarily used for sequential discrete data, we used an additional encoding scheme with discretized note durations and note velocities. Initial experiments showed the superiority of that scheme over durations and velocities encoded by floating point numbers.
+
+The note durations have been encoded using the same number of features as onsets, and the velocity, as a minor parameter, has been reduced to 8 discrete categories. In total, we have: \[\underbrace{128}_{\textrm{pitch}}+\underbrace{401}_{\textrm{onset}}+\underbrace{401}_{\textrm{duration}}+\underbrace{8}_{\textrm{velocity}} = 938\] features.
 
 \begin{figure}[ht!]
 \centering
@@ -36,40 +40,67 @@ As Transformers are primarily used for sequential discrete data, we used an addi
 \caption[The Transformer Encoder block.]{The Transformer Encoder block: a) default encoding, b) feature embedding. The positional encoding is optional.}
 \end{figure}
 
-For the training, we decreased the learning rate from the default value \num{1e-3} to \num{1e-4} and we set a warmup of 2500 steps. Variants without positional encoding have been tested as well\footnote{Language models have been reported to learn comparably good without positional encodings \cite{Haviv2022}.}.
+For the training, we decreased the learning rate from the default value \num{1e-3} to \num{1e-4} and we set a warmup of 2500 steps. Variants without positional encoding have been tested as well\footnote{Some language models have been reported to learn comparably good without positional encodings \cite{Haviv2022}.}.
 
 We stick to the default \texttt{pytorch} implementation of the Transformer encoder layer.
 
 \subsection{Results}
 
-In general, Transformers didn't perform as good as the original model. Positional encoding worsened the results in almost all cases.
+In general, Transformers didn't perform as good as the base model. Positional encoding worsened the results in most of the cases. Even with comparable validation results on certain subtask, Transformer-based models didn't generalize well enough to be on par with the original model. Only the Transformer-based time signature model outperformed the original, rather simple, convolutional neural classifier.
 
 We present various setups for all submodels: the beat model, the hand part model, the key and time signature models.
 
 \subsection{Beat Model}
 
+The vanilla Transformer architecture couldn't learn properly the correct beat prediction. It fails especially for downbeat classification, for all variants of the model.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/beat_transformer}
+\caption[Transformer results for the beat model.]{Transformer results for the beat model.}
+\label{beat_transformer}
+\end{table}
+
+A classical position encoding turned out to be not helpful, and even worsened the results. This suggests that for Transformers in order to properly predict the metric structure of a piece, a more adequate positional encoding is needed. The \emph{Rotary Positional Embedding} (RoPE) \cite{Su2024} is a fairly recent technique that could be worth examining.
 
 \subsection{Hand Part Model}
 
-The hand part model
+While the base hand part model outperformed all Transformer-based architectures, the latter in many cases were very close to the original one. Positional encoding slightly improved the results, although the overall results is comparable.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/hand_part_transformer}
+\caption[Transformer results for the hand part model.]{Transformer results for the hand part model.}
+\label{hand_part_transformer}
+\end{table}
+
+However, the MV2H metric results were significantly worse, despite comparable results on the validation set. 
 
 \subsection{Key Signature Model}
 
+For the key signature model, different Transformers achieved superior performance over the base model but usually only for one evaluation category. Yet, for all models, the MV2H results didn't get close to the the
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/key_signature_transformer}
+\caption[Transformer results for the key signature.]{Transformer results for the key signature.}
+\label{key_signature_transformer}
+\end{table}
+
+As in the case of the hand part model, MV2H metric results didn't reflect 
+
 \subsection{Time Signature Model}
 
+Transformed-based architectures outperformed the base convolutional layer network in the binary classification task.  
 
-\section{Attention}
+\begin{table}[ht!]
+\centering
+\input{sources/tables/time_signature_transformer}
+\caption[Transformer results for the time signature.]{Transformer results for the time signature.}
+\label{time_signature_transformer}
+\end{table}
 
-In subsequent experiments we stepped out from the full Transformer for attention mechanism only. We wanted to check whether access to the entire tensor sequence is beneficial for the transcription task.
-
-We hypothesize that Transformer architecture could outperform the proposed network but in a data-abundant scenario, but the entire dataset is still too small and needs more data-efficient models.
-
-Moreover local features distilled from convolutional neural networks are sufficient most of the time. 
-\missing
-
-% We hypothesize that Transformer architecture could outperform the proposed network but in a data-abundant scenario, but the entire dataset is still too small and needs more data-efficient models.
-
-% Moreover, the models' assignment heavy rely on small context of the piece. In other words, musical information that lies far apart from notes is not particularly useful for the inference.
+The time signature model does not affect the MV2H metric.
 
 \section{Temporal Convolutional Network}
 
@@ -178,10 +209,84 @@ As in the case of ablation studies, the time signature model does not affect the
 
 \section{Dynamics}
 
-\missing
+In a musical score, dynamics describe how loud (or hard) a note should be played. 
+
+We enhanced the model by adding a new transcription submodel. It is a classification model with ten categories, ranging from $\lilyDynamics{pppp}$ to $\lilyDynamics{ffff}$. We made a few simplifications regarding score markings interpretations: \begin{itemize}
+	\item \emph{Crescendi} and \emph{diminuendi} have been not considered.
+	\item Similarly, single note accents $>$ are ignored.
+	\item We assumed that each dynamics marking affects both hands at the same time. In other words, we disallow separate dynamics in our model.
+\end{itemize}
+
+Similarly to the key signature, the actual markings are shown only when the dynamics change. We assume then that the dynamics value is constant, and, if there is none provided, \emph{mezzo-forte} is a default one.
+
+The dynamics model is independent of all other submodels.
+
+\subsection{Architecture}
+
+The architecture of the model follows the same design as other submodules of the model. The dynamics module reflects the structure of the key signature model and consists of convolutional layers followed by a GRU block and the final linear output, with 10 categories.
+
+See Figure \ref{model_architecture_extended} for the model architecture, with later time signature model reduction and removed the quantization submodel.
 
 \begin{figure}[!ht]
 \centering
 \input{sources/graphs/model_architecture_extended}
-\caption[The extended architecture of the model.]{The extended architecture of the model by the \emph{dynamics} model.}
+\caption[The extended and architecture of the model.]{The extended architecture of the model by the \emph{dynamics} model. In the newer version of the base model, the time signature model has been reduced to a convolutional classifier. The quantization model is not shown as it does not take part in the final MIDI score generation.}
+\label{model_architecture_extended}
 \end{figure}
+
+The dynamics block may be replaced by any other considered block (Transformer or TCN) since the architecture of the entire model is modular.
+
+\subsection{Challenges}
+
+There were two main serious challenges in the process of development the dynamics model: \begin{itemize}
+	\item There are no direct dynamics annotations in any of the dataset considered.
+	\item The interpretation of dynamics in the performances are subjective and thus of a large variance.
+\end{itemize}
+
+\subsubsection{Dynamics Data}
+
+The ACPAS dataset does not contain information of dynamics at. No MIDI file encodes dynamics marking, nor any annotation describes that musical feature in the data. Out of all 3 sources, only the ASAP dataset provides dynamics annotations in the form, but only for the ground truth score in the MusicXML format.
+
+For the performance MIDI files from the ASAP dataset we recovered dynamics annotations using an imperfect automation process. The Table \ref{annotations_dynamics} shows the augmented annotations structure on an example.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/annotations_dynamics}
+\caption[Dynamics TSV annotations for the ASAP dataset.]{An augmented example of Table \ref{annotations}, with a starting \emph{forte} dynamics marking encoded as $f$.}
+\label{annotations_dynamics}
+\end{table}
+
+Moreover, not all musical pieces use dynamics. Pieces written for harpsichord or organs which lack dynamic control, as certain Bach's fugues. This makes the dataset even more limited in terms of dynamics markings.
+
+\subsubsection{Matching Algorithm}
+
+The matching algorithm parses the original ground truth MusicXML score file in order to extract positions of dynamics annotations aligned to certain block of notes.
+
+Performance MIDI files use absolute time in seconds, while scores measure time in beats, hence the positions cannot be compared directly. For initial experiments, we employed a naive matching algorithm based on the ratio of the number of already played notes to the number of all notes. Since some notes in the performance are either missing or superfluous, some slight deviations are allowed. 
+
+A chord with a dynamics annotation from a score is matched to a chord consisting of the same notes, and on the same position as in the original. Unmatched or misaligned chords are discarded. 
+
+A more sophisticated algorithm could be employed (as DTW), however we aimed for simplicity. We believe that the effort of providing high-quality dynamics data annotations to the dataset is unavoidable to achieve reliable dynamics models, and even more advanced matching algorithms are insufficient. The presented solution is only a preliminary work towards incorportating the richer vocabulary of a music score.
+
+\subsection{Subjectivity of Dynamics Markings}
+
+The second challenge comes from the fact that the dynamics annotations are not objective nor precise. The interpretation of these depends on musical context which is not only encompassed through MIDI data. That includes: the instrument on which the music is supposed to be played, music era and genre, and finally, the playing style of a performer. 
+
+This leads to a high variance of the expected outcome, as the correspondence between a score and a performance is far from strict.
+
+\subsection{Measure}
+
+We used a standard negative log-likelihood loss as in the case of key signature model. We employed the standard set of multiclass metrics, with $F_1$ macro metric as the final score, mimicking the evaluation scheme for the key signature model.
+
+In order to no penalize misclassification of similar classes (e.g. $\lilyDynamics{f}$ from $\lilyDynamics{ff}$), one could use standard distance between labels, where $0$ is the softest dynamics, $\lilyDynamics{pppp}$, and $1$ is the loudest possible one, $\lilyDynamics{ffff}$. Though, we used exactly the same setup as for the key signature model in our approach.
+
+\subsubsection{MV2HD}
+
+Since dynamics of notes can be evaluated independently of other features, assuming they correctly belong to the note stream, we propose an enhancement to the MV2H metric with the dynamics component: \textbf{MV2HD} where D stands for dynamics. The dynamics submetric is simply aforementioned $F_1$ score for correctly aligned notes, and the total metric can be viewed as: \[\textrm{MV2HD} = \tfrac{5}{6}\textrm{MV2HD} + \tfrac{1}{6}F_1\] where $F_1$ is the dynamics submetric score. Since the $F$-score lie in the unit interval $[0, 1]$, the MV2HD metric. The weight $\tfrac{1}{6}$ of dynamics is disputable, as the role of dynamics in the is of not the same importance as for instance meter alignment, however the value has been chosen for the sake of symmetry.
+
+Due to dynamics independency of other features, the metric still obeys the principle of disjoint penalties.
+
+As of now, the MV2HD metric is only a theoretical proposition and requires implementation to the Java code provided by \cite{McLeod2019}.
+
+\subsubsection{Results}
+
