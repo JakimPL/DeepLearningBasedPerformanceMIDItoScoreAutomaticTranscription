@@ -259,7 +259,62 @@ $F$ stands for the final MV2H metric, the average of all submetrics.
 
 \section{Case Studies}
 
-\missing
+We examined some concrete outputs from the validation and test sets, to see how well the model handled the transcription task. We wanted to see: \begin{itemize}
+	\item How often does the model its job right?
+	\item What are the common mistakes?
+	\item How disruptive are they to the score?
+	\item What effort one needs to perform to repair a transcription?
+\end{itemize}
+
+The model performed quite well on human-crafted MIDI songs. Transcriptions of live performance contained much more note metric alignment errors on average, and in many cases were unreadable due to overabundance of errors.
+
+In case of a single key/time signature misalignment, this is usa. Wrong key signatures happens rather rarely, but due to the time signature model constraints, non-standard odd signatures will always be attributed. If the error affects only that assignment, it requires only a single change in order to repair the transcription.
+
+For some pieces the model struggled to infer the correct meter grid. This happened rarely, mostly for odd time signatures. See Section \ref{meter_misalignment} for a concrete example.
+
+We observed the following other common issues.
+
+\subsection{Uncrecognized Pickup Measures}
+
+One of the most common errors in the transcription is a shift of the entire piece of a fraction of a measure. Unrecognized the first shortened measure (so called \emph{pickup measure}) is a special case of this error.
+
+\begin{figure}[ht!]
+\centering
+\begin{tabular}{c}a)
+\includesvg[width=0.95\textwidth]{images/albeniz_gen.svg} \\ b)
+\includesvg[width=0.95\textwidth]{images/albeniz_output_gen.svg}
+\end{tabular}
+\caption[\emph{Sevilla} by Isaac Albéniz.]{\emph{Sevilla} by Isaac Albéniz: a) the piece with a distinguished pickup measure (first three notes for each hand). Since the model assumed the time signature of ${3 \atop 4}$, the resulting content is shifted by the half of a measure. Other musical elements have been correctly assigned.}
+\label{albeniz}
+\end{figure}
+
+This type of error usually requires some manual adjustments: shifting the entire piece and, probably, fixing all ties of notes that fell out of theirs measure.
+
+\subsection{Hand Part Misalignments}
+
+Hand part misalignments do occur, although the assignment is mostly correct. Some errors of this type are obvious, but most of the time are rather hard to spot. However, even a single error of this type may sometimes render a piece unplayable which makes automatic transcriptions requiring further verification. 
+
+Sometimes, the piece is still playable with such transcription mistake and the error is tolerable but this of course slightly degrades the quality of the model's output.
+
+\subsection{Meter Misalignment}\label{meter_misalignment}
+
+\emph{Clair de Lune} is probably the most famous excerpt from Claude Debussy's piano suite \emph{Suite bergamasque}. The piece is played in a non-standard time signature ${9 \atop 8}$ in the key of D$\flat$.
+
+\begin{figure}[ht!]
+\centering
+\begin{tabular}{c}a)
+\includesvg[width=0.95\textwidth]{images/claire_de_lune_gen.svg} \\ b)
+\includesvg[width=0.95\textwidth]{images/claire_de_lune_output_gen.svg}
+\end{tabular}
+\caption[Claude Debussy's \emph{Claire de Lune}.]{The beginning of the Claude Debussy's \emph{Claire de Lune}: a) the original score from the MAPS test dataset, b) the model transcription. The model misaligned the metric structure by mixing quarter notes with triplets, which break the inner relationship between notes within a measure. Some right-hand notes (e.g. C in the second measure) are misattributed. The key signature has been assigned correctly.}
+\label{claire_de_lune}
+\end{figure}
+
+The model ,,insist'' on the standard ${4 \atop 4}$, imposing mixture of quarter notes and triplets, which does not align to the original meter structure. As the relationships between consecutive notes are not preserved, simply switching to the correct time signature is not going to fix that issue. Correcting the transcription requires a lot of effort.
+
+These types of errors do occur, especially for odd time signatures. They are rather severe. 
+
+In many situations, the error affects only a small part of a piece, or even a single phrase. Depending on whether the next beat is predicted correctly, the severity of that error may vary greatly. Accumulation of such errors requires a lot of effort to fix the transcription. This happens quite frequently for transcriptions of fast-played real performances.
 
 \section{Robustness Analysis} \label{robustness_analysis}
 
@@ -320,7 +375,7 @@ The first augmentation resolved the problem without sacrificing the model perfor
 \centering
 \includesvg[width=0.9\textwidth]{images/ceteris_paribus_results_h_augmentation.svg}
 \caption[Hand part assignment after data augmentation.]{Hand part assignment after data augmentation. Even for the extreme case of $\sigma_v = 64$, the model has been only slightly affected by the transformation.}
-\label{ceteris_paribus}
+\label{ceteris_paribus_h_augmentation}
 \end{figure}
 
 The second option may seem rather radical, however the results from ablation studies (Section \ref{ablation_studies}) show that there is no noticeable difference in the performance between hand part models with or without velocity feature.

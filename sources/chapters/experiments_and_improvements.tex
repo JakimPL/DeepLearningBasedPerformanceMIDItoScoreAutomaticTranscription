@@ -27,7 +27,7 @@ As the authors state at the end of the paper \cite{Liu2022}: \begin{quote}Possib
 
 We tested the vanilla architecture of the Transformer model, limited to the encoder only\footnote{There is no decoding in the transcription task.}. As a rule of thumb, we decided to keep the model size comparable to the original network. Different number of embedding sizes have been employed: $128$, $256$ and $512$ dimensions. 
 
-As Transformers are primarily used for sequential discrete data, we used an additional encoding scheme with discretized note durations and note velocities. Initial experiments showed the superiority of that scheme over durations and velocities encoded by floating point numbers.
+As Transformers are primarily used for sequential discrete data, we used an additional encoding scheme with discretized note durations and note velocities. We also added feature embeddings, concatenated before positional encoding. Preliminary experiments showed the superiority of that scheme over durations and velocities encoded by floating point numbers. See Figure \ref{vanilla_transformer_encoder_with_embedding} for architecture comparison.
 
 The note durations have been encoded using the same number of features as onsets, and the velocity, as a minor parameter, has been reduced to 8 discrete categories. In total, we have: \[\underbrace{128}_{\textrm{pitch}}+\underbrace{401}_{\textrm{onset}}+\underbrace{401}_{\textrm{duration}}+\underbrace{8}_{\textrm{velocity}} = 938\] features.
 
@@ -37,7 +37,8 @@ The note durations have been encoded using the same number of features as onsets
 \input{sources/graphs/vanilla_transformer_encoder.tex} & b)
 \input{sources/graphs/vanilla_transformer_encoder_with_embedding.tex}
 \end{tabular}
-\caption[The Transformer Encoder block.]{The Transformer Encoder block: a) default encoding, b) feature embedding. The positional encoding is optional.}
+\caption[The Transformer Encoder block.]{The Transformer Encoder block: a) default encoding, b) feature embedding. The second architecture has been chosen for the further experiments. The positional encoding is optional.}
+\label{vanilla_transformer_encoder_with_embedding}
 \end{figure}
 
 For the training, we decreased the learning rate from the default value \num{1e-3} to \num{1e-4} and we set a warmup of 2500 steps. Variants without positional encoding have been tested as well\footnote{Some language models have been reported to learn comparably good without positional encodings \cite{Haviv2022}.}.
@@ -61,7 +62,7 @@ The vanilla Transformer architecture couldn't learn properly the correct beat pr
 \label{beat_transformer}
 \end{table}
 
-A classical position encoding turned out to be not helpful, and even worsened the results. This suggests that for Transformers in order to properly predict the metric structure of a piece, a more adequate positional encoding is needed. The \emph{Rotary Positional Embedding} (RoPE) \cite{Su2024} is a fairly recent technique that could be worth examining.
+A classical position encoding turned out to be not helpful, and even worsened the results. This suggests that for Transformers in order to properly predict the metric structure of a piece, a more adequate positional encoding is needed. The \emph{Rotary Positional Embedding} (RoPE) \cite{Su2024} is a fairly recent technique that could be worth examining in that scenario.
 
 \subsection{Hand Part Model}
 
@@ -74,11 +75,11 @@ While the base hand part model outperformed all Transformer-based architectures,
 \label{hand_part_transformer}
 \end{table}
 
-However, the MV2H metric results were significantly worse, despite comparable results on the validation set. 
+However, the MV2H metric results were noticeably worse, despite comparable results on the validation set. 
 
 \subsection{Key Signature Model}
 
-For the key signature model, different Transformers achieved superior performance over the base model but usually only for one evaluation category. Yet, for all models, the MV2H results didn't get close to the the
+For the key signature model, different Transformers achieved superior performance over the base model but usually only for one evaluation category. Yet, for all models, the MV2H results didn't get close to the the original, high result of the harmony component.
 
 \begin{table}[ht!]
 \centering
@@ -86,8 +87,6 @@ For the key signature model, different Transformers achieved superior performanc
 \caption[Transformer results for the key signature.]{Transformer results for the key signature.}
 \label{key_signature_transformer}
 \end{table}
-
-As in the case of the hand part model, MV2H metric results didn't reflect 
 
 \subsection{Time Signature Model}
 
@@ -290,3 +289,4 @@ As of now, the MV2HD metric is only a theoretical proposition and requires imple
 
 \subsubsection{Results}
 
+\missing
