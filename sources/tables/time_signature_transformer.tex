@@ -1,12 +1,12 @@
-\begin{tabular}{cc|cccc}
-    \multicolumn{2}{c|}{\textbf{Model}} & \textbf{Base} & \textbf{T128} & \textbf{T256} & \textbf{T512} \\
-    \multicolumn{2}{c|}{\textbf{Parameters}} & 0.7 M & 1.5 M & 3.7 M & 9.9 M \\\hline
-    \multirow{4}{*}{Validation} & Accuracy    & $0.560$          & $0.506$          & $0.606$          & $\mathbf{0.663}$ \\
-    & Precision   & $\mathbf{0.315}$ & $0.305$          & $0.245$          & $0.297$          \\
-    & Recall      & $0.230$          & $0.218$          & $0.244$          & $\mathbf{0.296}$ \\
-    & $F_1$ score & $0.258$          & $0.236$          & $0.245$          & $\mathbf{0.296}$ \\\hline
-    \multirow{4}{*}{Test}       & Accuracy    & $0.552$          & $\mathbf{0.621}$ & $\mathbf{0.621}$ & $0.586$          \\
-    & Precision   & $0.444$          & $0.526$          & $\mathbf{0.546}$ & $0.500$          \\
-    & Recall      & $0.333$          & $\mathbf{0.833}$ & $0.500$          & $0.167$          \\
-    & $F_1$ score & $0.381$          & $\mathbf{0.645}$ & $0.522$          & $0.250$          \\
+\begin{tabular}{cc|ccccccc}
+    \multicolumn{2}{c|}{\textbf{Model}} & \textbf{Base} & \textbf{T128} & \textbf{T128 PE} & \textbf{T256} & \textbf{T256 PE} & \textbf{T512} & \textbf{T512 PE}\\
+    \multicolumn{2}{c|}{\textbf{Parameters}} & 0.7 M & 1.5 M & 1.5 M & 3.7 M & 3.7 M & 9.9 M & 9.9 M \\\hline
+    \multirow{4}{*}{Validation} & acc  & $0.560$          & $0.506$          & $\mathbf{0.677}$ & $0.606$ & $0.636$ & $0.663$ & $0.663$ \\
+    & prec & $\mathbf{0.315}$ & $0.305$          & $0.277$          & $0.245$ & $0.291$          & $0.297$          & $0.297$          \\
+    & rec  & $0.230$          & $0.218$          & $0.229$          & $0.244$ & $0.292$          & $\mathbf{0.296}$ & $\mathbf{0.296}$ \\
+    & $F$  & $0.258$          & $0.236$          & $0.238$          & $0.245$ & $0.291$          & $\mathbf{0.296}$ & $\mathbf{0.296}$ \\\hline
+    \multirow{4}{*}{Test}       & acc  & $0.552$          & $0.621$          & $0.621$          & $0.621$ & $\mathbf{0.724}$ & $0.586$ & $0.586$ \\
+    & prec & $0.444$          & $0.526$          & $0.529$          & $0.546$ & $\mathbf{0.833}$ & $0.500$          & $0.500$          \\
+    & rec  & $0.333$          & $\mathbf{0.833}$ & $0.750$          & $0.500$ & $0.417$          & $0.167$          & $0.167$          \\
+    & $F$  & $0.381$          & $\mathbf{0.645}$ & $0.621$          & $0.522$ & $0.556$          & $0.250$          & $0.250$          \\
 \end{tabular}

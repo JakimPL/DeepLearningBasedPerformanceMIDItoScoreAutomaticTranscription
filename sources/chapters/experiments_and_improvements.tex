@@ -5,7 +5,7 @@ In order to enhance the proposed model, we employed different strategies for fin
 	\item Experimenting with more powerful architectures, such as Transformers, which have demonstrated remarkable success in natural language processing (NLP).
 	\item Extending the model by introducing an additional module for handling other musical elements: dynamics. \end{itemize}
 	
-In subsequent experiments we stepped out from the full Transformer for attention mechanism only. We wanted to check whether access to the entire tensor sequence is beneficial for the transcription task. However, in the preliminary experiments combinations of self-attention mechanism with other components didn't perform as well as the base model nor Transformer-based ones.
+In subsequent experiments we stepped out from the full Transformer for attention mechanism only. We wanted to check whether access to the entire tensor sequence is beneficial for the transcription task. However, in the preliminary experiments combinations of self-attention mechanism with other components didn't perform as well as the base model nor Transformer-based ones, and the self-attention-based models have been excluded from the study.
 	
 Let us present results of these experiments.
 
@@ -54,11 +54,13 @@ The vanilla Transformer architecture failed to learn accurate beat predictions, 
 \begin{table}[ht!]
 \centering
 \input{sources/tables/beat_transformer}
-\caption[Transformer results for the beat model.]{Transformer results for the beat model.}
+\caption[Transformer results for the beat model.]{Transformer results for the beat model. The symbol \emph{b} stands for beat prediction, and \emph{db} stands for downbeat classification.}
 \label{beat_transformer}
 \end{table}
 
 Sinusoidal position encoding turned out to be not helpful, and even worsened the results. This suggests that for Transformers in order to properly predict the metric structure of a piece, a more adequate positional encoding is needed. The \emph{Rotary Positional Embedding} (RoPE) \cite{Su2024} is a fairly recent technique that may warrant further exploration in this context.
+
+Additionally, a note’s position within a song does not map cleanly onto tensor indices, as tensor positions lack a direct correspondence to the actual temporal context of note onsets. This indicates a need for an alternative positional encoding feature that can represent a note’s position relative to its onset.
 
 \subsection{Hand Part Model}
 
@@ -86,7 +88,7 @@ For the key signature model, some Transformer configurations achieved superior p
 
 \subsection{Time Signature Model}
 
-Transformer-based architectures outperformed the original convolutional network for the binary time signature classification task.
+Transformer-based architectures outperformed the original convolutional network for the binary time signature classification task. This is rather unsurprising as the base network was not so expressive.
 
 \begin{table}[ht!]
 \centering
@@ -102,7 +104,8 @@ The time signature model does not affect the MV2H metric.
 While Transformers hold significant promise for sequence modeling tasks, the results suggest that their application to musical transcription may require more specialized adaptations. In particular: \begin{itemize}
 	\item Transformers struggled to outperform the base model for the beat prediction. This suggests that a different quantization scheme may be needed, potentially involving modifications to the target variables.
 	\item Classical positional encodings were often detrimental, indicating a need for more sophisticated positional representations. Moreover, note positions in a sequence do not directly map to tensor indices, and the order of notes alone provides insufficient information about temporal relationships within the sequence.
-	\item  The dataset used in these experiments is not fully representative of performance MIDI, as it includes a significant number of human-crafted MIDI files. Transformers likely require larger and more diverse datasets to achieve superior results. Addressing that issue demands refining the dataset and acquiring more data of high quality.
+	\item The dataset used in these experiments is not fully representative of performance MIDI, as it includes a significant number of human-crafted MIDI files. Transformers likely require larger and more diverse datasets to achieve superior results. Addressing that issue demands refining the dataset and acquiring more data of high quality.
+	\item The time signature model could benefit from two enhancements: expanding its scope to include a wider variety of time signature classes as initially, and incorporating beat and downbeat predictions as auxiliary inputs to refine its classification accuracy.
 \end{itemize}
 
 \section{Temporal Convolutional Network}
@@ -154,6 +157,8 @@ We tested two model variants, with $128$ and $256$ filters per convolutional lay
 
 Experiments with TCNs showed that these networks achieved comparable or superior performance for certain transcription subtasks, while requiring fewer parameters and training faster compared to recurrent networks.
 
+We use standard abbreviations for the metrics: \emph{acc}, \emph{prec}, \emph{rec} and $F$ for accuracy, precision, recall and $F_1$ score, respectively.
+
 \subsubsection{Beat Model}
 
 The beat quantization task was less suited to the TCN architecture. While the larger TCN variant performed close to the baseline, the original model consistently outperformed both TCN variants.
@@ -171,7 +176,7 @@ The dynamic programming algorithm for out-of-note beat prediction has been left 
 
 \subsubsection{Hand Part Model}
 
-The TCN-based hand part model achieved results comparable to the baseline while benefiting from a significantly smaller and faster architecture.
+The TCN-based hand part model achieved results comparable to the baseline while benefiting from a significantly smaller and faster architecture. This suggests that recurrent networks are not strictly necessary for the hand part assignment task.
 
 \begin{table}[ht!]
 \centering
@@ -180,11 +185,9 @@ The TCN-based hand part model achieved results comparable to the baseline while 
 \label{hand_part_tcn}
 \end{table}
 
-This suggests that recurrent networks are not strictly necessary for the hand part assignment task.
-
 \subsubsection{Key Signature Model}
 
-The TCN-based key signature model struggled with rarer key signatures, resulting in a noticeable gap between macro and weighted metrics.
+The TCN-based key signature model struggled with rarer key signatures, resulting in a noticeable gap between macro and weighted metrics. Variants with more layers didn't improve the quality of the model.
 
 \begin{table}[ht!]
 \centering
@@ -193,11 +196,9 @@ The TCN-based key signature model struggled with rarer key signatures, resulting
 \label{key_signature_tcn}
 \end{table}
 
-Variants with more layers didn't improve the quality of the model.
-
 \subsubsection{Time Signature Model}
 
-The TCN-based time signature model significantly outperformed the baseline convolutional network.
+The TCN-based time signature model significantly outperformed the baseline convolutional network. As observed in earlier experiments, time signature estimation does not impact the MV2H metric.
 
 \begin{table}[ht!]
 \centering
@@ -206,9 +207,8 @@ The TCN-based time signature model significantly outperformed the baseline convo
 \label{time_signature_tcn}
 \end{table}
 
-As observed in earlier experiments, time signature estimation does not impact the MV2H metric.
-
 \section{Dynamics}
+
 In a musical score, dynamics indicate the intensity or volume with which notes should be played. To enhance the transcription capabilities of the model, we introduced a new submodule for transcribing dynamics. This submodule classifies notes into one of ten dynamic levels, ranging from $\lilyDynamics{pppp}$ (very soft) to $\lilyDynamics{ffff}$ (very loud). Several simplifications were made to address common challenges in interpreting dynamics:
 \begin{itemize}
 	\item Gradual dynamic changes such as \emph{crescendo} and \emph{diminuendo} were excluded.

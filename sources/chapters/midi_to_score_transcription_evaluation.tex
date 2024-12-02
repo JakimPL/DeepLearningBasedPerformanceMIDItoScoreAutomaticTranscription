@@ -18,9 +18,9 @@ As a result, more often than not, single aspects of a model are being analyzed a
 
 Earlier approaches to assessing transcription quality were often lacking in rigor. Some common pitfalls in the literature include:\begin{itemize}
 	\item {\bf Lack of Thorough Analysis}. A rigorous evaluation requires an assessment of all relevant aspects of a proposed solution. Failing to attribute vital parts of a model or algorithm renders the analysis incomplete.
-	\item {\bf Limited Case Demonstration}. The results of a algorithm were often demonstrated on a very limited set of musical pieces (\cite{Takeda2002} or \cite{Yang2005}). It is not obvious how a model performs outside showcased examples, and it endangers the research to cherry-picking \missing.
+	\item {\bf Limited Case Demonstration}. The results of a algorithm were often demonstrated on a very limited set of musical pieces (\cite{Takeda2002} or \cite{Yang2005}). It is not obvious how a model performs outside showcased examples, and it endangers the research to cherry-picking.
 	\item {\bf No Public Dataset or Reproducibility}. For both training and evaluation, the dataset used should be clearly described and, ideally, made publicly available. Without this, results are difficult or impossible to reproduce, as seen in \cite{Takeda2002}.
-	\item {\bf Absence of Human Expert Evaluation}. While statistical benchmarks are necessary for quantitative assessment, there may overlook nuances that are essential for performers relying on transcriptions.
+	\item {\bf Absence of Human Expert Evaluation}. While statistical benchmarks are necessary for quantitative assessment, there may overlook nuances that are essential for performers relying on transcriptions. 
 \end{itemize} 
 
 In the following sections we will explore various attempts from the literature to provide transcription quality metric.
@@ -50,11 +50,11 @@ The \emph{cross-entropy loss} is a commonly used loss function for training clas
 
 In binary classification, one class is labeled as \emph{positive} (or \emph{true}) and the other as \emph{negative} (or \emph{false}). Items belonging to a class are \emph{relevant}, while those predicted by the model as belonging to the class are considered \emph{retrieved} \cite[p. 76]{Roelleke2022}.
 
-The \emph{accuracy} of a predictor is defined as the ratio of correctly identified elements to the total number of elements: \[\textrm{accuracy} = \frac{\textrm{true positives} + \textrm{true negatives}}{\textrm{true positives} + \textrm{false positives} +\textrm{true negatives} + \textrm{false negatives}}\] emph{Precision} represents the proportion of correctly retrieved items to the total number of items retrieved: \[\textrm{precision} = \frac{\textrm{true positives}}{\textrm{true positives} + \textrm{false positives}}\] \emph{Recall} measures the proportion of correctly retrieved items to the total number of relevant items: \[\textrm{recall} = \frac{\textrm{true positives}}{\textrm{true positives} + \textrm{false negatives}}\] These definitions naturally extend to multiclass classification.
+The \emph{accuracy} of a predictor is defined as the ratio of correctly identified elements to the total number of elements: \[\textrm{accuracy} = \frac{\textrm{true positives} + \textrm{true negatives}}{\textrm{true positives} + \textrm{false positives} +\textrm{true negatives} + \textrm{false negatives}}\] \emph{Precision} represents the proportion of correctly retrieved items to the total number of items retrieved: \[\textrm{precision} = \frac{\textrm{true positives}}{\textrm{true positives} + \textrm{false positives}}\] \emph{Recall} measures the proportion of correctly retrieved items to the total number of relevant items: \[\textrm{recall} = \frac{\textrm{true positives}}{\textrm{true positives} + \textrm{false negatives}}\] These definitions naturally extend to multiclass classification.
 
 \subsection{$F_1$ score}
 
-\emph{$F_1$ score} (\emph{$F$-measure}) is a measure that equally balances precision and recall. It is defined as a harmonic mean of the precision and recall: \[F_1 = 2 \times \frac{\textrm{precision} \times \textrm{recall}}{\textrm{precision} + \textrm{recall}}\] In case of multiclass classification, we may distinguish two methods of calculating the metrics: \emph{micro} and \emph{macro} \cite[p. 259--261]{Manning2008}. For multiclass classification, two common methods can be used to compute the $F$-measure: \emph{macro} and \emph{micro} averaging \cite[p. 259--261]{Manning2008}. These approaches handle cases of class imbalance differently:\begin{itemize}
+\emph{$F_1$ score} (\emph{$F$-measure}) is a measure that equally balances precision and recall. It is defined as a harmonic mean of the precision and recall: \[F_1 = 2 \times \frac{\textrm{precision} \times \textrm{recall}}{\textrm{precision} + \textrm{recall}}\] For multiclass classification, two common methods can be used to compute the $F$-measure: \emph{macro} and \emph{micro} averaging \cite[p. 259--261]{Manning2008}. These approaches handle cases of class imbalance differently:\begin{itemize}
 	\item \textbf{Macro $F_1$}: The unweighted average of $F_1$ scores across all classes, treating each class equally.
 	\item \textbf{Micro $F_1$}: A weighted average of $F_1$ scores, where weights correspond to the number of instances in each class.\end{itemize}
 
@@ -87,9 +87,9 @@ For more information the exact problem statement, the procedure and algorithm ev
 
 \subsection{Rhythm Correction Cost}
 
-In music, note values are not absolute and depend on the tempo choice. A quarter note played a tempo $60$ beats per minute ($\quarterNote = 60$) lasts the same duration as a half note played at a tempo 120 BPM ($\halfNote = 120$). The choice of the unit is to somewhat arbitrary. Yet, doubling or halving the tempo may disrupt transcription metrics, as some naive metrics might inaccurately treat an entire passage as incorrect when the tempo is altered. This remark points out that the metric values should be analyzed in relationship to other notes, not as absolute values \cite[p. 7]{Nakamura2017c}.
+In music, note values are not absolute and depend on the tempo choice. A quarter note played at a tempo $60$ beats per minute lasts the same duration as a half note played at a tempo 120 BPM. The choice of the unit is to somewhat arbitrary. Yet, doubling or halving the tempo may disrupt transcription metrics, as some naive metrics might inaccurately treat an entire passage as incorrect when the tempo is altered. This remark points out that the metric values should be analyzed in relationship to other notes, not as absolute values \cite[p. 7]{Nakamura2017c}.
 
-To address this issue, Nakamura et al. introduced \emph{Rhythm Correction Cost} (RCC), which is defined as: ``the minimum number of scale and shift operations for onset score times'' \cite{Nakamura2018}. This metric takes into account tempo variations and adjusts for structural differences in note onsets between the transcription and the ground truth via two operations: scales and shifts.
+To address this issue, Nakamura et al. introduced \emph{Rhythm Correction Cost} (RCC), which is defined as: \emph{the minimum number of scale and shift operations for onset score times} \cite{Nakamura2018}. This metric takes into account tempo variations and adjusts for structural differences in note onsets between the transcription and the ground truth via two operations: scales and shifts.
 
 \begin{figure}[ht!]
 \centering
@@ -130,7 +130,7 @@ The metric is the main evaluation tool used for the main model quality assessmen
 
 \subsection{Components of the MV2H Metric}
 
-The MV2H metric is composed of five submetrics, each targeting a distinct transcription task. These metrics are calculated independently and combined to form the overall MV2H score, which, as previously, the arithmetic mean of all sub-metrics.
+The MV2H metric is composed of five submetrics, each targeting a distinct transcription task. These metrics are calculated independently and combined to form the overall MV2H score, which, as previously, the arithmetic mean of all submetrics.
 
 Below, we describe each component and how it is calculated.
 
@@ -158,7 +158,7 @@ To calculate the metrical alignment score, the system compares the onset and off
 
 \subsubsection{Note Value Detection}
 
-Note value detection evaluates the accuracy with which an AMT system transcribes the duration of each note. Note durations, referred to as note values in musical terminology, are normalized to account for tempo variations. This ensures that a note played in a faster tempo is still transcribed correctly relative to the piece's overall structure. For example, a quarter note at $60$ BPM ($\quarterNote = 90$) should be equivalent in duration to a half note at $120$ BPM ($\halfNote = 120$)\footnote{Unlike the previous set of metrics and the RCC component, the tempo misalignment is not considered here as an error.}.
+Note value detection evaluates the accuracy with which an AMT system transcribes the duration of each note. Note durations, referred to as note values in musical terminology, are normalized to account for tempo variations. This ensures that a note played in a faster tempo is still transcribed correctly relative to the piece's overall structure. For example, a quarter note at $60$ BPM should be equivalent in duration to a half note at $120$ BPM\footnote{Unlike the previous set of metrics and the RCC component, the tempo misalignment is not considered here as an error.}.
 
 Only a subset of correctly identified notes is subject to the metric. A note is included in the analysis, if corresponds with a true positive ground-truth: \begin{enumerate}
 	\item multi-pitch detection
@@ -173,7 +173,7 @@ Harmonic analysis assesses the system’s ability to correctly transcribe the ha
 
 The metric is based on standard key detection evaluation \cite{Raffel2014}, which measures how closely the transcribed key signature matches the ground truth, with partial credit given for related keys (e.g., relative or parallel major/minor of the correct key or key a fifth too high).
 
-The standard chord tracking evaluation is \emph{chord symbol recall} (CSR), described in detail in \cite{Harte2010}. It can be defined as ``proportion of the input for which the annotated chord matches the ground truth chord'' \cite{McLeod2018}.
+The standard chord tracking evaluation is \emph{chord symbol recall} (CSR), described in detail in \cite{Harte2010}. It can be defined as \emph{proportion of the input for which the annotated chord matches the ground truth chord} \cite{McLeod2018}.
 
 The Harmonic Analysis metric is the arithmetic mean of key detection metric and CSR.
 

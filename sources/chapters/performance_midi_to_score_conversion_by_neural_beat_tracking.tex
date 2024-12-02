@@ -83,9 +83,9 @@ Besides the quantization model, which relies on the beat tracking module, key si
 \caption[The initial architecture of the model.]{The initial architecture of the model proposed in \cite{Liu2022}. There are five separate modules of the entire model in total: \emph{beat}, \emph{quantization}, \emph{time signature}, \emph{key signature} and \emph{hand parts}.}
 \end{figure}
 
-The initial version of time signature model handled a finite set of time signature numerators and denominators, as described in Section \ref{music_score_encoding}, changing over time. Later, after the paper release, the model has been reduced to recognize only two the most common time signatures: ${4 \atop 4}$ and ${3 \atop 4}$, and only for the entire song. The architecture has been simplified to only convolutional layers, with the GRUBlock removed. With an additional support of beat quantizer, additional two time signatures ${2 \atop 4}$ and ${6 \atop 8}$ could be recognized. For performance analysis, we use the latter approach. Though, the role of the time signature model is rather supplementary: in principle, the time signature could be inferred from the beats and downbeats arrangement, obtained by the beat model.
+The initial version of time signature model handled a finite set of time signature numerators and denominators, as described in Section \ref{music_score_encoding}, changing over time. Later, after the paper release, the model has been reduced to recognize only two the most common time signatures: $\lilyTimeSignature{4}{4}$ and $\lilyTimeSignature{3}{4}$, and only for the entire song. The architecture has been simplified to only convolutional layers, with the GRUBlock removed. With an additional support of beat quantizer, additional two time signatures ${2 \atop 4}$ and ${6 \atop 8}$ could be recognized. For performance analysis, we use the latter approach. Though, the role of the time signature model is rather supplementary: in principle, the time signature could be inferred from the beats and downbeats arrangement, obtained by the beat model.
 
-Instead of direct tempo estimation, for each note an \emph{inter-beat-interval} time is estimated using classification, capturing time intervals between successive beats with 10 ms resolution, up to $4$ seconds. In the subsequent version of the beat model, the resolution has been increased to 401 features instead of 200.
+Instead of direct tempo estimation, for each note an \emph{inter-beat-interval} time is estimated using classification, capturing time intervals between successive beats with 10 ms resolution, up to $4$ seconds.
 
 \section{Score Generation}
 
@@ -93,7 +93,7 @@ The final score generation process synthesizes the source MIDI stream, incorpora
 
 \section{Training and Evaluation}
 
-The training and evaluation procedures were implemented to closely replicate those described by the original authors. In the following sections, we provide a detailed overview of the datasets, augmentation techniques, and specific configurations for training and evaluation setups.
+The training and evaluation procedures were implemented to replicate those described by the original authors. In the following sections, we provide a detailed overview of the datasets, augmentation techniques, and specific configurations for training and evaluation setups.
 
 \subsection{Datasets}\label{datasets}
 
@@ -103,7 +103,7 @@ The dataset used by the authors of the paper \cite{Liu2022} integrates three sou
 	\item The \emph{Aligned Scores and Performances} (ASAP) dataset \cite{Foscarin2020}.
 \end{itemize}
 
-The datasets consists of a variety of classical piano pieces by composers including as Bach, Mozart, Beethoven, Schubert, Chopin, Liszt, and others from the Western European classica repertoire.
+The datasets consists of a variety of classical piano pieces by composers including as Bach, Mozart, Beethoven, Schubert, Chopin, Liszt, and others from the Western European classical repertoire.
 
 Certain musical features, such as time and key signatures, are not always encoded in MIDI files. Consequently, the MIDI files have been annotated using different strategies.
 
@@ -135,7 +135,7 @@ The \emph{Classical Piano MIDI} (CPM) database was created by Bernd Krüger, who
 
 The dataset consists 337 pieces with a cumulative duration of approximately $23$ hours. All MIDI files are score-informed, with separate tracks for the left and right hands.  and time signatures are encoded in the MIDI files as meta messages.
 
-However, despite the fact that the MIDI files are tempo-varied, they were manually crafted, not performed. For instance, note onsets which lie on the same beat, occur simultaneously. In musical performance, even chords are played with certain time variation. Some authors disregard the source as not reliable. Beyer and Dai claim \cite{Beyer2024}: \begin{quote}he underlying data is score-derived and has been manually adjusted to represent aspects of performance and score at the same time. This leads to information leakage as highly regular onset/offset alignment remains in the \emph{performance} data.\end{quote}
+However, despite the fact that the MIDI files are tempo-varied, they were manually crafted, not performed. For instance, note onsets which lie on the same beat, occur simultaneously. In musical performance, even chords are played with certain time variation. Some authors disregard the source as not reliable. For example, Beyer and Dai claim \cite{Beyer2024}: \begin{quote}The underlying data is score-derived and has been manually adjusted to represent aspects of performance and score at the same time. This leads to information leakage as highly regular onset/offset alignment remains in the \emph{performance} data.\end{quote}
 
 \subsubsection{Augmented MIDI Aligned Piano Sounds}
 
@@ -164,7 +164,7 @@ For each performance, including the quantized MIDI file, annotations are provide
 \begin{table}[ht!]
 \centering
 \input{sources/tables/annotations}
-\caption[Example of performance MIDI annotation in TSV format.]{An example of a performance MIDI annotation in TSV format. The first row indicates an initial time signature of ${6 \atop 8}$. The piece begins in the key of D major, encoded as 2.}
+\caption[Example of performance MIDI annotation in TSV format.]{An example of a performance MIDI annotation in TSV format. The first row indicates an initial time signature of $\lilyTimeSignature{6}{8}$. The piece begins in the key of D major, encoded as 2.}
 \label{annotations}
 \end{table}
 
@@ -197,7 +197,7 @@ Once processed, the datasets were ready for model training.
 
 \subsubsection{Training}
 
-Each model was trained with a maximum of 50 epochs. Training examples were augmented according to the procedures discussed in Section \ref{data_augmentation}.
+Each model was trained with a maximum of 100 epochs, yet most of the models stabilized under 50. Training examples were augmented according to the procedures discussed in Section \ref{data_augmentation}.
 
 \subsubsection{Evaluation}
 
@@ -266,13 +266,13 @@ To evaluate the model’s performance, we conducted an analysis of specific outp
 	\item What level of effort is required to repair a flawed transcription?
 \end{itemize}
 
-The model performed quite well on human-crafted MIDI songs. Transcriptions of live performances exhibited a greater prevalence of note metric alignment errors and, in many cases, were rendered unreadable due to an overabundance of inaccuracies.
+The model performed quite well on human-crafted MIDI songs. Transcriptions of live performances exhibited a greater prevalence of note metric alignment errors and, in some cases, were rendered unreadable due to an overabundance of inaccuracies.
 
 For key or time signature misalignments, the corrections required were generally straightforward and demanded a single change in the transcription. Errors in key signature assignments were relatively rare, but the time signature model's classifier constraints made it impossible to handle non-standard odd signatures. 
 
 The model occasionally struggled with establishing the correct metric grid, particularly for pieces with unusual or complex time signatures. These instances, while infrequent, significantly impacted the overall transcription quality. Section \ref{meter_misalignment} provides an example of such a case.
 
-Below, we outline some common errors observed in the transcriptions.
+Below, we outline three common errors observed in the transcriptions: a metrical shift, hand part misalignments and the most severe of them: meter misalignments.
 
 \subsection{Unrecognized Pickup Measures}
 
@@ -284,7 +284,7 @@ One prevalent error type involves a systematic shift of the entire piece by a fr
 \includesvg[width=0.95\textwidth]{images/albeniz_gen.svg} \\ b)
 \includesvg[width=0.95\textwidth]{images/albeniz_output_gen.svg}
 \end{tabular}
-\caption[\emph{Sevilla} by Isaac Albéniz.]{\emph{Sevilla} by Isaac Albéniz: a) the piece with a distinguished pickup measure (first three notes for each hand). Since the model assumed the time signature of ${3 \atop 4}$, the resulting content is shifted by the half of a measure. Other musical elements have been correctly assigned.}
+\caption[\emph{Sevilla} by Isaac Albéniz.]{\emph{Sevilla} by Isaac Albéniz: a) the piece with a distinguished pickup measure (first three notes for each hand), b) the model transcriptionD. Since the model assumed the time signature of $\lilyTimeSignature{3}{4}$, the resulting content is shifted by the half of a measure. Other musical elements have been correctly assigned.}
 \label{albeniz}
 \end{figure}
 
@@ -298,11 +298,14 @@ Some errors of this type are easily noticeable, while others are subtle and hard
 
 \subsection{Meter Misalignment}\label{meter_misalignment}
 
-One illustrative example of meter misalignment is found in the transcription of Claude Debussy’s \emph{Clair de Lune}, a piece from the composer’s \emph{Suite bergamasque}. The original score employs a non-standard ${9 \atop 8}$ time signature in the key of D$\flat$.
+One illustrative example of meter misalignment is found in the transcription of Claude Debussy’s \emph{Clair de Lune}, a piece from the composer’s \emph{Suite bergamasque}. The original score employs a non-standard $\lilyTimeSignature{9}{8}$ time signature in the key of D$\flat$.
 
-\begin{figure}[ht!] \centering \begin{tabular}{c}a) \includesvg[width=0.95\textwidth]{images/claire_de_lune_gen.svg} \ b) \includesvg[width=0.95\textwidth]{images/claire_de_lune_output_gen.svg} \end{tabular} \caption[Claude Debussy's \emph{Clair de Lune}.]{The beginning of Claude Debussy's \emph{Clair de Lune}: a) the original score from the MAPS test dataset, b) the model transcription. The model misaligned the metric structure by mixing quarter notes with triplets, disrupting the inner relationships between notes within a measure. Some right-hand notes (e.g., C in the second measure) are misattributed. The key signature was assigned correctly.} \label{claire_de_lune} \end{figure}
+\begin{figure}[ht!]
+\centering \begin{tabular}{c}a) \includesvg[width=0.95\textwidth]{images/claire_de_lune_gen.svg} \\ b) \includesvg[width=0.95\textwidth]{images/claire_de_lune_output_gen.svg} \end{tabular} \caption[Claude Debussy's \emph{Clair de Lune}.]{The beginning of Claude Debussy's \emph{Clair de Lune}: a) the original score from the MAPS test dataset, b) the model transcription. The model misaligned the metric structure by mixing quarter notes with triplets, disrupting the inner relationships between notes within a measure. Some right-hand notes (e.g., C in the second measure) are misattributed. The key signature was assigned correctly.}
+\label{claire_de_lune}
+\end{figure}
 
-In this case, the model incorrectly imposed a ${4 \atop 4}$ time signature, resulting in a mixture of quarter notes and triplets that do not align with the original meter. This error not only disrupts the metric structure but also breaks the temporal relationships between consecutive notes. Consequently, simply changing the time signature to ${9 \atop 8}$ is insufficient to resolve the issue. Correcting such a transcription requires substantial effort.
+In this case, the model incorrectly imposed a $\lilyTimeSignature{4}{4}$ time signature, resulting in a mixture of quarter notes and triplets that do not align with the original meter. This error not only disrupts the metric structure but also breaks the temporal relationships between consecutive notes. Consequently, simply changing the time signature to ${9 \atop 8}$ is insufficient to resolve the issue. Correcting such a transcription requires substantial effort.
 
 Errors of this type are particularly common in pieces with unusual time signatures. While the severity of the error varies depending on the extent of the misalignment, such issues often require significant manual intervention to repair. In many cases, these errors are confined to specific phrases or sections, but they are more prevalent in transcriptions of fast-paced live performances.
 
@@ -327,7 +330,7 @@ We conducted an analysis of how the model is robust to transformation, for each 
 
 \subsection{\emph{Ceteris Paribus} Analysis}
 
-We conducted a \emph{ceteris paribus} (Latin for ,,all other things being equal'') type of analysis by augmenting original note sequence tensors. This approach allowed us to compare model outputs for transformed note sequences, isolating and measuring the influence of specific features.
+We conducted a \emph{ceteris paribus} (Latin for \emph{all other things being equal}) type of analysis by augmenting original note sequence tensors. This approach allowed us to compare model outputs for transformed note sequences, isolating and measuring the influence of specific features.
 
 A natural way of augmenting data in this context is to randomly distort a single feature (e.g., pitch, duration, or velocity), while keeping all others intact.
 
@@ -464,7 +467,7 @@ As a result, all models became invulnerable to transformations described in the 
 Each model was evaluated using two metrics:
 \begin{itemize} \item Model-specific $F_1$ scores. \item The MV2H metric, with restricted models replacing their corresponding original components. \end{itemize}
 
-All evaluations were conducted on the test subset of the dataset, with both base and restricted models trained exclusively on the training set. For a fair comparison, the model with the best validation $F_1$ score across 50 epochs was selected for each ablation study.
+All evaluations were conducted on the test subset of the dataset, with both base and restricted models trained exclusively on the training set. For a fair comparison, the model with the best validation $F_1$ score across 100 epochs was selected for each ablation study.
 
 \subsection{Beat Tracking} \label{beat_tracking}
 

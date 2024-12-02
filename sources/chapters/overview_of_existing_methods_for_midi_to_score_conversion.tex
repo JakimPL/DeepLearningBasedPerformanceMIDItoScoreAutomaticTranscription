@@ -2,7 +2,7 @@
 
 \section{A Brief History}
 
-While the modern formulation of the problem appears to be present in the academic discourse since \cite{Cogliati2016}, the challenges with interpreting various elements of the performance MIDI have been recognized much earlier. Cambouropoulos \cite{Cambouropoulos2000}, for instance, explored necessary elements to process in order to translate a performance MIDI into a score.
+While the modern formulation of the problem appears to be present in the academic discourse since in 2016 \cite{Cogliati2016}, the challenges with interpreting various elements of the performance MIDI have been recognized much earlier. Cambouropoulos \cite{Cambouropoulos2000}, for instance, explored necessary elements to process in order to translate a performance MIDI into a score.
 
 Cogliati et al. present a brief but succinct history of the development of AMT systems focused on trnascribing performance data into either musical scores or some other intermediate forms \cite{Cogliati2016}. Several key contributions include:
 \begin{itemize}
@@ -22,7 +22,7 @@ After the formulation, the problem has continued to evolve, incorporating the ad
 
 \section{Modern Formulation of the Problem}
 
-While complete systems for performance MIDI to score systems have been existed for a while\footnote{\emph{MuseScore 3} has a special module for importing performance MIDI. \missing}, the particular implementations were not the subject of scientific publications until 2016, when Cogliati et al. defined a comprehensive formulation of the process of transcribing an unannotated and unquantized MIDI file into a score. 
+While complete systems for performance MIDI to score systems have been existed for a while\footnote{\emph{MuseScore 3} has a special module for importing performance MIDI.}, the particular implementations were not the subject of scientific publications until 2016, when Cogliati et al. defined a comprehensive formulation of the process of transcribing an unannotated and unquantized MIDI file into a score. 
 
 Earlier AMT systems focused on different aspects of the transforming a recording --- either from an audio or a MIDI file --- into some form of musical notation. Many of these systems recognized only low level of musical information \cite{Cogliati2016}, usually concentrating on only one aspect of the transcription such as pitch detection or rhythm quantization. Some authors use the term \emph{complete audio-to-score AMT} \cite{Foscarin2020} or \emph{complete music transcription} (CMT) \cite{Ycart2018} to distinguish more advanced systems from low-level ones.
 
@@ -33,7 +33,7 @@ Earlier AMT systems focused on different aspects of the transforming a recording
 \label{transcription_system}
 \end{figure}
 
-The system proposed by Cogliati et al. (Figure \ref{transcription_system}) handles multiple aspects of the transcription process, taking into account not only beat quantization, but also imposing the metric structure and solving note spelling problem through key signature alignment.
+The system proposed by Cogliati et al. (Figure \ref{transcription_system}) handles multiple aspects of the transcription process, taking into account not only beat quantization, but also imposes both key and time metric signatures. The former solves the note spelling problem (refer to Section \ref{harmonic_equivalence}) through key signature alignment.
 
 In the following sections, we will describe some of the methods introduced in previous works that contributed to the development of this system.
 
@@ -93,7 +93,7 @@ The procedure returns the optimal sequence of intended notes: \[\hat{Q} = \argma
 
 \subsection{Training}
 
-Hidden Markov Models are subject to training in order to HMMs require training to determine the transition matrix $A$ and the emission probabilities $B$. More specifically, given an observation sequence $X$ and the corresponding sequence of hidden states $Q$, the model parameters $A$ and $B$ are inferred from training data. The \emph{Baum-Welch algorithm} is commonly used for this purpose \cite[p. 220--226]{Jurafsky2009}.
+Hidden Markov Models are subject to training in order to obtain transition matrix $A$ and the emission probabilities $B$. More specifically, given an observation sequence $X$ and the corresponding sequence of hidden states $Q$, the model parameters $A$ and $B$ are inferred from training data. The \emph{Baum-Welch algorithm} is commonly used for this purpose \cite[p. 220--226]{Jurafsky2009}.
 
 Takeda et al. used approximately $50\;000$ notes in MIDI data of classical and jazz music to train the $n$-gram model. For the rhythm vocabulary model, they extracted 267 one-bar-long rhythm patterns from 88 various pieces. The exact details of the dataset, however, were not provided.
 
@@ -106,6 +106,10 @@ As the Gaussian distribution is unimodal, the model assumes that the tempo is co
 The algorithm was designed for single-voice music transcriptions. The authors suggest that with enriched rhythm vocabulary containing overlapping notes (as in fugues or cannons) it is possible to use the framework on polyphonic music, however it would require chord identification to group notes played at almost the same time into a single entity. The paper does not provide more details on such procedure.
 
 No public implementation of the algorithm is available, making it difficult to compare its performance with modern solutions.
+
+\subsection{Extension}
+
+A polyphonic extension of the method can be found in \cite{Nakamura2017c}. The method extends the HMM framework for polyphonic music
 
 \section{Dynamic Programming Approach}
 

@@ -1,10 +1,10 @@
 \chapter{Representation of Music Information}
 
-The representation of music, a multifaceted and intricate domain, plays a crucial role in the comprehension and analysis of musical works. Music, inherently abstract and temporal, can be encapsulated in two primary forms of representation: \emph{audio} and \emph{symbolic}.
+The representation of music, a multifaceted and intricate domain, plays a central role in the comprehension and analysis of musical works. Music, inherently abstract and temporal, can be encapsulated in two primary forms of representation: \emph{audio} and \emph{symbolic}.
 
 Audio representation captures the live or recorded sound of music, preserving the performance's temporal and dynamic qualities. This form of representation is essential in fields such as musicology, audio engineering, and digital music processing, where the actual sound and its nuances are of prime interest. The shift from a symbolic to an audio-based representation marks a transition from a visual and interpretative medium to a direct auditory experience of music.
 
-Symbolic music representation translates musical ideas into structured symbols. This encompasses the abstract musical qualities such as pitch, rhythm, and dynamics through established notational systems such as Western sheet music and digital formats like MIDI (Musical Instrument Digital Interface). Western sheet music, with its historical roots and standardized notation, provides a visual framework for interpreting and performing music. These notations, evolved over centuries, encompass various elements like notes on staves, clefs, key signatures, and time signatures, which collectively guide the performer in realizing the composer's intent. While the internal structure of a music score is not a focus of this work, a curious reader may find useful information in \cite{Read1969}.
+Symbolic music representation translates musical ideas into structured symbols. This encompasses the abstract musical qualities such as pitch, rhythm, and dynamics through established notational systems such as Western sheet music and digital formats like MIDI (Musical Instrument Digital Interface). Western sheet music, with its historical roots and standardized notation, provides a visual framework for interpreting and performing music. These notations, evolved over centuries, cover various elements like notes on staves, clefs, key signatures, and time signatures, which collectively guide the performer in realizing the composer's intent. While the internal structure of a music score is not a focus of this work, a curious reader may find useful information in \cite{Read1969}.
 
 Different music representations offer distinct insights and tools for understanding, analyzing, and transforming music. This chapter delves into these two primary ways of representing music, defining basic notions around these.
 
@@ -16,7 +16,7 @@ Although this form of representation is not the primary focus of this work, unde
 
 \subsection{Waveform}
 
-In the digital world, the audio is not a continuous signal but discrete one. The transformation from a continuous-time signal to a discrete-time signal is called \emph{sampling}. During this process, a single value of the signal at a specific point in time is referred to as a \emph{sample} \cite[p.~34--35]{Smith1999}. Additionally, an entire sample recording is sometimes called an \emph{audio sample}.
+Digital audio signal is not continuous but discrete. The transformation from a continuous-time signal to a discrete-time signal is called \emph{sampling}. During this process, a single value of the signal at a specific point in time is referred to as a \emph{sample} \cite[p.~34--35]{Smith1999}. Additionally, an entire sample recording is sometimes called an \emph{audio sample}.
 
 \begin{figure}[ht!]
 \centering
@@ -52,7 +52,7 @@ When a Fourier transform is applied to short time windows of a discrete signal u
 \caption[A comparison of two different representations of the same sound.]{A comparison of two different representations of the same sound: a glass break: \emph{waveform} (left) and \emph{spectrogram} (right). The audio is rich in various frequency bands.}
 \end{figure}
 
-The spectrogram representation is vital for frequency information retrieving frequency information, aiding in the extraction of features such as pitch (the fundamental frequency) and timbre. However, short-time Fourier transforms are constrained by a trade-off between time and frequency resolutions. Achieving high resolution in one inherently limits the resolution in the other \cite[p.~365--366]{Smith1999}.
+The spectrogram representation is vital for retrieving frequency information, aiding in the extraction of features such as pitch (the fundamental frequency) and timbre. However, short-time Fourier transforms are constrained by a trade-off between time and frequency resolutions. Achieving high resolution in one inherently limits the resolution in the other \cite[p.~365--366]{Smith1999}.
 
 \section{Symbolic Representation}
 

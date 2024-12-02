@@ -36,15 +36,13 @@ A series of experiments compared the state-of-the-art performance with alternati
 
 \subsection{Transformers}
 
-Vanilla Transfomers didn't perform as good as other networks. We hypothesize that Transformer architecture could outperform the proposed network but in a data-abundant scenario. In the considered scenario the entire dataset is though too small (or not diverse enough) and needs more data-efficient models. The current dataset is rather small, and there is a need for more high-quality annotated performance MIDI data that is diverse and representative enough. For a limited amount of data, Transformers may be prone to overfitting.
+Vanilla Transfomers didn't perform as good as other networks. We hypothesize that Transformer architecture could outperform the proposed network but in a data-abundant scenario. In the considered scenario the entire dataset is though too small (or not diverse enough) and needs more data-efficient models. For a limited amount of data, Transformers may be prone to overfitting.
 
-Another suspected reason is that some features like hand part assignment are local, and long-term dependencies are not that useful as they could be. 
+Another suspected reason is that some features like hand part assignment are local, and long-term dependencies are not that useful as they could be, or they are not encoded correctly. This indicates that the traditional trigonometric positional encoding does not serve the purpose well. Some other form of positional encodings, that represent an actual onsets more than the position in a tensor sequence, may significantly improve the quality of the model.
 
-However, recently there were a successful use of Transformers in the field \cite{Beyer2024} on a subset of the considered dataset. The authors provide a Roformer encoder-decoder model with a custom token embedding. They also provided additional data augmentations as duration and onset jitter, introducing noise to the note beginning and ends. The authors modified the initial ACPAS dataset as they claim that a hand-crafted part of the is not representative for the performance. 
+Recently, there were a successful use of Transformers in the field \cite{Beyer2024} on a subset of the considered dataset. The authors provide a RoFormer encoder-decoder model with a custom token embedding. They also provided additional data augmentations as duration and onset jitter, introducing noise to the note beginning and ends. The authors modified the initial ACPAS dataset as they claim that a hand-crafted part of the is not representative for the performance. 
 
-This suggests that the traditional trigonometric positional encoding does not serve the purpose well, and some other form of positional encodings may significantly improve the quality of the model.
-
-However, the aforementioned work operates on different score format (MusicXML) and uses a different set of metrics than \cite{Liu2022}, making hard to compare both models without further investigation.
+The aforementioned work operates on different score format (MusicXML) and uses a different set of metrics than \cite{Liu2022}, making hard to compare both models without further investigation.
 
 \subsection{Temporal Convolutional Networks}
 
@@ -58,6 +56,8 @@ We enhanced the base model with a dedicated dynamics submodel to transcribe scor
 	\item \textbf{Data scarcity:} None of the datasets provided direct dynamics annotations, requiring heuristic and automated processes to align performance data with score annotations.
 	\item \textbf{Subjectivity:} Dynamics markings are context-dependent and subjective, varying by instrument, genre, and performer interpretation. As a result, the relationship between a musical sheet and its realization is far from strict.	\end{itemize}
 
-Despite these challenges, the dynamics model demonstrated reasonable performance using convolutional and recurrent layers. To evaluate its impact, we proposed an extension of the MV2H metric, denoted MV2HD, which incorporates an $F_1$ score for dynamics. This enhancement maintains disjoint penalty principles and provides a more comprehensive evaluation of transcription quality.
+The dynamics model demonstrated an average, but reasonable under above circumstances, performance.
+
+We proposed an extension of the MV2H metric, denoted MV2HD, which incorporates an $F_1$ score for dynamics. This enhancement maintains disjoint penalty principles and provides a more comprehensive evaluation of transcription quality. However, the metric is yet to be implemented.
 
 Future work should focus on refining dynamics annotations in the dataset, implementation of the MV2HD metric, and experimenting with alternative architectures, such as Transformers and TCNs, may yield further improvements.
