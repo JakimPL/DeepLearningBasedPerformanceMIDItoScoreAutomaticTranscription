@@ -1,6 +1,7 @@
 \chapter{Experiments and Improvements}\label{experiments_and_improvements}
 
 In order to enhance the proposed model, we employed different strategies for finding improvements: \begin{itemize}
+	\item Removing some input features to improve the robustness of the model.
 	\item Testing smaller, more data-efficient networks to optimize the current architecture.
 	\item Experimenting with more powerful architectures, such as Transformers, which have demonstrated remarkable success in natural language processing (NLP).
 	\item Extending the model by introducing an additional module for handling other musical elements: dynamics. \end{itemize}
@@ -8,6 +9,84 @@ In order to enhance the proposed model, we employed different strategies for fin
 In subsequent experiments we stepped out from the full Transformer for attention mechanism only. We wanted to check whether access to the entire tensor sequence is beneficial for the transcription task. However, in the preliminary experiments combinations of self-attention mechanism with other components didn't perform as well as the base model nor Transformer-based ones, and the self-attention-based models have been excluded from the study.
 	
 Let us present results of these experiments.
+
+\section{Ablation Studies} \label{ablation_studies}
+
+To validate the assumptions presented in Section \ref{robustness_analysis}, we conducted ablation studies by training models that utilized only a restricted set of input features. Specifically, the following configurations were employed: \begin{itemize}
+	\item The \textbf{hand part} model was trained only on note pitches and onsets.
+	\item The \textbf{key signature} model was trained only on note pitches and onsets.
+	\item The \textbf{time signature} model was trained using only note onsets.
+\end{itemize}
+
+As a result, all models became invulnerable to transformations described in the Section \ref{perturbations}. This section evaluates the impact of such feature reduction on model performance.
+
+Each model was evaluated using two metrics:
+\begin{itemize} \item Model-specific $F_1$ scores. \item The MV2H metric, with restricted models replacing their corresponding original components. \end{itemize}
+
+All evaluations were conducted on the test subset of the dataset, with both base and restricted models trained exclusively on the training set. For a fair comparison, the model with the best validation $F_1$ score across 50 epochs was selected for each ablation study.
+
+\subsection{Beat Tracking} \label{beat_tracking}
+
+The authors of the original paper provided ablation studies for the beat-tracking model, analyzing how the omission of features and data augmentation influenced its performance. The results of these analyses are summarized in Tables \ref{beat_tracking_feature_omission} and \ref{beat_tracking_data_augmentation}.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/feature_omission}
+\caption[Feature omission study.]{Feature omission study \cite{Liu2022}.}
+\label{beat_tracking_feature_omission}
+\end{table}
+
+Not surprisingly, note onsets are the most important feature used by the beat-tracking model. While neglecting other features doesn't hardly impact the model, still feature omission results in a slight quality degradation.
+
+Velocity may carry some information about beats as they tend to occur along with heavier notes \cite{Liu2022}. Harmonic structure inferred by pitch may also transfer such information, for example it is quite common to play chords at the beginning of a measure. Note durations may also offer hints about the underlying meter.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/data_augmentation}
+\caption[Ablation study for data augmentation.]{Ablation study for data augmentation \cite{Liu2022}.}
+\label{beat_tracking_data_augmentation}
+\end{table}
+
+\subsection{Hand Part Model}
+
+A variant of the hand part model was trained without using note durations or velocities. As the hand part assignment influences only the voice separation subscale of the MV2H metric, other submetrics were excluded from the evaluation.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/hand_part_ablation}
+\caption[Ablation study for the hand part model.]{Ablation study for the hand part model.}
+\label{hand_part_ablation}
+\end{table}
+
+The results (Table \ref{hand_part_ablation}) show comparable performance between the restricted and original models across all metrics. This indicates that velocity provides marginal, if any, additional information for hand part assignment. These findings align with the observations in Section \ref{results}, where velocity had a limited influence on model predictions.
+
+\subsection{Key Signature Model}
+
+The restricted key signature model, trained using only note pitches and onsets, achieved performance similar to the original model.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/key_signature_ablation}
+\caption[Ablation study for the key signature model.]{Ablation study for the key signature model.}
+\label{key_signature_ablation}
+\end{table}
+
+Table \ref{key_signature_ablation} shows the results with included the harmony MV2H subscale. Let us remind that weighted metric results are calculated independently, and weighted by the number of true labels of each class, while macro metrics are unweighted.
+
+The observed differences fall within the expected range of model stochasticity. The result agrees also with the negligible influence of other factors to the final model decision on key signature, described in Section \ref{results}.
+
+\subsection{Time Signature Model}
+
+A restricted time signature model, trained solely on note onsets, outperformed the original convolutional network classifier in terms of $F_1$ scores.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/time_signature_ablation}
+\caption[Ablation study for the time signature model.]{Ablation study for the time signature model.}
+\label{time_signature_ablation}
+\end{table}
+
+Interestingly, as the MV2H metric does not directly depend on time signature predictions, substituting the original model with the restricted version had no impact on the overall evaluation. This shows that not only introducing full information to the model is not beneficial, but actually hurts the performance of the model. 
 
 \section{Transformers}
 
