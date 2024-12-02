@@ -1,43 +1,38 @@
 \chapter{Conclusions}
 
-We presented the performance MIDI to score automatic transcription task in detail, described the components and challenges in that problem, presented earlier methods. Finally, we presented the state-of-the-art deep-learning model with in-depth analysis of its performance and behavior.
+We have explored the automatic transcription task from performance MIDI to symbolic scores in detail, discussing its components, challenges, and earlier methods. The state-of-the-art deep learning model has been analyzed thoroughly, with an in-depth examination of its performance and behavior.
 
-The analysis consisted of: \begin{itemize}
-	\item Analyzing the performance and behavior of the main considered model.
-	\item Providing ablation studies due to found model anomalies, especially concerning undesired influence of velocity feature.
-	\item Developing local feature importance methods for further 
-	\item Comparing the results with other model architectures such as Transformers or Temporal Convolutional Networks.
-\end{itemize}
+Our analysis included the following: \begin{itemize}
+	\item A comprehensive evaluation of the primary model's performance and behavior.
+	\item Ablation studies addressing model anomalies, especially the undesired influence of the velocity feature.
+	\item Development of local feature importance methods to interpret the model's decisions.
+	\item Comparison with alternative architectures, such as Transformers and Temporal Convolutional Networks (TCNs). \end{itemize}
 
-Additionally, we provided an enhancement to the model that allows to interpret an additional musical feature --- dynamics. 
+Additionally, we proposed an enhancement to the model to handle an additional musical feature: dynamics.
 
-Let us briefly summarize the results.
+Below is a summary of the results.
 
 \section{Robustness Analysis}
 
-We were able to discover certain artifacts of the score generation models, especially when it comes to velocity contribution to hand part assignment. The time signature model is not fully robust to alterations that should not have affect the output. Only the key signature model was robust to all considered transformation.
+Our analysis uncovered artifacts in the transcription models, particularly related to velocity's influence on hand part assignment. The time signature model showed sensitivity to transformations that should have been inconsequential, while the key signature model remained robust across all perturbations.
 
-We also were able to mitigate the undesired behaviors without sacrificing the model's performance by data augmentation or feature removal.
+By employing data augmentation and selective feature removal, we mitigated these undesired behaviors without degrading model performance.
 
 \section{Feature Importance Methods}
 
-Current XAI methods do not work well with symbolic music data in general. Developing more tailored and adaptable XAI methods for musical applications could contribute to improved model interpretability. 
+Symbolic music data presents unique challenges for explainable artificial intelligence (XAI). Existing XAI methods often do not adapt well to this domain. Developing more targeted and specialized XAI tools could improve model interpretability.
 
-We provided two ways of analyzing the behavior of submodels: semi-LIME approach that allowed us to see how velocity feature influenced the hand part assignment of other notes.
+We implemented two methods to analyze submodel behavior: \begin{itemize}
+	\item A semi-LIME approach to visualize how velocity features influenced hand part assignment.
+	\item A note omission method to quantify how individual notes contributed to key signature assignment decisions. \end{itemize}
 
-The second method, based on note omission, showed how certain notes voted for or against the current key signature assignment. We were able to verify the correctness of model decision 
+These methods provided insights into the models' decision but have certain limitations. The semi-LIME approach, for example, assumes feature independence. Ont he other hand, both methods disregard temporal relationships.
 
-Unfortunately, the proposed methods have drawbacks and are not fully justified. One of the challenges would be to find a reasonable (and interpretable) embedding of the pitch space that encodes musical features. 
+A broader challenge in developing XAI tools for symbolic music lies in the absence of a meaningful pitch space representation that encodes musical relationships comprehensively. The current treatment of pitch as a discrete space hinders the analysis of key signature assignment and limits the interpretability of related tasks.
 
 \section{Experiments}
 
-We conducted a series of experiments in which compared the state-of-the-art performance with some other solutions. There were three most promising architectures: \begin{itemize}
-	\item Transformer.
-	\item Self-attention.
-	\item Temporal Convolutional Network.
-\end{itemize}
-
-We are going to briefly describe all these experiments.
+A series of experiments compared the state-of-the-art performance with alternative architectures. Below are the findings:
 
 \subsection{Transformers}
 
@@ -51,8 +46,18 @@ This suggests that the traditional trigonometric positional encoding does not se
 
 However, the aforementioned work operates on different score format (MusicXML) and uses a different set of metrics than \cite{Liu2022}, making hard to compare both models without further investigation.
 
+\subsection{Temporal Convolutional Networks}
+
+TCNs provided a compelling alternative to recurrent architectures for certain transcription tasks. These networks are computationally efficient and maintain stability during training.
+
+While TCNs achieved comparable results for hand part assignment and time signature models, their performance lagged in key signature prediction.
+
 \subsection{Dynamics}
 
-% We enhanced the base model by the dynamics model which gives a 
+We enhanced the base model with a dedicated dynamics submodel to transcribe score dynamics, ranging from $\lilyDynamics{pppp}$ to $\lilyDynamics{ffff}$. While this addition captures a significant aspect of musical expression, two major challenges arose: 	\begin{itemize}
+	\item \textbf{Data scarcity:} None of the datasets provided direct dynamics annotations, requiring heuristic and automated processes to align performance data with score annotations.
+	\item \textbf{Subjectivity:} Dynamics markings are context-dependent and subjective, varying by instrument, genre, and performer interpretation. As a result, the relationship between a musical sheet and its realization is far from strict.	\end{itemize}
 
-% However, as the datasets usually don't provide the information on 
+Despite these challenges, the dynamics model demonstrated reasonable performance using convolutional and recurrent layers. To evaluate its impact, we proposed an extension of the MV2H metric, denoted MV2HD, which incorporates an $F_1$ score for dynamics. This enhancement maintains disjoint penalty principles and provides a more comprehensive evaluation of transcription quality.
+
+Future work should focus on refining dynamics annotations in the dataset, implementation of the MV2HD metric, and experimenting with alternative architectures, such as Transformers and TCNs, may yield further improvements.
