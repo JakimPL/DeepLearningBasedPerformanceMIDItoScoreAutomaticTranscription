@@ -111,10 +111,10 @@ Given that Transformers are designed for sequential discrete data, we applied an
 \begin{figure}[ht!]
 \centering
 \begin{tabular}{cc}a)
-\input{sources/graphs/vanilla_transformer_encoder.tex} & b)
-\input{sources/graphs/vanilla_transformer_encoder_with_embedding.tex}
+\input{sources/graphs/vanilla_transformer_encoder} & b)
+\input{sources/graphs/vanilla_transformer_encoder_with_embedding}
 \end{tabular}
-\caption[The Transformer Encoder block.]{The Transformer Encoder block: a) default encoding, b) feature embedding. The second architecture was selected for subsequent experiments. The positional encoding is optional.}
+\caption[The Transformer Encoder block.]{The Transformer Encoder block: a) default encoding, b) feature embedding. The $\frown$ symbols stands for concatenation. The second architecture was selected for subsequent experiments. The positional encoding is optional.}
 \label{vanilla_transformer_encoder_with_embedding}
 \end{figure}
 
@@ -133,11 +133,11 @@ The vanilla Transformer architecture failed to learn accurate beat predictions, 
 \begin{table}[ht!]
 \centering
 \input{sources/tables/beat_transformer}
-\caption[Transformer results for the beat model.]{Transformer results for the beat model. The symbol \emph{b} stands for beat prediction, and \emph{db} stands for downbeat classification.}
+\caption[Transformer results for the beat model.]{Transformer results for the beat model. The symbol \emph{b} stands for beat prediction, and \emph{db} stands for downbeat classification. Models with the positional encoding are labeled as PE.}
 \label{beat_transformer}
 \end{table}
 
-Sinusoidal position encoding turned out to be not helpful, and even worsened the results. This suggests that for Transformers in order to properly predict the metric structure of a piece, a more adequate positional encoding is needed. The \emph{Rotary Positional Embedding} (RoPE) \cite{Su2024} is a fairly recent technique that may warrant further exploration in this context.
+Sinusoidal position encoding turned out to be not helpful, and most of the time worsened the results a bit. This suggests that for Transformers in order to properly predict the metric structure of a piece, a more adequate positional encoding is needed. The \emph{Rotary Positional Embedding} (RoPE) \cite{Su2024} is a fairly recent technique that may warrant further exploration in this context.
 
 Additionally, a note’s position within a song does not map cleanly onto tensor indices, as tensor positions lack a direct correspondence to the actual temporal context of note onsets. This indicates a need for an alternative positional encoding feature that can represent a note’s position relative to its onset.
 
@@ -335,9 +335,9 @@ The matching algorithm parses the original ground truth MusicXML score to extrac
 
 MIDI performance files use absolute time in seconds, while scores are in beats, so direct comparison is not possible. To overcome this, we employed a basic matching algorithm that relies on the ratio of already played notes to the total number of notes. Deviations are allowed to account for missing or extra notes.
 
-Chords with a dynamics annotation from the score are matched to chords with identical notes and corresponding positions in the original performance. Any unmatched or misaligned chords are discarded.
+Chords with a dynamics annotation from the score are matched to chords with identical notes and corresponding positions in the original performance. Any unmatched or misaligned chords are discarded. We achieved the total coverage of $58.6\%$ of all dynamics markings.
 
-While more sophisticated algorithms (e.g., Dynamic Time Warping) could be used, we opted for simplicity. We believe that high-quality dynamics annotations are essential for building a reliable dynamics model, and even more advanced matching algorithms are unlikely to resolve the core issue of data quality. The current solution is a preliminary step toward incorporating a richer vocabulary for musical scores.
+While more sophisticated algorithms could be used, we opted for simplicity. We believe that high-quality dynamics annotations are essential for building a reliable dynamics model, and even more advanced matching algorithms are unlikely to resolve the core issue of data quality. The current solution is a preliminary step toward incorporating a richer vocabulary for musical scores.
 
 \subsection{Subjectivity of Dynamics Markings}
 
@@ -351,9 +351,11 @@ The model was trained using the standard negative log-likelihood loss, similar t
 
 To avoid penalizing misclassifications between similar dynamic classes (e.g., distinguishing $\lilyDynamics{f}$ from $\lilyDynamics{ff}$), one could apply a standard distance metric between labels, where $0$ represents the softest dynamics, $\lilyDynamics{pppp}$, and $1$ represents the loudest, $\lilyDynamics{ffff}$. However, we followed the same setup as the key signature model for simplicity.
 
+Since the intersection of the original test set and the ASAP dataset is empty, the test set is not available. 
+
 \subsubsection{MV2HD}
 
-Since dynamics can be evaluated independently of other features, assuming they are correctly aligned with the note stream, we propose an enhancement to the MV2H metric, called \textbf{MV2HD}, where D stands for dynamics. The dynamics submetric is simply the $F_1$ score for correctly aligned notes, and the total metric is calculated as: \[\textrm{MV2HD} = \tfrac{5}{6}\textrm{MV2HD} + \tfrac{1}{6}F_1\] Here, $F_1$ is the dynamics submetric score. Since the $F_1$ score lies in the interval $[0, 1]$, the MV2HD metric is bounded between $0$ and $1$. The weight of $\tfrac{1}{6}$ for dynamics is debatable, as dynamics do not play the same role as, for example, meter alignment. However, this weight was chosen for symmetry in the overall metric.
+Since dynamics can be evaluated independently of other features, assuming they are correctly aligned with the note stream, we propose an enhancement to the MV2H metric, called \textbf{MV2HD}, where D stands for dynamics. The dynamics submetric is simply the $F_1$ score for correctly aligned notes, and the total metric is calculated as: \[\textrm{MV2HD} = \tfrac{5}{6}\textrm{MV2HD} + \tfrac{1}{6}F_1^{(D)}\] Here, $F_1^{(D)}$ is the dynamics submetric score. Since the $F_1$ score lies in the interval $[0, 1]$, the MV2HD metric is bounded between $0$ and $1$. The weight of $\tfrac{1}{6}$ for dynamics is debatable, as dynamics do not play the same role as, for example, meter alignment. However, this weight was chosen for symmetry in the overall metric.
 
 Because dynamics are independent of other features, the MV2HD metric still adheres to the principle of disjoint penalties.
 
@@ -361,4 +363,13 @@ Currently, the MV2HD metric is a theoretical proposal and would require implemen
 
 \subsubsection{Results}
 
-\missing
+The base architecture (convolutional layers followed by a GRU block) achieved the best result among all considered architectures. However, the final results is unsatisfactory.
+
+\begin{table}[ht!]
+\centering
+\input{sources/tables/dynamics_results}
+\caption[Results for the dynamics model.]{Results for the dynamics model.}
+\label{dynamics_results}
+\end{table}
+
+These results are understandable, given the challenges discussed earlier. We believe that refining the dataset, particularly with respect to dynamics annotations, could significantly enhance the performance of all models. The availability of high-quality data appears to be a more important factor than the specific architectural choices for the model.

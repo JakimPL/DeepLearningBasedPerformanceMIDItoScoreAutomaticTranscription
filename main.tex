@@ -5,7 +5,7 @@
 % Zawartosc merytoryczna stanowi oryginalnosiagniecie
 % naukowosciowe Marcina Wolinskiego.  Wszelkie prawa zastrzeżone.
 %
-% Copyright (c) 2001 by Marcin Woliński <M.Wolinski@gust.org.pl>
+% Copyright (c) 2001 by Marcin Woliński <M.Wolinski@gust.org.pl>l
 % Poprawki spowodowane zmianami przepisów - Marcin Szczuka, 1.10.2004
 % Poprawki spowodowane zmianami przepisow i ujednolicenie 
 % - Seweryn Karłowicz, 05.05.2006
@@ -33,22 +33,13 @@
 \usepackage{setspace}
 \usepackage{enumitem}
 \usepackage[hidelinks]{hyperref}
-\usepackage{algorithm}
+\usepackage[chapter]{algorithm}
 \usepackage{algpseudocode}
 \usepackage{multirow}
 \usepackage{siunitx}
 
 \usepackage{caption}
 \usepackage{float}
-
-% Ensure that algorithms are numbered within sections
-\makeatletter
-\@addtoreset{algorithm}{section}
-\makeatother
-
-\DeclareCaptionFormat{algorithmformat}{Algorithm \arabic{section}.\arabic{algorithm}: #3}
-\captionsetup[algorithm]{format=algorithmformat}
-\numberwithin{algorithm}{chapter}
 
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{calc}
