@@ -1,7 +1,15 @@
 \begin{abstract}
-The primary objective of this work is to provide a thorough review and enhancement of recent advancements in the field of automatically transforming performance MIDI recordings into musical scores, which is a part of a more general task: \emph{Automatic Music Transcription}, that is extracting symbolic representations of music from raw audio signal.
 
-The work focuses primarily on extending the methodology proposed in the paper titled \emph{Performance MIDI-to-Score Conversion by Neural Beat Tracking} \cite{Liu2022}. In this paper work, the authors introduced a novel approach that amalgamates Neural Beat Tracking techniques with Convolutional Recurrent Neural Networks to facilitate the conversion of MIDI recordings, specifically piano performances, into musical scores. 
+The primary objective of this thesis is to explore, evaluate, and extend recent developments in the automatic transcription of performance MIDI recordings into musical scores, a subtask within the broader domain of \emph{Automatic Music Transcription} (AMT). AMT aims to extract symbolic representations of music from raw audio signals, providing a bridge between musical performance and formalized notation.
 
-The scope of this study includes a comprehensive examination of the aforementioned techniques, along with augmentations of these methods, involving incorporating additional musical elements, particularly note dynamics. As a consequence, the work extends the widely-used score evaluation metric, MV2H (\emph{Multi-pitch detection, Voice separation, Metrical alignment, Note Value detection and Harmonic Analysis}) \cite{McLeod2018}, with \emph{Dynamic detection}.
+This work focuses on enhancing the methodology introduced in the state-of-the-art study, \emph{Performance MIDI-to-Score Conversion by Neural Beat Tracking} \cite{Liu2022}. This approach combines Convolutional Recurrent Neural Networks with dynamic programming approach to convert performance MIDI recordings into musical scores.
+
+The thesis includes a detailed analysis of the model’s architecture, behavior, and limitations, incorporating insights from custom explainable artificial intelligence (XAI) techniques developed to analyze model decisions. These analyses identified model shortcomings, including undesired dependencies on certain features, and informed strategies to enhance robustness. Additionally, ablation studies were conducted to evaluate the impact of the robustness enhancement on the model's performance.
+
+To expand the capabilities of the baseline model, this work integrates an additional submodel for predicting note dynamics. A novel extension to the MV2H score evaluation metric (\emph{Multi-pitch detection, Voice separation, Metrical alignment, Note Value detection, and Harmonic Analysis}) is proposed, augmenting it with \emph{Dynamic detection}, resulting in the MV2HD metric.
+
+The study also compares the baseline architecture with two promising alternatives: \emph{Transformers} and \emph{Temporal Convolutional Networks}. While the base model demonstrated superior performance in most tasks, these architectures offer valuable insights into the trade-offs between accuracy, complexity, and computational efficiency.
+
+This thesis contributes to the ongoing research in AMT by enhancing model robustness, incorporating dynamics transcription, and proposing new evaluation methodologies, laying the groundwork for further advancements in performance-to-score conversion.
+
 \end{abstract}

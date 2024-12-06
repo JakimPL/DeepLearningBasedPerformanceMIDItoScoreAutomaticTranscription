@@ -1,4 +1,4 @@
-\chapter{MIDI-to-Score Transcription Evaluation}
+\chapter{MIDI-to-Score Transcription Evaluation}\label{midi_to_score_transcription_evaluation}
 
 When transcribing a performance MIDI into a musical score, one needs to evaluate how faithful an output is to the original sheet. A transcription quality metric should take a transcription of a performance-MIDI and a ground-truth score as input, and produce a non-negative real number as an output, ideally within the range $[0, 1]$.
 
@@ -18,7 +18,7 @@ As a result, more often than not, single aspects of a model are being analyzed a
 
 Earlier approaches to assessing transcription quality were often lacking in rigor. Some common pitfalls in the literature include:\begin{itemize}
 	\item {\bf Lack of Thorough Analysis}. A rigorous evaluation requires an assessment of all relevant aspects of a proposed solution. Failing to attribute vital parts of a model or algorithm renders the analysis incomplete.
-	\item {\bf Limited Case Demonstration}. The results of a algorithm were often demonstrated on a very limited set of musical pieces (\cite{Takeda2002} or \cite{Yang2005}). It is not obvious how a model performs outside showcased examples, and it endangers the research to cherry-picking.
+	\item {\bf Limited Case Demonstration}. The results of a algorithm were often demonstrated on a very limited set of musical pieces. It is not obvious how a model performs outside showcased examples, and it endangers the research to cherry-picking. This is the case of both works \cite{Takeda2002} or \cite{Yang2005}, which are described in more detail in Chapter \ref{overview_of_existing_methods_for_midi_to_score_conversion}.
 	\item {\bf No Public Dataset or Reproducibility}. For both training and evaluation, the dataset used should be clearly described and, ideally, made publicly available. Without this, results are difficult or impossible to reproduce, as seen in \cite{Takeda2002}.
 	\item {\bf Absence of Human Expert Evaluation}. While statistical benchmarks are necessary for quantitative assessment, there may overlook nuances that are essential for performers relying on transcriptions. 
 \end{itemize} 
