@@ -8,6 +8,8 @@
 *.lot
 *.out
 *.pdf
+*.nav
+*.snm
 *.toc
 
 .idea/

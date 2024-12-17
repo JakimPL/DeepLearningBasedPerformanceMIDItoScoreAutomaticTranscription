@@ -1,26 +1,266 @@
 \documentclass[a4paper, 9pt]{beamer}
+\usepackage{fontspec}
+\usepackage{lilyglyphs}
 \usepackage{graphicx}
 \usepackage{tikz}
 \usepackage{ragged2e}
+\usepackage{multirow}
 \usepackage{amsmath, amsthm, amssymb, xspace, array}
 \usepackage{xcolor}
-\usepackage{verbatim}
-\usepackage{media9}
 \usepackage{multicol}
 \usepackage{lmodern}
-\usepackage{animate}
+\usepackage{svg}
 \usepackage{style}
+\bibliographystyle{alpha}
 
-\date{17th of December 2024}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{calc}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes.geometric}
+
 \title{Deep Learning-Based Performance MIDI to Score Automatic Transcription}
 \author{Mateusz Szymański}
 \institute{University of Warsaw \\ Faculty of Mathematics, Informatics and Mechanics}
-\date{\today}
+\date{17th of December 2024}
 
 \begin{document}
 
 \begin{frame}
 \titlepage
+\end{frame}
+
+\begin{frame}
+The work is divided into several sections.\pause
+\begin{itemize}
+	\item Introduce basic notions required to understand the problem.\pause
+	\item Introduce \emph{Automatic Music Transcription} task in a broader context of \emph{Musical Information Retrieval}.\pause
+	\item Describe the scope of \emph{performance MIDI to score transcription} task.\pause
+	\item Overview of two earlier dominant methods:  \emph{Hidden Markov Models} \cite{Takeda2002} and dynamic programming approach \cite{Yang2005}.\pause
+	\item Introduce and analyze the main model of interest: \emph{Performance MIDI-to-Score Conversion by Neural Beat Tracking} \cite{Liu2022}.\pause
+	\item Provide explainable machine learning tools for better understanding models' decisions.\pause
+	\item Explore different architectures and propose improvements to the base model.
+\end{itemize}
+\end{frame}
+
+\section{Automatic Music Transcription}
+
+\begin{frame}
+\begin{figure}[ht!]
+\centering
+\includesvg[width=\textwidth]{images/short_piano_roll.svg}\pause \\ 
+\includesvg[width=\textwidth]{images/mozart_gen.svg}
+\caption{A performance MIDI transcribed to a score.}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\begin{figure}[ht!]
+\centering
+\scalebox{0.75}{\input{sources/graphs/transcription_system}}
+\caption{Performance MIDI to score system proposed by Cogliati et al. \cite{Cogliati2016}.}
+\end{figure}
+\end{frame}
+
+\section{Performance MIDI to Score Conversion}
+
+\begin{frame}
+To convert a performance MIDI (a raw stream of notes) to a score, one needs to: \pause\begin{itemize}
+	\item Quantize notes: \begin{itemize}
+		\item Impose a beat grid.\pause
+		\item Align musical onsets to the grid.\pause
+		\item Interpret music durations in terms of note values.\pause
+	\end{itemize}
+	\item Assign time signatures.\pause
+	\item Assign key signatures.\pause
+	\item Separate left and right hand notes.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\begin{figure}[ht!]
+\centering
+\scalebox{0.7}{\input{sources/graphs/model_architecture_extended}}
+\caption{The main model's architecture. The dynamics submodule is a novel part.}
+\end{figure}
+\end{frame}
+
+\section{Analysis}
+
+\begin{frame}
+We reproduced the results using the same setup as the authors:
+\begin{table}[ht!]
+\centering
+\input{sources/tables/mv2h}
+\caption[MV2H metric evaluation on the test set.]{MV2H metric evaluation on the test set, with results compared to the original model evaluation.}
+\end{table}
+\end{frame}
+
+\subsection{Case Studies}
+
+\begin{frame}
+\begin{figure}[ht!]
+\centering
+\begin{tabular}{c}a)
+\includesvg[width=0.95\textwidth]{images/albeniz_gen.svg} \\ b)
+\includesvg[width=0.95\textwidth]{images/albeniz_output_gen.svg}
+\end{tabular}
+\caption[\emph{Sevilla} by Isaac Albéniz.]{\emph{Sevilla} by Isaac Albéniz: a) the piece with a distinguished pickup measure (first three notes for each hand), b) the model transcription. Since the model assumed the time signature of $\lilyTimeSignature{3}{4}$, the resulting content is shifted by the half of a measure. Other musical elements have been correctly assigned.}
+\label{albeniz}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\begin{figure}[ht!]
+\centering \begin{tabular}{c}a) \includesvg[width=0.95\textwidth]{images/claire_de_lune_gen.svg} \\ b) \includesvg[width=0.95\textwidth]{images/claire_de_lune_output_gen.svg} \end{tabular} \caption[Claude Debussy's \emph{Clair de Lune}.]{The beginning of Claude Debussy's \emph{Clair de Lune}: a) the original score from the MAPS test dataset, b) the model transcription. The model misaligned the metric structure by mixing quarter notes with triplets, disrupting the inner relationships between notes within a measure. Some right-hand notes (e.g., C in the second measure) are misattributed. The key signature was assigned correctly.}
+\label{claire_de_lune}
+\end{figure}
+\end{frame}
+
+\subsection{\emph{Ceteris Paribus} Analysis}
+
+\begin{frame}
+We conducted a \emph{ceteris paribus} type of analysis by augmenting original note sequence tensors to test if the model satisfies some natural requirements:\pause \begin{itemize}
+	\item Note velocity should not influence time signature or hand part assignment.\pause
+	\item Note pitch should be irrelevant to time signature prediction.\pause
+	\item Note pitch is essential for determining key signature and hand part assignment, while other features should have minimal impact on these aspects.\pause
+	\item Note duration should not affect key signature assignment.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+For a sample $M = 50$ musical pieces from the dataset, we introduced the following transformations:\pause \begin{itemize}
+	\item Adding noise to the velocity of different standard deviations $\sigma_v$.\pause
+	\item Scaling note lengths by a factor.\pause
+	\item Changing pitch with standard deviations $\sigma_p$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\begin{figure}[ht!]
+\centering
+\includesvg[width=1.0\textwidth]{images/ceteris_paribus_results_h.svg}
+\caption{Results of the \emph{ceteris paribus} experiment for the hand part model $f_H$. The model is robust to note duration changes while it is susceptible to velocity manipulation.}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\begin{figure}[ht!]
+\centering
+\includesvg[width=1.0\textwidth]{images/ceteris_paribus_results_k.svg}
+\caption{Results of the \emph{ceteris paribus} experiment for the key signature model $f_K$. The model is robust to all perturbations.}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\begin{figure}[ht!]
+\centering
+\includesvg[width=1.0\textwidth]{images/ceteris_paribus_results_t.svg}
+\caption{Results of the \emph{ceteris paribus} experiment for the time signature model $f_T$. The model is sensitive to note duration changes, which is expected to some extent, and relatively robust to other transformations.}
+\end{figure}
+\end{frame}
+
+\subsection{Local Feature Importance}
+
+\begin{frame}
+We developed a custom XAI methods to better understand the model's decisions. In particular, we wanted to know the influence of individual notes on model output.\pause
+
+For instance, we used a LIME-like approach to assess how the model velocity affects the hand part assignment on the note level.
+\end{frame}
+
+\begin{frame}
+\begin{figure}[ht!] \centering \includesvg[width=0.85\textwidth]{images/lime_hand_part.svg} \caption[Velocity influence on hand part assignment.]{Velocity influence on hand part assignment. The G2 note (thick outline) is influenced by the velocity of neighboring notes. Negative influence is represented by the diagonal pattern. Increasing the velocity of the low note causes misalignment of G3 and B3 notes to the left hand, while reducing the G2 velocity shifts it to the right hand. This behavior is undesirable.} \label{hand_part_misalignment} \end{figure}
+\end{frame}
+
+\begin{frame}
+For key signature assignment, we developed a method for measuring individual note influence on the assignment.\pause
+
+To measure if a particular note voted for or against the current note, we calculated the difference between model's decision on the original sequence and model's output on a sequence with the note being removed. 
+\end{frame}
+
+\section{Experiments}
+
+\begin{frame}
+We conducted several experiments:\pause
+\begin{itemize}
+	\item Perform ablation studies based on the XAI observations.\pause
+	\item Explore the Transformed-based networks.\pause
+	\item Test smaller, data-efficient networks to optimize the current architecture.\pause
+	\item Extend the model by the dynamics model. \end{itemize}
+\end{frame}
+
+\subsection{Ablation Studies}
+
+\begin{frame}Based on previous observations, we extended the original research by conducting several ablation studies:\pause \begin{itemize}
+	\item The \textbf{hand part} model was trained only on note pitches and onsets.\pause
+	\item The \textbf{key signature} model was trained only on note pitches and onsets.\pause
+	\item The \textbf{time signature} model was trained using only note onsets.\pause
+\end{itemize}
+
+We proved that excluding velocity from hand part and time signature models doesn't hurt the overall performance of the model.  The restricted time signature model was superior to the original model.
+\end{frame}
+
+\subsection{Transformers}
+
+\begin{frame}
+\begin{figure}[ht!]
+\centering
+\resizebox{!}{0.8\textheight}{\input{sources/graphs/transformer}}
+\caption[The Transformer architecture.]{The Transformer architecture \cite{Vaswani2017}.}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\begin{figure}[ht!]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{cc}a)
+\input{sources/graphs/vanilla_transformer_encoder} & b)
+\input{sources/graphs/vanilla_transformer_encoder_with_embedding}
+\end{tabular}}
+\caption[The Transformer Encoder block.]{The Transformer Encoder block: a) default encoding, b) feature embedding. The $\frown$ symbols stands for concatenation. The second architecture was selected for subsequent experiments. The positional encoding is optional.}
+\label{vanilla_transformer_encoder_with_embedding}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+Transformed-based beat model not only didn't outperform the base model, but it was significantly worse. Similarly, but in less extent, for the hand part model.\pause
+
+Key and time signature Transformers were on par with the base model.\pause
+
+In most cases, the sinusoidal positional encoding worsened the results.
+\end{frame}
+
+\subsection{Temporal Convolutional Network}
+
+\begin{frame}
+\begin{figure}[ht!]
+\centering
+\resizebox{!}{0.8\textheight}{\input{sources/graphs/temporal_convolutional_network}}
+\caption[The Temporal Convolutional Block.]{The Temporal Convolutional Block.}
+\label{temporal_convolutional_network}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+The TCN networks were on par for each submodel except the key signature model. The TCN time signature model outperformed the base model.
+\end{frame}
+
+\subsection{Dynamics Module}
+
+\begin{frame}
+We extended the model by a \textbf{dynamics submodule}.\pause
+
+Unfortunately, at the moment the dataset does not contain direct information on dynamics.\pause
+
+The indirect dynamics markings were available only for the ASAP subset.\pause
+
+Only about $60\%$ of all dynamics markings have been extracted from the MusicXML source to annotations.\pause
+
+The model had $F$ score of $0.5$.
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+\bibliography{bibliography/bibliography}
 \end{frame}
 
 \end{document}

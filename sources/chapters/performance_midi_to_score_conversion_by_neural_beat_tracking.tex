@@ -284,7 +284,7 @@ One prevalent error type involves a systematic shift of the entire piece by a fr
 \includesvg[width=0.95\textwidth]{images/albeniz_gen.svg} \\ b)
 \includesvg[width=0.95\textwidth]{images/albeniz_output_gen.svg}
 \end{tabular}
-\caption[\emph{Sevilla} by Isaac Albéniz.]{\emph{Sevilla} by Isaac Albéniz: a) the piece with a distinguished pickup measure (first three notes for each hand), b) the model transcriptionD. Since the model assumed the time signature of $\lilyTimeSignature{3}{4}$, the resulting content is shifted by the half of a measure. Other musical elements have been correctly assigned.}
+\caption[\emph{Sevilla} by Isaac Albéniz.]{\emph{Sevilla} by Isaac Albéniz: a) the piece with a distinguished pickup measure (first three notes for each hand), b) the model transcription. Since the model assumed the time signature of $\lilyTimeSignature{3}{4}$, the resulting content is shifted by the half of a measure. Other musical elements have been correctly assigned.}
 \label{albeniz}
 \end{figure}
 
@@ -354,12 +354,12 @@ The results of the perturbation experiments are summarized below.
 
 The key signature model $f_K$ demonstrated high robustness across all perturbations, with an average error of less than $1.5\%$ in all categories.
 
-The time signature model $f_T$ was robust to pitch and velocity manipulations, with average errors below $13\%$. However, it exhibited sensitivity to changes in note durations, consistent with the role of duration in determining meter. See Table \ref{perturbations} for details. 
+The time signature model $f_T$ was robust to pitch and velocity manipulations, with average errors below $13\%$. However, it exhibited sensitivity to changes in note durations, consistent with the role of duration in determining meter. See Table \ref{average_errors} for details.
 
 \begin{table}[ht!]
 \input{sources/tables/perturbations_errors}
 \caption[The average errors of certain perturbations (in percent).]{The average errors of certain perturbations (in percent).}
-\label{perturbations}
+\label{average_errors}
 \end{table}
 
 The hand part model $f_H$ was robust to note duration changes (maximum average error of $3\%$), but it exhibited significant inconsistency when note velocities were modified. This issue was mitigated when velocity perturbations were applied uniformly to notes played simultaneously, reflecting the common practice of maintaining similar velocities for chords played by one hand (see Table \ref{hand_part_perturbations} for detailed results).
